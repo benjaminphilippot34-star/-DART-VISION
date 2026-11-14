@@ -284,7 +284,12 @@ class MainActivity : ComponentActivity() {
             try {
                 val manifest = JSONObject(httpGet(updateManifestUrl))
                 val remoteCode = manifest.optInt("versionCode", -1)
-                val currentCode = if (Build.VERSION.SDK_INT >= 28) packageManager.getPackageInfo(packageName, 0).longVersionCode.toInt() else @Suppress("DEPRECATION") packageManager.getPackageInfo(packageName, 0).versionCode
+                @Suppress("DEPRECATION")
+                val currentCode = if (Build.VERSION.SDK_INT >= 28) {
+                    packageManager.getPackageInfo(packageName, 0).longVersionCode.toInt()
+                } else {
+                    packageManager.getPackageInfo(packageName, 0).versionCode
+                }
                 if (remoteCode <= currentCode) {
                     if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show() }
                     return@execute
