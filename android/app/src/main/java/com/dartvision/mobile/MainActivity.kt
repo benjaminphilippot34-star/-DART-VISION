@@ -98,7 +98,13 @@ class MainActivity : ComponentActivity() {
             val percent = frameAnalyzer.changedPercent
             status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence."
                 else if (percent == null) "Analyse caméra en cours…"
-                else "Différence d'image : %.2f %% • contrôle visuel nécessaire".format(percent)
+                else {
+                    val regions = frameAnalyzer.changedRegions
+                    val largest = regions.firstOrNull()
+                    if (largest == null) "Différence : %.2f %% • aucune zone assez grande".format(percent)
+                    else "Différence : %.2f %% • %d zone(s) • principale : %d px, centre (%.1f ; %.1f) • contrôle visuel nécessaire"
+                        .format(percent, regions.size, largest.pixelCount, largest.centroidX, largest.centroidY)
+                }
         }
         root.addView(analysisRow)
         scoreView = label("501", 28f)
