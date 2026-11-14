@@ -1,0 +1,16 @@
+DART VISION — MISES À JOUR OTA (SOURCE PRÉPARÉE)
+
+Cette version ajoute le contrôle de version, le téléchargement d'un APK, la vérification SHA-256 et l'ouverture de l'installateur Android. Android demandera toujours la confirmation finale de l'utilisateur.
+
+CONFIGURATION AVANT PUBLICATION
+1. Remplacer OWNER/REPO dans MainActivity.kt par le propriétaire et le nom du dépôt.
+2. Publier latest.json à la racine du dépôt avec les champs versionCode, versionName, apkUrl et sha256.
+3. Publier l'APK signé dans une GitHub Release et calculer son SHA-256.
+
+CONDITION DE SIGNATURE
+Les mises à jour Android doivent être signées avec la même clé que l'application déjà installée. Sans cette clé, Android refusera la mise à jour. Ne jamais envoyer le fichier de clé ni son mot de passe dans une conversation.
+
+LIMITES
+- Le code source est préparé mais n'a pas été compilé ni testé sur un Xiaomi.
+- L'installation finale nécessite une confirmation Android.
+- Les mises à jour ne fonctionneront qu'après publication d'un premier APK signé compatible.
