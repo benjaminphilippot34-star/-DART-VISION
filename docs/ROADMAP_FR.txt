@@ -1,0 +1,16 @@
+ROADMAP DART VISION
+===================
+0.5 — Base mobile multi-téléphone (source)
+0.6 — Appairage QR, découverte réseau, reconnexion et sécurité locale
+0.7 — Moteur de jeu complet : 501/301, Cricket, modes personnalisés, historique et undo
+0.8 — Calibration géométrique de la cible et contrôle qualité de prise de vue
+0.9 — Détection des fléchettes et impacts, validation sur séquences réelles
+1.0 — Application stable, statistiques, profils, tests multi-appareils
+Après Android : portage iOS et synchronisation cloud facultative.
+
+ARCHITECTURE CIBLE
+- Téléphone principal : caméra, traitement IA embarqué, état maître de la partie.
+- Téléphones secondaires : interface complète de pilotage et affichage synchronisé.
+- Réseau local : fonctionnement sans Internet.
+- Cloud facultatif : comptes, sauvegardes et statistiques à distance.
+- PC facultatif : outils de développement/entraînement, jamais requis pour jouer.
