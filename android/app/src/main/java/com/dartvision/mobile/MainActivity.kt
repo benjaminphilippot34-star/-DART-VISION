@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -44,6 +45,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var joinInput: EditText
     private lateinit var connectButton: Button
     private var camera: Camera? = null
+    private val frameAnalyzer = FrameChangeAnalyzer()
+    private val analysisExecutor = Executors.newSingleThreadExecutor()
     private var server: GameServer? = null
     private val worker = Executors.newSingleThreadExecutor()
     private val poller = Executors.newSingleThreadScheduledExecutor()
@@ -86,6 +89,18 @@ class MainActivity : ComponentActivity() {
             layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
         }
         root.addView(preview)
+        val analysisRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        addButton(analysisRow, "Référence avant lancer") {
+            val captured = frameAnalyzer.captureReference()
+            status.text = if (captured) "Image de référence enregistrée. Lance une fléchette puis mesure le changement." else "Attends que la caméra fournisse une image."
+        }
+        addButton(analysisRow, "Mesurer changement") {
+            val percent = frameAnalyzer.changedPercent
+            status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence."
+                else if (percent == null) "Analyse caméra en cours…"
+                else "Différence d'image : %.2f %% • contrôle visuel nécessaire".format(percent)
+        }
+        root.addView(analysisRow)
         scoreView = label("501", 28f)
         scoreView.gravity = Gravity.CENTER
         root.addView(scoreView)
@@ -149,8 +164,12 @@ class MainActivity : ComponentActivity() {
             try {
                 val provider = future.get()
                 val previewCase = Preview.Builder().build().also { it.setSurfaceProvider(preview.surfaceProvider) }
+                val analysisCase = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                    .also { it.setAnalyzer(analysisExecutor, frameAnalyzer) }
                 provider.unbindAll()
-                camera = provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, previewCase)
+                camera = provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, previewCase, analysisCase)
             } catch (e: Exception) { status.text = status.text.toString() + "\nCaméra : ${e.message}" }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -368,7 +387,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        server?.stop(); worker.shutdown(); poller.shutdownNow()
+        server?.stop(); worker.shutdown(); poller.shutdownNow(); analysisExecutor.shutdown()
         super.onDestroy()
     }
 }
