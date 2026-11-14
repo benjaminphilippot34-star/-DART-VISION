@@ -70,7 +70,8 @@ object DartboardScoring {
             else -> Triple(1, number, "Simple")
         }
 
-        val sectorWireDistance = distanceToNearestSectorWire(radius, angle)
+        val sectorWireDistance = if (radius <= OUTER_BULL_RADIUS_MM) Double.POSITIVE_INFINITY
+            else distanceToNearestSectorWire(radius, angle)
         val ringBoundaries = doubleArrayOf(
             INNER_BULL_RADIUS_MM,
             OUTER_BULL_RADIUS_MM,
@@ -95,7 +96,7 @@ object DartboardScoring {
 
     private fun distanceToNearestSectorWire(radius: Double, angleDegrees: Double): Double {
         val sectorWidth = 18.0
-        val nearestBoundary = floor(angleDegrees / sectorWidth + 0.5) * sectorWidth
+        val nearestBoundary = 9.0 + floor((angleDegrees - 9.0) / sectorWidth + 0.5) * sectorWidth
         val deltaRadians = Math.toRadians(angleDegrees - nearestBoundary)
         return radius * kotlin.math.abs(sin(deltaRadians))
     }
