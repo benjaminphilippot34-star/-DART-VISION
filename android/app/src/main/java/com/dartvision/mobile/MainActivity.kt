@@ -57,6 +57,8 @@ class MainActivity : ComponentActivity() {
     private var hostUrl: String? = null
     private var isHost = true
     private var zoom = 1f
+    private var cameraModeEnabled = false
+    private var cameraPanelView: LinearLayout? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var x01Engine: X01GameEngine? = null
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
@@ -68,8 +70,6 @@ class MainActivity : ComponentActivity() {
         startLocalGame()
         restoreX01Game()
         checkForUpdates(silent = true)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) startCamera()
-        else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 51)
     }
 
     private fun buildUi() {
@@ -202,6 +202,17 @@ class MainActivity : ComponentActivity() {
             else "Analyse : ${"%.2f".format(frameAnalyzer.changedPercent ?: 0.0)} % de différence. Vérifie le score proposé."
         }
         cameraPanel.addView(aiButtons)
+        cameraPanelView = cameraPanel
+        cameraPanel.visibility = View.GONE
+
+        val choicePanel = panel()
+        choicePanel.addView(text("CHOISIR LE MODE DE JEU", 13f, accent, true))
+        choicePanel.addView(text("Tu peux jouer sans caméra ou l'activer quand tu le souhaites.", 12f, muted))
+        val choiceButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        button(choiceButtons, "MODE NORMAL", true) { setCameraMode(false) }
+        button(choiceButtons, "MODE CAMÉRA") { setCameraMode(true) }
+        choicePanel.addView(choiceButtons)
+        root.addView(choicePanel)
         root.addView(cameraPanel)
 
         val settings = panel()
@@ -700,6 +711,23 @@ class MainActivity : ComponentActivity() {
             .edit().putString("game_state", value.toString()).apply()
     }
 
+    private fun setCameraMode(enabled: Boolean) {
+        cameraModeEnabled = enabled
+        cameraPanelView?.visibility = if (enabled) View.VISIBLE else View.GONE
+        if (!enabled) {
+            try { ProcessCameraProvider.getInstance(this).get().unbindAll() } catch (_: Exception) {}
+            camera = null
+            status.text = "MODE NORMAL • Saisie manuelle activée, caméra désactivée."
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            startCamera()
+            status.text = "MODE CAMÉRA • Caméra activée."
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 51)
+        }
+    }
+
     private fun startCamera() {
         val future = ProcessCameraProvider.getInstance(this)
         future.addListener({
@@ -915,6 +943,7 @@ class MainActivity : ComponentActivity() {
                 connection.connect()
                 if (connection.responseCode !in 200..299) throw IllegalStateException("Téléchargement indisponible")
                 val apk = File(cacheDir, "dart-vision-update.apk")
+                if (apk.exists()) apk.delete()
                 connection.inputStream.use { input -> FileOutputStream(apk).use { output -> input.copyTo(output) } }
                 connection.disconnect()
                 if (expectedSha256.isNotBlank()) {
@@ -957,8 +986,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 51 && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) startCamera()
-        else status.text = "Autorisation caméra refusée. Les fonctions de score restent disponibles."
+        if (requestCode == 51 && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED && cameraModeEnabled) startCamera()
+        else if (requestCode == 51) { cameraModeEnabled = false; cameraPanelView?.visibility = View.GONE; status.text = "Caméra non activée. Le mode normal reste disponible." }
     }
 
     override fun onDestroy() {
