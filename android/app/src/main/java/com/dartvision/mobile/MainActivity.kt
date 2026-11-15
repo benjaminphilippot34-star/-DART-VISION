@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
                 }
         }
         root.addView(analysisRow)
-        scoreView = label("501", 28f)
+        scoreView = label("301", 28f)
         scoreView.gravity = Gravity.CENTER
         root.addView(scoreView)
         val rowJoin = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
         }
         root.addView(updateButton)
         val row1 = LinearLayout(this)
-        addButton(row1, "Nouvelle 501") { action("new_game") }
+        addButton(row1, "Nouvelle 301") { action("new_game") }
         addButton(row1, "+ Joueur") { action("add_player") }
         addButton(row1, "Tour suivant") { action("next_turn") }
         root.addView(row1)
@@ -153,11 +153,11 @@ class MainActivity : ComponentActivity() {
     private fun startLocalGame() {
         val saved = getSharedPreferences("dart_vision_local", MODE_PRIVATE).getString("game_state", null)
         val restored = try { saved?.let { JSONObject(it) } } catch (_: Exception) { null }
-        if (restored != null && restored.optJSONArray("players") != null) {
+        if (restored != null && restored.optJSONArray("players") != null && restored.optString("mode") == "301") {
             state.set(restored)
         } else {
-            val players = JSONArray().put(JSONObject().put("name", "Joueur 1").put("score", 501))
-            state.set(JSONObject().put("mode", "501").put("players", players).put("active", 0).put("turn", 1).put("lastAction", "Partie créée"))
+            val players = JSONArray().put(JSONObject().put("name", "Joueur 1").put("score", 301))
+            state.set(JSONObject().put("mode", "301").put("players", players).put("active", 0).put("turn", 1).put("lastAction", "Partie 301 créée"))
             saveLocalState(state.get())
         }
         isHost = true
@@ -267,11 +267,11 @@ class MainActivity : ComponentActivity() {
             when (name) {
                 "new_game" -> {
                     val fresh = JSONArray()
-                    for (i in 0 until players.length()) fresh.put(JSONObject().put("name", players.getJSONObject(i).optString("name", "Joueur ${i+1}")).put("score", 501))
-                    if (fresh.length() == 0) fresh.put(JSONObject().put("name", "Joueur 1").put("score", 501))
-                    s.put("players", fresh).put("active", 0).put("turn", 1).put("mode", "501")
+                    for (i in 0 until players.length()) fresh.put(JSONObject().put("name", players.getJSONObject(i).optString("name", "Joueur ${i+1}")).put("score", 301))
+                    if (fresh.length() == 0) fresh.put(JSONObject().put("name", "Joueur 1").put("score", 301))
+                    s.put("players", fresh).put("active", 0).put("turn", 1).put("mode", "301")
                 }
-                "add_player" -> players.put(JSONObject().put("name", "Joueur ${players.length()+1}").put("score", 501))
+                "add_player" -> players.put(JSONObject().put("name", "Joueur ${players.length()+1}").put("score", 301))
                 "next_turn" -> {
                     if (players.length() > 0) s.put("active", (s.optInt("active") + 1) % players.length())
                     s.put("turn", s.optInt("turn") + 1)
@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
     private fun refreshScore() {
         val s = state.get()
         val players = s.optJSONArray("players") ?: JSONArray()
-        val lines = StringBuilder("501 • Tour ${s.optInt("turn", 1)}\n")
+        val lines = StringBuilder("301 • Tour ${s.optInt("turn", 1)}\n")
         for (i in 0 until players.length()) {
             val p = players.optJSONObject(i) ?: continue
             lines.append(if (i == s.optInt("active")) "▶ " else "   ")
