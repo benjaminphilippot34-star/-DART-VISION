@@ -37,10 +37,12 @@ jobs:
           DARTVISION_KEY_PASSWORD: ${{ secrets.DARTVISION_KEY_PASSWORD }}
         run: |
           gradle -p android testDebugUnitTest assembleRelease --stacktrace
+      - name: Prepare stable APK filename
+        run: cp android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/dart-vision.apk
       - name: Calculate release checksum and version
         id: release
         run: |
-          APK="android/app/build/outputs/apk/release/app-release.apk"
+          APK="android/app/build/outputs/apk/release/dart-vision.apk"
           sha256sum "$APK" | awk '{print "sha256="$1}' >> "$GITHUB_OUTPUT"
           echo "version_name=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts)" >> "$GITHUB_OUTPUT"
           echo "version_code=$(sed -n 's/.*versionCode = \([0-9]*\).*/\1/p' android/app/build.gradle.kts)" >> "$GITHUB_OUTPUT"
@@ -49,7 +51,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: DART VISION ${{ steps.release.outputs.version_name }}
-          files: android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk
+          files: android/app/build/outputs/apk/release/dart-vision.apk
           generate_release_notes: true
       - uses: actions/checkout@v4
         with:
