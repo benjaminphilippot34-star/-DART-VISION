@@ -57,7 +57,7 @@ data class X01Settings(
     val bestOfSets: Int = 1
 ) {
     init {
-        require(startingScore in 101..1001)
+        require(startingScore in 2..1001)
         require(legsToWin >= 1 && setsToWin >= 1)
         require(bestOfLegs >= 1 && bestOfSets >= 1)
     }
