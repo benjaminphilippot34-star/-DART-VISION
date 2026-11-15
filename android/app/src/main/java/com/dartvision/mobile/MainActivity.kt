@@ -346,7 +346,11 @@ class MainActivity : ComponentActivity() {
         scoreTurnView = txt("TOUR " + state.get().optInt("turn", 1) + " • 3 FLÉCHETTES", 9f, teal, true)
             .apply { setPadding(0, dp(5), 0, 0) }
         activePlayerPanel.addView(scoreTurnView)
-        playerStatsView = txt("", 9f, muted, false).apply { setPadding(0, dp(7), 0, 0); maxLines = 3 }
+        playerStatsView = txt("", 10f, white, true).apply {
+            setPadding(0, dp(9), 0, 0)
+            maxLines = 3
+            setLineSpacing(dp(2).toFloat(), 1f)
+        }
         activePlayerPanel.addView(playerStatsView)
         scoreCard.addView(activePlayerPanel)
 
@@ -2155,6 +2159,19 @@ class MainActivity : ComponentActivity() {
         scoreView.text = player?.optInt("score", 301)?.toString() ?: "301"
         scoreContextView.text = player?.optString("name", "Joueur " + (active + 1)) ?: "Joueur " + (active + 1)
         scoreTurnView.text = "TOUR " + s.optInt("turn", 1) + " • 3 FLÉCHETTES"
+        val previousPlayers = s.optJSONArray("history")?.let { h ->
+            if (h.length() > 0) h.optJSONObject(h.length() - 1)?.optJSONArray("players") else null
+        }
+        val previousScore = previousPlayers?.optJSONObject(active)?.optInt("score", player?.optInt("score", 301) ?: 301)
+            ?: (x01Engine?.state?.settings?.startingScore ?: 301)
+        val history = x01Engine?.state?.history.orEmpty().filter { it.playerIndex == active }
+        val darts = history.sumOf { it.hits.size }
+        val scored = history.sumOf { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) }
+        val average = if (darts == 0) 0.0 else scored * 3.0 / darts
+        playerStatsView.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) +
+            "\nSCORE PRÉCÉDENT  " + previousScore +
+            "\nFLÉCHETTES JETÉES  " + darts
+        playerStatsView.visibility = View.VISIBLE
         refreshOpponentScores(players, active, 0xFF91A4B2.toInt(), 0xFFF4F8FA.toInt(), 0xFF28D7C2.toInt())
     }
 
