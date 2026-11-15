@@ -1,33 +1,69 @@
 ROADMAP DART VISION
 ===================
-0.5 — Base mobile Android et caméra CameraX
-0.6 — Calibration guidée, stabilité de l'image et outil de diagnostic
-0.7 — Suivi des fléchettes présentes, détection des nouvelles fléchettes et retraits
-0.8 — Localisation de la pointe, calcul de zone et validation manuelle
-0.9 — Corpus de tests réels, mesure de précision et gestion des cas ambigus
-0.95 — Catalogue DartCounter et premiers moteurs hors ligne (X01, Cricket/Tactics, Shanghai, entraînements)
-1.0 — Écrans complets pour tous les modes, règles X01 avancées, manches/sets, sauvegarde et historique
-1.1 — Appairage QR sécurisé, hotspot Android, synchronisation et gestion des déconnexions
-1.2 — Seconde caméra facultative et fusion des deux vues
-1.3 — Commandes vocales, annonces, profils et statistiques
+
+OBJECTIF GLOBAL
+Créer une seule application DART VISION, utilisable sur téléphone sans ordinateur ni logiciel tiers, capable de compter les fléchettes avec une IA mixte (vision classique + modèles IA embarqués), de gérer les parties et de synchroniser plusieurs téléphones localement.
+
+PRIORITÉS PRODUIT VALIDÉES
+1. Fiabilité du comptage automatique : localiser la pointe réelle, pas le centre du fût ou l'empennage.
+2. IA mixte : traitement d'image déterministe et IA embarquée ; validation automatique autorisée uniquement lorsque la confiance est suffisamment élevée et mesurée. Sinon demander confirmation.
+3. Modes caméra : 1 caméra pour commencer ; 2 ou 4 caméras possibles pour réduire les occultations et améliorer la précision. Une caméra unique doit rester utilisable.
+4. Sources caméra intégrées dans DART VISION : caméra du téléphone, caméra USB compatible Android, flux réseau RTSP et appareils ONVIF compatibles. Aucun recours obligatoire à DroidCam ou à une application caméra tierce.
+5. Téléphone autonome : le PC Windows est facultatif, jamais requis pour installer, lancer ou utiliser une partie.
+6. Multi-téléphones : chaque téléphone participant doit pouvoir afficher le score et agir sur la partie : démarrer/arrêter, gérer les joueurs, saisir/corriger un score, annuler un lancer, changer de mode et consulter les statistiques.
+7. Fonctionnement hors ligne : partie solo sur un téléphone sans réseau ; plusieurs téléphones reliés par réseau local ou hotspot sans Internet.
+8. Installation guidée : assistant intégré pour connecter une caméra, autoriser les accès, cadrer et calibrer la cible, tester le flux et diagnostiquer les problèmes.
+9. Qualité d'image : privilégier une caméra placée face à la cible ; conserver toute la cible visible avec une marge ; préférer le zoom optique lorsqu'il existe. Le zoom numérique ne doit pas être présenté comme un gain de précision. Recalibrer après changement de caméra, position, orientation ou zoom.
+10. Blink Mini Gen 1 Pan-Tilt : source à étudier uniquement si un flux vidéo local/direct compatible est réellement accessible ; ne pas promettre sa compatibilité avant test.
+
+ÉTAPES
+0.5 — Base mobile Android et caméra CameraX.
+0.6 — Calibration guidée, stabilité de l'image et outil de diagnostic.
+0.7 — Suivi des fléchettes présentes, détection des nouvelles fléchettes et retraits.
+0.8 — Localisation de la pointe, calcul de zone et validation manuelle.
+0.9 — Corpus de tests réels, mesure de précision et gestion des cas ambigus.
+0.95 — Catalogue DartCounter et premiers moteurs hors ligne (X01, Cricket/Tactics, Shanghai, entraînements).
+1.0 — Écrans complets pour tous les modes, règles X01 avancées, manches/sets, sauvegarde et historique.
+1.1 — Appairage QR sécurisé, hotspot Android, synchronisation et gestion des déconnexions.
+1.2 — Seconde caméra facultative et fusion des deux vues.
+1.3 — Commandes vocales, annonces, profils et statistiques.
+1.4 — Architecture multi-caméras étendue à 4 vues ; gestion des caméras USB, RTSP et ONVIF dans l'assistant caméra.
+1.5 — Assistant d'installation complet, tests de compatibilité appareils et optimisation multi-marques.
 Après Android : portage iOS et synchronisation cloud facultative.
 
 ARCHITECTURE CIBLE
-- Téléphone principal : caméra, traitement IA embarqué, calibration et état maître de la partie.
-- Téléphone secondaire caméra : angle indépendant facultatif pour lever les occultations.
-- Téléphones joueurs : affichage et commandes synchronisés.
-- Réseau local : fonctionnement sans Internet ; appairage sécurisé par QR code.
-- Cloud facultatif : comptes, sauvegardes et statistiques à distance.
-- PC facultatif : outils de développement/entraînement, jamais requis pour jouer.
+- Téléphone principal : caméra/IA/calibration/état maître de la partie ; tout fonctionne localement.
+- Caméras supplémentaires : deuxième puis jusqu'à quatre vues, chacune avec calibration et paramètres propres.
+- Sources vidéo : CameraX (caméra intégrée), USB UVC compatible, RTSP et ONVIF selon capacités matérielles et autorisations.
+- Téléphones joueurs : tous peuvent consulter et commander la partie ; arbitrage centralisé sur l'état maître pour éviter les doubles actions.
+- Connexion locale : Wi-Fi existant ou hotspot du téléphone principal ; appairage QR/code temporaire et commandes authentifiées.
+- PC Windows : outil facultatif de développement, d'annotation et de préparation des jeux de données ; pas une dépendance d'utilisation.
+- Cloud : strictement facultatif pour sauvegardes, profils et statistiques à distance.
 
-RÈGLE DE QUALITÉ
-Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences réelles annotées et séparées entre développement et validation. Si la pointe est masquée ou trop proche d'une séparation, l'application doit demander une validation plutôt que d'inventer un score.
+PIPELINE DE VISION À CONSTRUIRE
+A. Capturer des images stables avant et après le lancer.
+B. Détecter un déplacement de cible/caméra et réaligner les images.
+C. Filtrer variations d'exposition, ombres, reflets et mouvements.
+D. Suivre l'état de la cible : fléchettes déjà présentes, nouvelles fléchettes, retraits et rebonds.
+E. Détecter la forme et l'axe de la fléchette, puis localiser la pointe côté cible.
+F. Projeter la pointe dans le repère de la cible calibrée et calculer secteur/anneau.
+G. Calculer une confiance et une incertitude ; validation automatique seulement au-dessus d'un seuil calibré sur des données réelles.
+H. Fusionner les observations de plusieurs caméras après calibration indépendante et association du même impact.
+I. Afficher le score, permettre correction/annulation et transmettre un résultat confirmé au moteur de jeu.
 
-ÉTAT ACTUEL
+QUALITÉ ET VALIDATION
+- Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences réelles annotées, distinctes entre développement et validation.
+- Tester les 20 secteurs, simples/doubles/triples, bull, fils, fléchettes serrées/croisées, pointes masquées, ombres, reflets, éclairages variables, retraits et rebonds.
+- Mesurer précision de localisation de pointe, exactitude du score, faux positifs, doubles comptages, retraits, fréquence des confirmations et latence.
+- Si la pointe est masquée, si deux hypothèses sont proches ou si la confiance est insuffisante, demander validation au lieu d'inventer un score.
+
+ÉTAT ACTUEL AU 15/11/2026
 - Catalogue de 13 modes ajouté ; moteurs locaux de base présents pour X01, Cricket, Tactics, Shanghai et plusieurs entraînements.
-- Saisie manuelle d'un tour (1 à 3 fléchettes) reliée aux moteurs ; X01 gère les manches, sets et alternance du premier joueur. Les autres modes restent des versions de base à valider et leurs états ne sont pas tous sauvegardés.
-- Calibration perspective mathématique ajoutée : transformation des quatre coins de la cible vers des coordonnées en millimètres, puis conversion d'un point d'impact déjà localisé en score. Tests unitaires associés.
-- Calibration désormais accessible depuis l'écran caméra : sélection tactile des quatre coins extérieurs dans l'ordre haut-gauche, haut-droite, bas-droite, bas-gauche ; conversion PreviewView FIT_CENTER vers le buffer ImageAnalysis en tenant compte de la rotation ; sauvegarde locale et restauration. La transformation est calculée et validée, mais elle ne localise pas à elle seule la pointe d'une fléchette.
-- La détection caméra n'identifie pas encore les pointes : elle analyse seulement les changements d'image. Aucun score automatique ne doit être considéré comme opérationnel.
+- Saisie manuelle d'un tour (1 à 3 fléchettes) reliée aux moteurs ; X01 gère manches, sets et alternance du premier joueur. Les autres modes restent des versions de base à valider et leurs états ne sont pas tous sauvegardés.
+- Calibration perspective mathématique : transformation des quatre coins de la cible vers des coordonnées en millimètres, puis conversion d'un point d'impact déjà localisé en score.
+- Calibration accessible depuis l'écran caméra : sélection tactile des quatre coins extérieurs dans l'ordre haut-gauche, haut-droite, bas-droite, bas-gauche ; conversion PreviewView FIT_CENTER vers le buffer ImageAnalysis en tenant compte de la rotation ; sauvegarde et restauration locales.
+- L'aperçu CameraX et le cadrage ont été vérifiés par l'utilisateur sur un Xiaomi 14T. Cela valide l'affichage caméra de base, pas la précision de détection ni le calcul automatique du score.
+- L'analyse actuelle repère des changements persistants dans l'image. Elle ne localise pas encore la pointe et ne constitue pas encore une IA de reconnaissance de fléchettes.
+- La synchronisation actuelle entre téléphones est une base locale par IP ; QR, hotspot automatisé, authentification robuste, commandes depuis tous les téléphones et fusion multi-caméras restent à développer.
+- USB, RTSP, ONVIF et 4 caméras sont des objectifs d'architecture, pas des fonctions disponibles aujourd'hui.
 
-Voir docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md pour la synthèse des idées retenues et le pipeline technique.
