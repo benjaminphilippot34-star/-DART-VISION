@@ -199,7 +199,8 @@ class MainActivity : ComponentActivity() {
         root.addView(playersPanel)
 
         val cameraPanel = panel()
-        cameraPanel.addView(text("DART VISION • CAMÉRA & IA", 13f, accent, true))
+        cameraPanel.addView(text("DART VISION • CAMÉRA & CALIBRATION", 13f, accent, true))
+        cameraPanel.addView(text("Aide au cadrage et analyse des changements d’image. La reconnaissance automatique de la pointe et du score n’est pas encore disponible : vérifie chaque résultat manuellement.", 12f, muted))
         preview = PreviewView(this).apply {
             scaleType = PreviewView.ScaleType.FIT_CENTER
             layoutParams = FrameLayout.LayoutParams(-1, -1)
@@ -288,7 +289,7 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFFFF563D.toInt())
         })
         panel.addView(TextView(this).apply {
-            text = "Connecte ton compte pour retrouver ton profil sur tes appareils."
+            text = "Crée un compte ou connecte-toi. La synchronisation du profil et des parties entre appareils sera activée dans une prochaine version."
             textSize = 13f
             setTextColor(0xFFB4BDC8.toInt())
         })
@@ -563,7 +564,6 @@ class MainActivity : ComponentActivity() {
                 setColor(0xFF303844.toInt())
                 cornerRadius = dp(12).toFloat()
             }
-            setOnClickListener { (it.parent as? View)?.let { _ -> } }
             contentDescription = "Fermer l’écran"
         })
         content.addView(header)
@@ -948,7 +948,7 @@ class MainActivity : ComponentActivity() {
             textSize = 25f
             gravity = Gravity.CENTER
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(0xFF14221E.toInt())
+            setTextColor(0xFFE32636.toInt())
             setPadding(0, dp(12), 0, dp(12))
         }
         content.addView(totalView)
@@ -975,7 +975,7 @@ class MainActivity : ComponentActivity() {
                 text = title
                 textSize = 12f
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(0xFF50645E.toInt())
+                setTextColor(0xFF9AA3AF.toInt())
             })
             val spinner = Spinner(this).apply {
                 adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, options)
