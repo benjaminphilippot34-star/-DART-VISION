@@ -780,70 +780,81 @@ class MainActivity : ComponentActivity() {
         }
         val density = resources.displayMetrics.density
         fun dp(v: Int) = (v * density).toInt()
+        val options = mutableListOf("MISS", "25", "BULL")
+        for (n in 1..20) {
+            options.add("S$n")
+            options.add("D$n")
+            options.add("T$n")
+        }
+        val labels = listOf("FLÉCHETTE 1", "FLÉCHETTE 2", "FLÉCHETTE 3")
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), dp(8), dp(14), dp(8))
-            setBackgroundColor(0xFF151D25.toInt())
+            setPadding(dp(16), dp(8), dp(16), dp(8))
         }
-        val display = TextView(this).apply {
-            text = "0"; textSize = 38f; gravity = Gravity.CENTER
-            setTextColor(0xFFF5F7FA.toInt()); setPadding(0, dp(12), 0, dp(12))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF263440.toInt()); cornerRadius = dp(12).toFloat()
+        val totalView = TextView(this).apply {
+            text = "TOTAL : 0"
+            textSize = 25f
+            gravity = Gravity.CENTER
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(0xFF14221E.toInt())
+            setPadding(0, dp(12), 0, dp(12))
+        }
+        content.addView(totalView)
+        val selectors = mutableListOf<Spinner>()
+        fun dartValue(label: String): DartHit = when {
+            label == "MISS" -> DartHit(null, 1)
+            label == "25" -> DartHit(25, 1)
+            label == "BULL" -> DartHit(25, 2)
+            else -> {
+                val multiplier = when (label.first()) { 'D' -> 2; 'T' -> 3; else -> 1 }
+                DartHit(label.drop(1).toInt(), multiplier)
             }
         }
-        content.addView(display, LinearLayout.LayoutParams(-1, dp(76)).apply { bottomMargin = dp(10) })
-        var entered = ""
-        fun refresh() { display.text = if (entered.isEmpty()) "0" else entered }
-        fun keyRow(labels: List<String>, onKey: (String) -> Unit) {
-            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            labels.forEach { label ->
-                row.addView(Button(this).apply {
-                    text = label; isAllCaps = false; textSize = 16f
-                    setTextColor(0xFFF5F7FA.toInt())
-                    background = android.graphics.drawable.GradientDrawable().apply {
-                        setColor(if (label in listOf("180", "140", "100", "60", "0", "MISS", "⌫", "EFFACER")) 0xFFE34B55.toInt() else 0xFF344451.toInt())
-                        cornerRadius = dp(9).toFloat()
-                    }
-                    layoutParams = LinearLayout.LayoutParams(0, dp(50), 1f).apply {
-                        setMargins(dp(3), dp(3), dp(3), dp(3))
-                    }
-                    setOnClickListener { onKey(label) }
-                })
+        fun points(label: String): Int = dartValue(label).points
+        fun updateTotal() {
+            totalView.text = "TOTAL : ${selectors.sumOf { points(it.selectedItem.toString()) }}"
+        }
+        labels.forEachIndexed { index, title ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, dp(5), 0, dp(5))
             }
+            row.addView(TextView(this).apply {
+                text = title
+                textSize = 12f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(0xFF50645E.toInt())
+            })
+            val spinner = Spinner(this).apply {
+                adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, options)
+                setSelection(0)
+                onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
+                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        updateTotal()
+                    }
+                }
+            }
+            selectors.add(spinner)
+            row.addView(spinner)
             content.addView(row)
         }
-        for (digits in listOf(listOf("1","2","3"), listOf("4","5","6"), listOf("7","8","9"))) {
-            keyRow(digits) { if (entered.length < 3) entered += it; refresh() }
-        }
-        keyRow(listOf("⌫", "0", "EFFACER")) {
-            when (it) {
-                "⌫" -> if (entered.isNotEmpty()) entered = entered.dropLast(1)
-                "EFFACER" -> entered = ""
-                else -> if (entered.length < 3) entered += it
-            }
-            refresh()
-        }
         content.addView(TextView(this).apply {
-            text = "SCORES RAPIDES"; textSize = 11f; setTextColor(0xFFB5C0C9.toInt())
-            setPadding(dp(4), dp(8), 0, 0)
+            text = "Choisis le segment et le multiplicateur de chaque fléchette. Les MISS sont prises en compte."
+            textSize = 12f
+            setTextColor(0xFF50645E.toInt())
+            setPadding(0, dp(8), 0, 0)
         })
-        keyRow(listOf("26", "41", "45", "60")) { entered = it; refresh() }
-        keyRow(listOf("81", "85", "100", "140")) { entered = it; refresh() }
-        keyRow(listOf("180", "MISS")) { entered = if (it == "MISS") "0" else it; refresh() }
-
         val dialog = AlertDialog.Builder(this)
-            .setTitle("SAISIE MANUELLE DU SCORE")
+            .setTitle("SAISIE DES 3 FLÉCHETTES")
             .setView(content)
             .setNegativeButton("ANNULER", null)
-            .setPositiveButton("VALIDER", null)
+            .setPositiveButton("VALIDER LE TOUR", null)
             .create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 try {
-                    val total = entered.toIntOrNull() ?: 0
-                    require(total in 0..180)
-                    val hits = scoreToDarts(total)
+                    val hits = selectors.map { dartValue(it.selectedItem.toString()) }
                     val message = if (engine != null) {
                         val result = engine.throwTurn(hits)
                         refreshX01()
@@ -856,8 +867,8 @@ class MainActivity : ComponentActivity() {
                     } else trainingTurnHandler!!.invoke(hits)
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     dialog.dismiss()
-                } catch (_: Exception) {
-                    Toast.makeText(this, "Score invalide : saisis un total entre 0 et 180.", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this, e.message ?: "Impossible d'enregistrer ce tour.", Toast.LENGTH_LONG).show()
                 }
             }
         }
