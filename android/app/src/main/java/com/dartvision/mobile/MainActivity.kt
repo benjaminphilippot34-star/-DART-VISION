@@ -1644,29 +1644,48 @@ class MainActivity : ComponentActivity() {
             grid.addView(row)
         }
         content.addView(grid, LinearLayout.LayoutParams(-1, -2))
-        val bottom = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        fun bottomButton(caption: String, weight: Float = 1f, click: () -> Unit) =
-            Button(this).apply {
-                text = caption; isAllCaps = false; textSize = 15f; setTextColor(ink)
-                background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
-                layoutParams = LinearLayout.LayoutParams(0, dp(42), weight)
+        val bottom = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(2), dp(3), dp(2), dp(3))
+        }
+        fun iconAction(glyph: String, description: String, click: () -> Unit) =
+            TextView(this).apply {
+                text = glyph
+                contentDescription = description
+                gravity = Gravity.CENTER
+                textSize = 21f
+                setTextColor(ink)
+                background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 50)
+                layoutParams = LinearLayout.LayoutParams(dp(42), dp(42)).apply {
+                    setMargins(dp(4), 0, dp(4), 0)
+                }
                 setOnClickListener { click() }
             }
-        bottom.addView(bottomButton("↶") { if (hits.isNotEmpty()) { hits.removeAt(hits.lastIndex); render() } })
-        bottom.addView(bottomButton("MANQUÉ") { addHit(DartHit.MISS) })
-        bottom.addView(Button(this).apply {
-            text = "▣"; isAllCaps = false; textSize = 21f; setTextColor(0xFF062A27.toInt())
-            background = rounded(teal, teal, 12)
-            layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
-            setOnClickListener {
-                (content.parent as? android.view.ViewGroup)?.removeView(content)
-                manualEntryView = null
-                showManualEntryPrompt()
-                navigateToMorePage?.invoke()
-                setCameraMode(true)
-            }
+        bottom.addView(iconAction("↶", "Retour / annuler la dernière fléchette") {
+            if (hits.isNotEmpty()) { hits.removeAt(hits.lastIndex); render() }
         })
-        content.addView(bottom)
+        bottom.addView(iconAction("⚙", "Paramètres") {
+            navigateToMorePage?.invoke()
+        })
+        val missed = TextView(this).apply {
+            text = "MANQUÉ"; contentDescription = "Fléchette manquée"
+            gravity = Gravity.CENTER; textSize = 12f; setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(ink); background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 14)
+            layoutParams = LinearLayout.LayoutParams(0, dp(40), 1f).apply {
+                setMargins(dp(5), 0, dp(5), 0)
+            }
+            setOnClickListener { addHit(DartHit.MISS) }
+        }
+        bottom.addView(missed)
+        bottom.addView(iconAction("▣", "Activer le mode caméra") {
+            (content.parent as? android.view.ViewGroup)?.removeView(content)
+            manualEntryView = null
+            showManualEntryPrompt()
+            navigateToMorePage?.invoke()
+            setCameraMode(true)
+        })
+        content.addView(bottom, LinearLayout.LayoutParams(-1, dp(48)))
         render = {
             slots.forEachIndexed { i, slot ->
                 val hit = hits.getOrNull(i)
