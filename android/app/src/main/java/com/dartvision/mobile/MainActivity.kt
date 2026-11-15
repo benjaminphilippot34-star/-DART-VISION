@@ -789,15 +789,15 @@ class MainActivity : ComponentActivity() {
                 row.addView(TextView(this).apply { text = "♙"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); layoutParams = LinearLayout.LayoutParams(38, -2) })
                 row.addView(TextView(this).apply { text = name; textSize = 15f; setTextColor(0xFFF4F8FA.toInt()); layoutParams = LinearLayout.LayoutParams(0, -2, 1f) })
                 row.addView(TextView(this).apply { text = "✎"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); setPadding(12, 8, 12, 8); setOnClickListener {
-                    val field = EditText(this).apply { setText(name); setSelection(text.length); setSingleLine(true) }
-                    AlertDialog.Builder(this).setTitle("Modifier le pseudo").setView(field)
+                    val field = EditText(this@MainActivity).apply { setText(name); setSelection(text.length); setSingleLine(true) }
+                    AlertDialog.Builder(this@MainActivity).setTitle("Modifier le pseudo").setView(field)
                         .setNegativeButton("ANNULER", null).setPositiveButton("ENREGISTRER") { _, _ ->
                             val updated = field.text.toString().trim()
                             if (updated.isNotBlank() && names.indices.none { it != index && names[it].equals(updated, true) }) {
                                 names[index] = updated
                                 prefs.edit().putString("names", names.joinToString("\\n")).apply()
                                 render()
-                            } else Toast.makeText(this, "Pseudo vide ou déjà utilisé.", Toast.LENGTH_SHORT).show()
+                            } else Toast.makeText(this@MainActivity, "Pseudo vide ou déjà utilisé.", Toast.LENGTH_SHORT).show()
                         }.show()
                 } })
                 row.addView(TextView(this).apply { text = "×"; textSize = 22f; setTextColor(0xFFFF756D.toInt()); setPadding(12, 8, 8, 8); setOnClickListener { names.removeAt(index); prefs.edit().putString("names", names.joinToString("\n")).apply(); render() } })
