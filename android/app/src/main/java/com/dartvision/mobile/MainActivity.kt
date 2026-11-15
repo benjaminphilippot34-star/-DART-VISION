@@ -190,6 +190,7 @@ class MainActivity : ComponentActivity() {
         headingText.addView(txt("SCORE EN DIRECT", 9f, teal, true))
         gameHeading.addView(headingText)
         btn(gameHeading, "MODES", false) { showGameModes() }
+        btn(gameHeading, "CAMÉRA", false) { showPage("more"); setCameraMode(true) }
         gamePage.addView(gameHeading)
         val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
         val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
