@@ -225,11 +225,7 @@ class MainActivity : ComponentActivity() {
         gamePage.addView(scoreCard)
         val boardCard = card()
         boardCard.addView(txt("CIBLE • APERÇU", 10f, muted, true))
-        boardCard.addView(TextView(this).apply {
-            text = "◎"; textSize = 112f; gravity = Gravity.CENTER
-            setTextColor(0xFF28D7C2.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(235))
-        })
+        boardCard.addView(DartboardPreview(this).apply { layoutParams = LinearLayout.LayoutParams(-1, dp(250)) })
         gamePage.addView(boardCard)
         val adjust = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(adjust, "−1") { action("adjust", "delta" to "-1") }
@@ -1585,6 +1581,65 @@ class MainActivity : ComponentActivity() {
         saveLocalState(state.get())
         server?.stop(); worker.shutdown(); poller.shutdownNow(); analysisExecutor.shutdown()
         super.onDestroy()
+    }
+}
+
+
+private class DartboardPreview(context: android.content.Context) : View(context) {
+    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    private val numbers = intArrayOf(20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
+    private val colors = intArrayOf(0xFF101820.toInt(), 0xFFF2E8D5.toInt(), 0xFFB92735.toInt(), 0xFF168C67.toInt())
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        val side = minOf(width, height).toFloat()
+        val cx = width / 2f
+        val cy = height / 2f
+        val radius = side * 0.43f
+        paint.color = 0xFF080D13.toInt()
+        canvas.drawCircle(cx, cy, radius * 1.08f, paint)
+        val rings = floatArrayOf(0f, .10f, .48f, .54f, .88f, .94f, 1f)
+        val sweep = 360f / 20f
+        for (i in 0 until 20) {
+            val start = -99f + i * sweep
+            val base = if (i % 2 == 0) 1 else 0
+            val path = android.graphics.Path()
+            path.moveTo(cx, cy)
+            path.arcTo(android.graphics.RectF(cx-radius, cy-radius, cx+radius, cy+radius), start, sweep, false)
+            path.close()
+            paint.color = colors[base]
+            canvas.drawPath(path, paint)
+            for (ring in 0 until rings.size - 1) {
+                val inner = radius * rings[ring]
+                val outer = radius * rings[ring + 1]
+                val ringPath = android.graphics.Path()
+                ringPath.moveTo(cx + inner * kotlin.math.cos(Math.toRadians(start.toDouble())).toFloat(), cy + inner * kotlin.math.sin(Math.toRadians(start.toDouble())).toFloat())
+                ringPath.arcTo(android.graphics.RectF(cx-outer, cy-outer, cx+outer, cy+outer), start, sweep, false)
+                ringPath.arcTo(android.graphics.RectF(cx-inner, cy-inner, cx+inner, cy+inner), start+sweep, -sweep, false)
+                ringPath.close()
+                paint.color = when (ring) {
+                    2, 4 -> if (i % 2 == 0) colors[2] else colors[3]
+                    else -> if ((i + ring) % 2 == 0) colors[0] else colors[1]
+                }
+                canvas.drawPath(ringPath, paint)
+            }
+            paint.color = 0xFFB8C7C7.toInt()
+            paint.strokeWidth = side * .003f
+            canvas.drawLine(
+                cx + radius * .10f * kotlin.math.cos(Math.toRadians(start.toDouble())).toFloat(),
+                cy + radius * .10f * kotlin.math.sin(Math.toRadians(start.toDouble())).toFloat(),
+                cx + radius * kotlin.math.cos(Math.toRadians(start.toDouble())).toFloat(),
+                cy + radius * kotlin.math.sin(Math.toRadians(start.toDouble())).toFloat(), paint
+            )
+            paint.color = 0xFFF3F5F4.toInt()
+            paint.textSize = side * .045f
+            paint.textAlign = android.graphics.Paint.Align.CENTER
+            val angle = Math.toRadians((start + sweep/2).toDouble())
+            canvas.drawText(numbers[i].toString(), cx + radius*1.045f*kotlin.math.cos(angle).toFloat(), cy + radius*1.045f*kotlin.math.sin(angle).toFloat() + paint.textSize*.35f, paint)
+        }
+        paint.color = 0xFF168C67.toInt()
+        canvas.drawCircle(cx, cy, radius*.095f, paint)
+        paint.color = 0xFFB92735.toInt()
+        canvas.drawCircle(cx, cy, radius*.045f, paint)
     }
 }
 
