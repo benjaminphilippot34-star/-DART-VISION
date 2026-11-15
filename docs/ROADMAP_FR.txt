@@ -5,9 +5,11 @@ ROADMAP DART VISION
 0.7 — Suivi des fléchettes présentes, détection des nouvelles fléchettes et retraits
 0.8 — Localisation de la pointe, calcul de zone et validation manuelle
 0.9 — Corpus de tests réels, mesure de précision et gestion des cas ambigus
-0.95 — Catalogue DartCounter local, modèles de réglages X01/121/Shanghai et tests unitaires (socle ajouté ; moteurs de règles à développer)\n1.0 — Moteurs de jeu complets, interfaces de modes, appairage QR sécurisé et synchronisation multi-téléphones
-1.1 — Seconde caméra facultative et fusion des deux vues
-1.2 — Commandes vocales, annonces, profils et statistiques
+0.95 — Catalogue DartCounter et premiers moteurs hors ligne (X01, Cricket/Tactics, Shanghai, entraînements)
+1.0 — Écrans complets pour tous les modes, règles X01 avancées, manches/sets, sauvegarde et historique
+1.1 — Appairage QR sécurisé, hotspot Android, synchronisation et gestion des déconnexions
+1.2 — Seconde caméra facultative et fusion des deux vues
+1.3 — Commandes vocales, annonces, profils et statistiques
 Après Android : portage iOS et synchronisation cloud facultative.
 
 ARCHITECTURE CIBLE
@@ -20,5 +22,12 @@ ARCHITECTURE CIBLE
 
 RÈGLE DE QUALITÉ
 Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences réelles annotées et séparées entre développement et validation. Si la pointe est masquée ou trop proche d'une séparation, l'application doit demander une validation plutôt que d'inventer un score.
+
+ÉTAT ACTUEL
+- Sélecteur des modes ajouté.
+- X01 : écran de configuration 301/501/701 et saisie manuelle des fléchettes ; moteur de base et annulation.
+- Moteurs locaux de base ajoutés pour plusieurs modes d'entraînement et Cricket/Tactics/Shanghai.
+- Les écrans dédiés aux autres modes, la sauvegarde complète de leurs états et la validation des règles restent à faire.
+- La détection caméra n'identifie pas encore les pointes : elle analyse seulement les changements d'image.
 
 Voir docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md pour la synthèse des idées retenues et le pipeline technique.
