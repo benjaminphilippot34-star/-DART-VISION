@@ -4,7 +4,7 @@ Application Android de comptage et d'entraînement aux fléchettes, conçue pour
 
 ## État du projet
 
-Le projet est en développement actif. La compilation Android et les tests unitaires passent sur GitHub Actions. La dernière compilation validée produit un APK de débogage installable.
+Version Android déclarée : **0.8.0** (versionCode 9). Le projet est en développement actif.
 
 Fonctions déjà présentes :
 - Partie locale hors ligne et catalogue de 13 modes de jeu/entraînement.
@@ -23,22 +23,27 @@ Fonctions déjà présentes :
 - La sauvegarde complète des modes d'entraînement autres que X01 reste à faire.
 - Aucune validation physique n'a encore été réalisée sur un Xiaomi 14T.
 
-## Récupérer l'APK de développement
+## Récupérer les APK de développement
+
+Après une exécution réussie du workflow **Android build, tests and signed release** :
 
 1. Ouvrir l'onglet [Actions](https://github.com/benjaminphilippot34-star/-DART-VISION/actions).
-2. Ouvrir la dernière exécution verte de **Android build and tests** sur la branche `main`.
-3. Dans **Artifacts**, télécharger `dart-vision-debug-apk`.
-4. Extraire l'archive : elle contient `app-debug.apk` et le rapport des tests unitaires.
-5. Transférer l'APK sur le téléphone Android et autoriser son installation si Android le demande.
+2. Ouvrir la dernière exécution verte sur la branche `main`.
+3. Dans **Artifacts**, télécharger `dart-vision-debug-apk` pour l'APK de test.
+4. Si les quatre secrets de signature sont configurés, télécharger aussi `dart-vision-signed-release-apk`.
+5. Extraire l'archive : elle contient l'APK correspondant.
 
-Cet APK est une version de développement, pas encore une version finale publiée sur le Play Store.
+L'APK signé est destiné aux essais et à la distribution directe. Ce n'est pas une publication sur le Play Store.
 
-## Documentation
+## Secrets GitHub pour la signature Android
 
-- [Comparatif des applications et architecture](docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md)
-- [Feuille de route](docs/ROADMAP_FR.txt)
-- [Plan de tests terrain](docs/PLAN_TESTS_TERRAIN_FR.md)
-- [Guide de première bêta Android](docs/GUIDE_PREMIERE_BETA_ANDROID_FR.md)
+Dans **Settings → Secrets and variables → Actions**, le workflow utilise :
+- `DARTVISION_KEYSTORE_BASE64` : keystore Android encodé en Base64.
+- `DARTVISION_STORE_PASSWORD` : mot de passe du keystore.
+- `DARTVISION_KEY_ALIAS` : alias de la clé.
+- `DARTVISION_KEY_PASSWORD` : mot de passe de la clé.
+
+Le workflow décode le keystore uniquement sur le runner GitHub, construit l'APK signé puis supprime le fichier temporaire. Ne jamais ajouter le keystore ni les mots de passe au dépôt.
 
 ## Construction
 
@@ -49,4 +54,11 @@ Cet APK est une version de développement, pas encore une version finale publié
 - `minSdk` : 26
 - `compileSdk` : 35
 
-La compilation et les tests sont automatisés dans `.github/workflows/android-build.yml`.
+La compilation, les tests unitaires et la génération des APK sont automatisés dans `.github/workflows/android-build.yml`.
+
+## Documentation
+
+- [Comparatif des applications et architecture](docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md)
+- [Feuille de route](docs/ROADMAP_FR.txt)
+- [Plan de tests terrain](docs/PLAN_TESTS_TERRAIN_FR.md)
+- [Guide de première bêta Android](docs/GUIDE_PREMIERE_BETA_ANDROID_FR.md)
