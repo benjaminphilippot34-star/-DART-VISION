@@ -31,6 +31,23 @@ class BoardCalibration private constructor(private val h: DoubleArray) {
             require(corners.size == 4)
             require(corners.all { it.x.isFinite() && it.y.isFinite() })
             require(halfSizeMm > 0.0 && halfSizeMm.isFinite())
+            // Reject crossed, duplicated or nearly collinear points before solving the homography.
+            val turns = (0..3).map { i ->
+                val a = corners[i]
+                val b = corners[(i + 1) % 4]
+                val c = corners[(i + 2) % 4]
+                (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x)
+            }
+            require(turns.all { abs(it) > 1e-6 } &&
+                (turns.all { it > 0.0 } || turns.all { it < 0.0 })) {
+                "Les coins doivent former un quadrilatère convexe dans l'ordre demandé."
+            }
+            val twiceArea = (0..3).sumOf { i ->
+                val a = corners[i]
+                val b = corners[(i + 1) % 4]
+                a.x * b.y - b.x * a.y
+            }
+            require(abs(twiceArea) > 1e-4) { "La surface de calibration est trop petite." }
             val targets = listOf(
                 BoardPoint(-halfSizeMm, -halfSizeMm),
                 BoardPoint(halfSizeMm, -halfSizeMm),
