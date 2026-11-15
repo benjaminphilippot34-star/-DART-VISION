@@ -406,19 +406,7 @@ class MainActivity : ComponentActivity() {
             }.show()
     }
 
-    private fun parseDartHit(raw: String): DartHit {
-        val value = raw.uppercase().replace(" ", "")
-        if (value == "MISS" || value == "0") return DartHit.MISS
-        val multiplier = when {
-            value.startsWith("T") -> 3
-            value.startsWith("D") -> 2
-            value.startsWith("S") -> 1
-            else -> 1
-        }
-        val numberText = if (value.firstOrNull() in listOf('S', 'D', 'T')) value.drop(1) else value
-        val number = numberText.toInt()
-        return DartHit(number, multiplier)
-    }
+    private fun parseDartHit(raw: String): DartHit = DartHitParser.parse(raw)
 
 
     private fun saveX01Game() {
