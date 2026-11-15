@@ -262,9 +262,9 @@ class MainActivity : ComponentActivity() {
             setBackgroundColor(0xFF191E26.toInt())
             elevation = dp(12).toFloat()
         }
-        button(bottomNav, "ACCUEIL", true) { showMainMenu() }
-        button(bottomNav, "JOUEURS") { managePlayers() }
-        button(bottomNav, "PARTIE") { configureX01() }
+        button(bottomNav, "ACCUEIL", true) { scroll.smoothScrollTo(0, 0) }
+        button(bottomNav, "JOUEURS") { scroll.post { scroll.smoothScrollTo(0, playersPanel.top) } }
+        button(bottomNav, "PARTIE") { scroll.post { scroll.smoothScrollTo(0, game.top) } }
         button(bottomNav, "MENU") { showMainMenu() }
         shell.addView(bottomNav, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
