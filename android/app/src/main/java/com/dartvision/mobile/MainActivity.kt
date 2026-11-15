@@ -181,6 +181,10 @@ class MainActivity : ComponentActivity() {
 
     private fun onCalibrationTap(viewX: Double, viewY: Double) {
         if (!calibrationOverlay.active) return
+        if (frameAnalyzer.imageWidth <= 0 || frameAnalyzer.imageHeight <= 0) {
+            Toast.makeText(this, "Attends que l'image caméra soit prête.", Toast.LENGTH_SHORT).show()
+            return
+        }
         val point = PreviewCoordinateMapper.viewToImage(
             viewX, viewY, calibrationOverlay.width, calibrationOverlay.height,
             frameAnalyzer.imageWidth, frameAnalyzer.imageHeight, frameAnalyzer.rotationDegrees
