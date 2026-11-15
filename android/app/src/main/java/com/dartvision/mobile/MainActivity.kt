@@ -234,60 +234,82 @@ class MainActivity : ComponentActivity() {
         // L’inscription et la connexion disposent de leur propre onglet.
         accountPage.addView(buildAccountPanel())
 
-        // Tableau de score
+        // Écran de jeu compact inspiré de la maquette fournie.
+        val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
+        val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
         val gameHeading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val headingText = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
         headingText.addView(txt("PARTIE EN COURS", 19f, white, true))
-        headingText.addView(txt("SCORE EN DIRECT", 9f, teal, true))
+        headingText.addView(txt("501 • SCORE EN DIRECT", 9f, teal, true))
         gameHeading.addView(headingText)
-        btn(gameHeading, "CHECKOUT", false) { showCheckoutSuggestions() }
+        btn(gameHeading, "SORTIES", false) { showCheckoutSuggestions() }
         btn(gameHeading, "MODES", false) { showGameModes() }
         gamePage.addView(gameHeading)
-        val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
-        val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
-        val playerStrip = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(8), 0, dp(5)) }
+
+        val playerStrip = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(9), 0, dp(5)) }
         for (i in 0 until currentPlayers.length()) {
             val p = currentPlayers.optJSONObject(i) ?: continue
             val selected = i == active
             val chip = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(8), dp(8), dp(8), dp(8))
+                orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(7), dp(8), dp(7), dp(8))
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (selected) 0xFF123D3A.toInt() else panelColor); cornerRadius = dp(13).toFloat()
                     setStroke(dp(1), if (selected) teal else 0xFF263744.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), 0, dp(3), dp(7)) }
             }
-            chip.addView(txt(p.optString("name", "Joueur " + (i + 1)), 11f, if (selected) teal else muted, true))
-            chip.addView(txt(p.optInt("score", 301).toString(), 19f, white, true))
+            chip.addView(txt((if (selected) "▶ " else "") + p.optString("name", "Joueur " + (i + 1)), 10f, if (selected) teal else muted, true))
+            chip.addView(txt(p.optInt("score", 501).toString(), 19f, white, true))
             playerStrip.addView(chip)
         }
         gamePage.addView(playerStrip)
+
         val scoreCard = card().apply {
             gravity = Gravity.CENTER_HORIZONTAL
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFF121D27.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
             }
         }
-        scoreCard.addView(txt(selectedMode.title.uppercase(), 11f, teal, true))
-        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 301)?.toString() ?: "301", 64f, white, true)
-            .apply { gravity = Gravity.CENTER; setPadding(0, dp(3), 0, 0) }
+        scoreCard.addView(txt(selectedMode.title.uppercase(), 10f, teal, true))
+        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 501)?.toString() ?: "501", 58f, white, true)
+            .apply { gravity = Gravity.CENTER; setPadding(0, dp(2), 0, 0) }
         scoreCard.addView(scoreView)
         scoreCard.addView(txt("SCORE RESTANT", 9f, muted, true))
-        scoreCard.addView(txt("TOUR " + state.get().optInt("turn", 1), 10f, teal, true).apply { setPadding(0, dp(8), 0, dp(3)) })
+        scoreCard.addView(txt("TOUR " + state.get().optInt("turn", 1) + "  •  3 FLÉCHETTES", 10f, teal, true).apply { setPadding(0, dp(7), 0, 0) })
         gamePage.addView(scoreCard)
-        val boardCard = card()
-        boardCard.addView(txt("CIBLE • APERÇU", 10f, muted, true))
-        boardCard.addView(DartboardPreview(this).apply { layoutParams = LinearLayout.LayoutParams(-1, dp(250)) })
-        gamePage.addView(boardCard)
-        val adjust = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        btn(adjust, "−1") { action("adjust", "delta" to "-1") }
-        btn(adjust, "−20") { action("adjust", "delta" to "-20") }
-        btn(adjust, "+20") { action("adjust", "delta" to "20") }
-        gamePage.addView(adjust)
-        val entry = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        btn(entry, "ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
-        btn(entry, "SAISIR 3 FLÉCHETTES", true) { enterManualTurn() }
-        gamePage.addView(entry)
+
+        val entryTitle = txt("SAISIE DE LA VOLÉE", 11f, muted, true).apply { setPadding(dp(3), dp(5), 0, dp(3)) }
+        gamePage.addView(entryTitle)
+        val multiplierRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        listOf("SIMPLE", "DOUBLE", "TRIPLE", "BULL", "OUTER").forEachIndexed { index, label ->
+            btn(multiplierRow, label, index == 0) { enterManualTurn() }
+        }
+        gamePage.addView(multiplierRow)
+        val keypad = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        for (r in 0 until 4) {
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for (col in 0 until 5) {
+                val number = r * 5 + col + 1
+                btn(row, number.toString(), false) { enterManualTurn() }
+            }
+            keypad.addView(row)
+        }
+        gamePage.addView(keypad)
+        val entryActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        btn(entryActions, "↶ ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
+        btn(entryActions, "MANQUÉ") { enterManualTurn() }
+        btn(entryActions, "SAISIR", true) { enterManualTurn() }
+        gamePage.addView(entryActions)
+        val cameraShortcut = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END }
+        btn(cameraShortcut, "▣ CAMÉRA", false) {
+            cameraPanelView?.let { panel ->
+                (panel.parent as? android.view.ViewGroup)?.removeView(panel)
+                panel.visibility = View.VISIBLE
+                gamePage.addView(panel)
+            }
+            setCameraMode(true)
+        }
+        gamePage.addView(cameraShortcut)
         val next = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(next, "TOUR SUIVANT", true) { action("next_turn") }
         btn(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else showGameModes() }
