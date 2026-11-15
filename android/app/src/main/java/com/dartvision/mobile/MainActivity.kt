@@ -370,7 +370,7 @@ class MainActivity : ComponentActivity() {
         gamePage.addView(manualEntryHost)
         showManualEntryPrompt()
         val cameraShortcut = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END }
-        btn(cameraShortcut, "▣ CAMÉRA", false) {
+        btn(cameraShortcut, "📹 CAMÉRA", false) {
             cameraPanelView?.let { panel ->
                 (panel.parent as? android.view.ViewGroup)?.removeView(panel)
                 panel.visibility = View.VISIBLE
@@ -1717,7 +1717,7 @@ class MainActivity : ComponentActivity() {
             setOnClickListener { addHit(DartHit.MISS) }
         }
         bottom.addView(missed)
-        bottom.addView(iconAction("▣", "Activer le mode caméra") {
+        bottom.addView(iconAction("📹", "Activer le mode caméra") {
             (content.parent as? android.view.ViewGroup)?.removeView(content)
             manualEntryView = null
             showManualEntryPrompt()
