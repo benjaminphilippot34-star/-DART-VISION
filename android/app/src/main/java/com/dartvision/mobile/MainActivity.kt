@@ -1517,7 +1517,7 @@ class MainActivity : ComponentActivity() {
                 hits.add(hit)
                 val live = if (engine != null) engine.previewTurn(hits.toList()) else null
                 if (live != null && (live.bust || live.legWon)) {
-                    val result = engine.throwTurn(hits.toList())
+                    val result = engine!!.throwTurn(hits.toList())
                     refreshX01(); saveX01Game()
                     val message = if (result.bust) "Bust : score restauré à ${result.scoreBefore}. Tour terminé." else "Leg gagné !"
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
