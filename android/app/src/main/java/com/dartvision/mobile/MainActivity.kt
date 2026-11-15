@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity() {
         header.addView(logo)
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         brand.addView(text("DART VISION", 20f, white, true))
-        brand.addView(text("COMPTEUR DE FLÉCHETTES", 10f, muted, true))
+        brand.addView(text("PRÉCISION • PERFORMANCE", 10f, muted, true))
         header.addView(brand)
         root.addView(header)
 
@@ -139,8 +139,8 @@ class MainActivity : ComponentActivity() {
         button(navigation, "MENU") { showMainMenu() }
         root.addView(navigation)
 
-        val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        modeRow.addView(text("301", 22f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
+        val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(2), dp(4), dp(2), dp(8)) }
+        modeRow.addView(text("TABLEAU DE BORD", 17f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
         button(modeRow, "CHOISIR MODE") { showGameModes() }
         root.addView(modeRow)
 
@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
         val players = state.get().optJSONArray("players") ?: JSONArray()
         val active = state.get().optInt("active", 0).coerceIn(0, (players.length() - 1).coerceAtLeast(0))
         val currentName = players.optJSONObject(active)?.optString("name", "Joueur 1") ?: "Joueur 1"
-        game.addView(text("AU TOUR DE", 11f, accent, true))
+        game.addView(text("PARTIE EN COURS  •  AU TOUR DE", 11f, accent, true))
         game.addView(text(currentName.uppercase(), 25f, white, true))
         scoreView = text(players.optJSONObject(active)?.optInt("score", 301)?.toString() ?: "301", 54f, white, true).apply { gravity = Gravity.CENTER }
         game.addView(scoreView)
@@ -223,7 +223,7 @@ class MainActivity : ComponentActivity() {
         cameraPanel.visibility = View.GONE
 
         val choicePanel = panel()
-        choicePanel.addView(text("CHOISIR LE MODE DE JEU", 13f, accent, true))
+        choicePanel.addView(text("MODE DE JEU", 13f, accent, true))
         choicePanel.addView(text("Tu peux jouer sans caméra ou l'activer quand tu le souhaites.", 12f, muted))
         val choiceButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         button(choiceButtons, "MODE NORMAL", true) { setCameraMode(false) }
@@ -234,11 +234,11 @@ class MainActivity : ComponentActivity() {
 
         val settings = panel()
         status = text("PRÊT À JOUER", 12f, accent, true)
-        settings.addView(status)
+        settings.addView(text("ÉTAT DE L’APPLICATION", 10f, muted, true))\n        settings.addView(status)
         val settingsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         button(settingsRow, "MODES DE JEU") { showGameModes() }
         button(settingsRow, "MISES À JOUR") { checkForUpdates(silent = false) }
-        button(settingsRow, "EFFACER CALIBRAGE") { clearBoardCalibration() }
+        button(settingsRow, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingsRow)
         root.addView(settings)
         setContentView(scroll)
@@ -309,7 +309,6 @@ class MainActivity : ComponentActivity() {
                 android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or
                 android.text.InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
             setSingleLine(true)
-            isSelectAllOnFocus = true
             if (index != null) {
                 val ps = state.get().optJSONArray("players") ?: JSONArray()
                 setText(ps.optJSONObject(index)?.optString("name", ""))
