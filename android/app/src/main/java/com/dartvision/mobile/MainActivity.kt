@@ -1703,7 +1703,7 @@ class MainActivity : ComponentActivity() {
             try {
                 val message = if (engine != null) {
                     val result = engine.throwTurn(hits.toList())
-                    refreshX01(); saveX01Game()
+                    refreshX01(); saveX01Game(); saveFinishedAccountMatch()
                     when {
                         result.bust -> "Bust : le score de la volée est annulé."
                         result.legWon -> "Leg gagné !"
