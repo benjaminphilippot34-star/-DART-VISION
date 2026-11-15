@@ -1036,64 +1036,78 @@ class MainActivity : ComponentActivity() {
         }
         val density = resources.displayMetrics.density
         fun dp(v: Int) = (v * density).toInt()
-        val options = mutableListOf("MISS", "25", "BULL")
-        for (n in 1..20) {
-            options.add("S$n"); options.add("D$n"); options.add("T$n")
-        }
-        fun dartValue(label: String): DartHit = when {
-            label == "MISS" -> DartHit.MISS
-            label == "25" -> DartHit(25, 1)
-            label == "BULL" -> DartHit(25, 2)
-            else -> DartHit(label.drop(1).toInt(), when (label.first()) { 'D' -> 2; 'T' -> 3; else -> 1 })
-        }
-        val selected = MutableList(3) { "MISS" }
+        val teal = 0xFF28D7C2.toInt()
+        val panel = 0xFF1B2A35.toInt()
+        val white = 0xFFF4F8FA.toInt()
+        var score = 0
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), dp(8), dp(18), dp(12))
         }
-        val total = TextView(this).apply {
-            text = "TOTAL DE LA VOLÉE\n0"
-            textSize = 25f; gravity = Gravity.CENTER
-            setTextColor(0xFF28D7C2.toInt())
+        val scoreDisplay = TextView(this).apply {
+            text = "SCORE DE LA VOLÉE\n0"
+            textSize = 25f
+            gravity = Gravity.CENTER
+            setTextColor(teal)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding(0, dp(12), 0, dp(16))
+            setPadding(0, dp(12), 0, dp(14))
         }
-        content.addView(total)
-        val dartButtons = mutableListOf<Button>()
-        fun refresh() {
-            val points = selected.sumOf { dartValue(it).points }
-            total.text = "TOTAL DE LA VOLÉE\n$points"
-            dartButtons.forEachIndexed { i, button -> button.text = "FLÉCHETTE ${i + 1}     ${selected[i]}  •  ${dartValue(selected[i]).points} pts" }
+        content.addView(scoreDisplay)
+        val scoreInput = EditText(this).apply {
+            hint = "Saisir le score (0 à 180)"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            textSize = 20f
+            gravity = Gravity.CENTER
+            setTextColor(white)
+            setHintTextColor(0xFF91A4B2.toInt())
+            setSingleLine(true)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(panel); cornerRadius = dp(12).toFloat()
+                setStroke(dp(1), 0xFF40515C.toInt())
+            }
+            setPadding(dp(12), dp(10), dp(12), dp(10))
         }
-        repeat(3) { index ->
-            val button = Button(this).apply {
-                isAllCaps = false; textSize = 13f
-                setTextColor(0xFFF5F6F8.toInt())
+        content.addView(scoreInput, LinearLayout.LayoutParams(-1, dp(54)))
+        fun updateScore(value: Int) {
+            score = value.coerceIn(0, 180)
+            scoreInput.setText(score.toString())
+            scoreInput.setSelection(scoreInput.text.length)
+            scoreDisplay.text = "SCORE DE LA VOLÉE\n$score"
+        }
+        scoreInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                score = s?.toString()?.toIntOrNull()?.coerceIn(0, 180) ?: 0
+                scoreDisplay.text = "SCORE DE LA VOLÉE\n$score"
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+        val quick = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        fun quickButton(label: String, delta: Int) {
+            quick.addView(Button(this).apply {
+                text = label; isAllCaps = false; textSize = 14f
+                setTextColor(white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF202B35.toInt()); cornerRadius = dp(12).toFloat()
+                    setColor(panel); cornerRadius = dp(12).toFloat()
                     setStroke(dp(1), 0xFF40515C.toInt())
                 }
-                minHeight = dp(54)
-                setOnClickListener {
-                    AlertDialog.Builder(this@MainActivity)
-                        .setTitle("FLÉCHETTE ${index + 1}")
-                        .setItems(options.toTypedArray()) { _, which ->
-                            selected[index] = options[which]
-                            refresh()
-                        }.show()
+                layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply {
+                    setMargins(dp(3), dp(5), dp(3), dp(5))
                 }
-            }
-            dartButtons.add(button)
-            content.addView(button, LinearLayout.LayoutParams(-1, dp(58)).apply { bottomMargin = dp(7) })
+                setOnClickListener { updateScore(score + delta) }
+            })
         }
-        refresh()
+        quickButton("−1", -1)
+        quickButton("−20", -20)
+        quickButton("+20", 20)
+        content.addView(quick)
         content.addView(TextView(this).apply {
-            text = "Sélectionne le secteur touché pour chaque fléchette : simple, double, triple, 25, bull ou raté."
+            text = "Entre le total des 3 fléchettes. Le score sera réparti automatiquement sur la volée."
             textSize = 11f; setTextColor(0xFF9AA3AF.toInt())
             setPadding(0, dp(8), 0, dp(4))
         })
         val dialog = AlertDialog.Builder(this)
-            .setTitle("SAISIE MANUELLE • 3 FLÉCHETTES")
+            .setTitle("SAISIR 3 FLÉCHETTES")
             .setView(content)
             .setNegativeButton("ANNULER", null)
             .setPositiveButton("VALIDER LA VOLÉE", null)
@@ -1101,7 +1115,10 @@ class MainActivity : ComponentActivity() {
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 try {
-                    val hits = selected.map(::dartValue)
+                    val finalScore = scoreInput.text.toString().toIntOrNull()
+                        ?: throw IllegalArgumentException("Saisis un score entre 0 et 180.")
+                    require(finalScore in 0..180) { "Le score doit être compris entre 0 et 180." }
+                    val hits = scoreToDarts(finalScore)
                     val message = if (engine != null) {
                         val result = engine.throwTurn(hits)
                         refreshX01()
@@ -1115,7 +1132,7 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     dialog.dismiss()
                 } catch (e: Exception) {
-                    Toast.makeText(this, e.message ?: "Impossible d'enregistrer cette volée.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
                 }
             }
         }
