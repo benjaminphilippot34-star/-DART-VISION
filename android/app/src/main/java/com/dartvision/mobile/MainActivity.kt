@@ -68,6 +68,10 @@ class MainActivity : ComponentActivity() {
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var x01Engine: X01GameEngine? = null
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
+    private var availableUpdate: JSONObject? = null
+    private var updateNavButton: Button? = null
+    private var updateVersionLabel: TextView? = null
+    private var updatePageView: LinearLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -170,6 +174,8 @@ class MainActivity : ComponentActivity() {
         val playersPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val morePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val accountPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val updatePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        updatePageView = updatePage
         val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
         val navButtons = mutableListOf<Pair<String, Button>>()
         fun showPage(page: String) {
@@ -178,6 +184,7 @@ class MainActivity : ComponentActivity() {
             playersPage.visibility = if (page == "players") View.VISIBLE else View.GONE
             morePage.visibility = if (page == "more") View.VISIBLE else View.GONE
             accountPage.visibility = if (page == "account") View.VISIBLE else View.GONE
+            updatePage.visibility = if (page == "update") View.VISIBLE else View.GONE
             navButtons.forEach { (key, view) ->
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
@@ -238,6 +245,17 @@ class MainActivity : ComponentActivity() {
         tile("Paramètres", "Application et mises à jour", "⚙") { showPage("more") }
         // L’inscription et la connexion disposent de leur propre onglet.
         accountPage.addView(buildAccountPanel())
+        updatePage.addView(txt("MISE À JOUR DART VISION", 20f, white, true))
+        updatePage.addView(txt("Les mises à jour apparaissent ici uniquement lorsqu'une nouvelle version est réellement publiée.", 11f, muted))
+        updateVersionLabel = txt("Vérification des mises à jour…", 13f, teal, true).apply { setPadding(0, dp(12), 0, dp(12)) }
+        updatePage.addView(updateVersionLabel)
+        val installUpdateButton = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(installUpdateButton, "TÉLÉCHARGER ET INSTALLER", true) {
+            val info = availableUpdate
+            if (info != null) downloadAndInstallUpdate(info.optString("apkUrl"), info.optString("sha256", ""))
+        }
+        updatePage.addView(installUpdateButton)
+        updatePage.addView(txt("Android demandera de confirmer l'installation. La mise à jour conserve les données de l'application si elle est signée avec la même clé.", 10f, muted))
 
         // Écran de jeu compact inspiré de la maquette fournie.
         val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
@@ -291,7 +309,7 @@ class MainActivity : ComponentActivity() {
             isVerticalScrollBarEnabled = true
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
             layoutParams = LinearLayout.LayoutParams(0, dp(190), 1f)
-            addView(opponentScoresContainer, ScrollView.LayoutParams(-1, -2))
+            addView(opponentScoresContainer, FrameLayout.LayoutParams(-1, -2))
         }
         scoreCard.addView(opponentScroll)
         refreshOpponentScores(currentPlayers, active, muted, white, teal)
@@ -391,7 +409,7 @@ class MainActivity : ComponentActivity() {
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
 
-        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage)
+        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(updatePage)
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         val bottom = LinearLayout(this).apply {
@@ -405,10 +423,12 @@ class MainActivity : ComponentActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, dp(54), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
                 setOnClickListener { showPage(key) }
             }
+            if (key == "update") { updateNavButton = button; button.visibility = View.GONE }
             navButtons.add(key to button); bottom.addView(button)
         }
         nav("home", "ACCUEIL", "⌂"); nav("game", "JOUER", "◎"); nav("players", "JOUEURS", "♙"); nav("more", "PLUS", "•••")
         nav("account", if (hasAccountAtStart) "COMPTE" else "INSCRIPTION", "♙")
+        nav("update", "MISE À JOUR", "⬇")
         showPage(if (hasAccountAtStart) "home" else "account")
         shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
@@ -1751,7 +1771,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun httpGet(url: String): String
+    private fun httpGet(url: String): String {
         val c = URL(url).openConnection() as HttpURLConnection
         c.connectTimeout = 2500; c.readTimeout = 2500; c.requestMethod = "GET"
         return c.inputStream.bufferedReader().use { it.readText() }.also { c.disconnect() }
@@ -1780,19 +1800,22 @@ class MainActivity : ComponentActivity() {
                     packageManager.getPackageInfo(packageName, 0).versionCode
                 }
                 if (remoteCode <= currentCode) {
-                    if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show() }
+                    runOnUiThread {
+                        availableUpdate = null
+                        updateNavButton?.visibility = View.GONE
+                        updateVersionLabel?.text = "Aucune mise à jour disponible. DART VISION est à jour."
+                        if (!silent) AlertDialog.Builder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show()
+                    }
                     return@execute
                 }
                 val versionName = manifest.optString("versionName", "nouvelle version")
                 val apkUrl = manifest.getString("apkUrl")
                 val sha256 = manifest.optString("sha256", "").lowercase()
+                if (!apkUrl.startsWith("https://") || remoteCode <= 0 || versionName.isBlank()) throw IllegalStateException("Manifeste de mise à jour invalide")
                 runOnUiThread {
-                    AlertDialog.Builder(this)
-                        .setTitle("Mise à jour disponible")
-                        .setMessage("DART VISION $versionName est disponible. Télécharger et installer ?")
-                        .setNegativeButton("Plus tard", null)
-                        .setPositiveButton("Télécharger") { _, _ -> downloadAndInstallUpdate(apkUrl, sha256) }
-                        .show()
+                    availableUpdate = manifest
+                    updateVersionLabel?.text = "DART VISION $versionName est disponible. Appuie ci-dessous pour télécharger la version officielle signée."
+                    updateNavButton?.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
                 if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("Vérification impossible").setMessage("Connexion ou publication indisponible. Réessaie plus tard.").setPositiveButton("OK", null).show() }
