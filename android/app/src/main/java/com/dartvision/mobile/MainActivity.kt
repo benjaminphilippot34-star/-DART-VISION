@@ -190,6 +190,7 @@ class MainActivity : ComponentActivity() {
         headingText.addView(txt("PARTIE EN COURS", 19f, white, true))
         headingText.addView(txt("SCORE EN DIRECT", 9f, teal, true))
         gameHeading.addView(headingText)
+        btn(gameHeading, "CHECKOUT", false) { showCheckoutSuggestions() }
         btn(gameHeading, "MODES", false) { showGameModes() }
         btn(gameHeading, "CAMÉRA", false) { showPage("more"); setCameraMode(true) }
         gamePage.addView(gameHeading)
@@ -944,6 +945,32 @@ class MainActivity : ComponentActivity() {
         scoreView.text = "${selectedMode.title}\nMode local hors ligne${summary}"
         status.text = "MODE ${selectedMode.title.uppercase()} • moteur local • saisie manuelle"
         Toast.makeText(this, "${selectedMode.title} prêt. Saisis les fléchettes du tour.", Toast.LENGTH_LONG).show()
+    }
+
+    private fun showCheckoutSuggestions() {
+        val game = x01Engine
+        if (game == null) {
+            Toast.makeText(this, "Le calculateur est disponible en mode X01.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val state = game.state
+        val score = state.players[state.activePlayer].score
+        if (state.settings.outRule == X01OutRule.STRAIGHT_OUT) {
+            AlertDialog.Builder(this).setTitle("Conseils de sortie")
+                .setMessage("La partie est configurée en sortie libre : aucun finish en double n'est requis.")
+                .setPositiveButton("OK", null).show()
+            return
+        }
+        val routes = CheckoutCalculator.routes(score, 12)
+        val message = if (routes.isEmpty()) {
+            if (score > 170) "Il n'existe pas de sortie en trois fléchettes au-dessus de 170."
+            else "Aucune sortie directe en trois fléchettes pour $score."
+        } else routes.mapIndexed { i, route -> "${i + 1}. ${route.notation}" }.joinToString("\n")
+        AlertDialog.Builder(this)
+            .setTitle("SORTIES POSSIBLES • $score")
+            .setMessage(message)
+            .setPositiveButton("FERMER", null)
+            .show()
     }
 
     private fun configureX01() {
