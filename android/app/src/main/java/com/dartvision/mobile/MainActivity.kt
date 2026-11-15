@@ -69,7 +69,48 @@ class MainActivity : ComponentActivity() {
         loadBoardCalibration()
         startLocalGame()
         restoreX01Game()
+        handleAuthCallback(intent)
         checkForUpdates(silent = true)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleAuthCallback(intent)
+    }
+
+    private fun handleAuthCallback(callbackIntent: Intent?) {
+        val uri = callbackIntent?.data ?: return
+        if (uri.scheme != "dartvision" || uri.host != "auth-callback") return
+        val fragment = uri.fragment.orEmpty()
+        val values = fragment.split("&").mapNotNull { part ->
+            val bits = part.split("=", limit = 2)
+            if (bits.size == 2) bits[0] to Uri.decode(bits[1]) else null
+        }.toMap()
+        val error = values["error_description"] ?: values["error"]
+        if (!error.isNullOrBlank()) {
+            status.post { status.text = "Confirmation impossible : $error"; Toast.makeText(this, "Confirmation impossible : $error", Toast.LENGTH_LONG).show() }
+            return
+        }
+        val accessToken = values["access_token"]
+        if (accessToken.isNullOrBlank()) {
+            Toast.makeText(this, "Lien reçu, mais aucun jeton de confirmation trouvé.", Toast.LENGTH_LONG).show()
+            return
+        }
+        worker.execute {
+            try {
+                val user = SupabaseAuthClient().getUser(accessToken)
+                runOnUiThread {
+                    getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                        .putString("user_id", user.userId).putString("email", user.email)
+                        .putString("access_token", accessToken).putString("refresh_token", values["refresh_token"]).apply()
+                    Toast.makeText(this, "Adresse confirmée. Compte connecté.", Toast.LENGTH_LONG).show()
+                    showAuthenticatedHome()
+                }
+            } catch (e: Exception) {
+                runOnUiThread { Toast.makeText(this, e.message ?: "Validation du compte impossible.", Toast.LENGTH_LONG).show() }
+            }
+        }
     }
 
     private fun buildUi() {
