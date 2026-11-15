@@ -573,6 +573,7 @@ class MainActivity : ComponentActivity() {
                 cornerRadius = dp(12).toFloat()
             }
             contentDescription = "Fermer l’écran"
+            setOnClickListener { dialog.dismiss() }
         })
         content.addView(header)
         if (metrics.isNotEmpty()) {
@@ -1037,7 +1038,7 @@ class MainActivity : ComponentActivity() {
 
     private fun scoreToDarts(total: Int): List<DartHit> {
         require(total in 0..180)
-        if (total == 0) return List(3) { DartHit(null, 1) }
+        if (total == 0) return List(3) { DartHit.MISS }
         val values = (1..20).flatMap { n -> listOf(n to 1, n * 2 to 2, n * 3 to 3) } +
             listOf(25 to 1, 50 to 2)
         fun find(remaining: Int, dartsLeft: Int): List<DartHit>? {
