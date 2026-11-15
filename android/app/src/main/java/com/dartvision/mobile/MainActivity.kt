@@ -155,13 +155,13 @@ class MainActivity : ComponentActivity() {
         startPanel.addView(text("DART VISION  •  PRÊT À JOUER", 12f, accent, true))
         startPanel.addView(text("LE JEU COMMENCE ICI", 13f, muted, true))
         val startActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(startActions, "NOUVELLE PARTIE", true) { showGameModes() }
-        button(startActions, "JOUEURS") { managePlayers() }
+        button(startActions, "NOUVELLE PARTIE", true) { showPage("game"); showGameModes() }
+        button(startActions, "JOUEURS") { showPage("players"); managePlayers() }
         startPanel.addView(startActions)
         val quickModes = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(quickModes, "X01") { selectedMode = DartGameMode.X01; configureX01() }
-        button(quickModes, "CRICKET") { selectedMode = DartGameMode.CRICKET; configureTrainingMode() }
-        button(quickModes, "ENTRAÎNEMENT") { showTrainingModes() }
+        button(quickModes, "X01") { showPage("game"); selectedMode = DartGameMode.X01; configureX01() }
+        button(quickModes, "CRICKET") { showPage("game"); selectedMode = DartGameMode.CRICKET; configureTrainingMode() }
+        button(quickModes, "ENTRAÎNEMENT") { showPage("game"); showTrainingModes() }
         startPanel.addView(quickModes)
         pageHome.addView(startPanel)
         pageHome.addView(buildAccountPanel())
@@ -265,7 +265,7 @@ class MainActivity : ComponentActivity() {
         settings.addView(text("ÉTAT DE L’APPLICATION", 10f, muted, true))
         settings.addView(status)
         val settingsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(settingsRow, "MODES DE JEU") { showGameModes() }
+        button(settingsRow, "MODES DE JEU") { showPage("game"); showGameModes() }
         button(settingsRow, "MISES À JOUR") { checkForUpdates(silent = false) }
         button(settingsRow, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingsRow)
