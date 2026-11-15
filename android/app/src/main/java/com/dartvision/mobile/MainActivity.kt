@@ -962,7 +962,7 @@ class MainActivity : ComponentActivity() {
         content.addView(totalView)
         val selectors = mutableListOf<Spinner>()
         fun dartValue(label: String): DartHit = when {
-            label == "MISS" -> DartHit(null, 1)
+            label == "MISS" -> DartHit.MISS
             label == "25" -> DartHit(25, 1)
             label == "BULL" -> DartHit(25, 2)
             else -> {
