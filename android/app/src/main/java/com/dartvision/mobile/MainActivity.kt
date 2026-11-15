@@ -117,6 +117,25 @@ class MainActivity : ComponentActivity() {
             setBackgroundColor(bg)
         }
         scroll.addView(root)
+        val pageHome = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val pageGame = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val pagePlayers = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val pageMenu = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val navButtons = mutableListOf<Pair<String, Button>>()
+        fun showPage(page: String) {
+            pageHome.visibility = if (page == "home") View.VISIBLE else View.GONE
+            pageGame.visibility = if (page == "game") View.VISIBLE else View.GONE
+            pagePlayers.visibility = if (page == "players") View.VISIBLE else View.GONE
+            pageMenu.visibility = if (page == "menu") View.VISIBLE else View.GONE
+            navButtons.forEach { (key, view) ->
+                val selected = key == page
+                view.alpha = if (selected) 1f else 0.62f
+                view.background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(if (selected) accent else 0xFF191E26.toInt())
+                    cornerRadius = dp(14).toFloat()
+                }
+            }
+        }
         val header = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL }
         val logo = ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
@@ -144,13 +163,13 @@ class MainActivity : ComponentActivity() {
         button(quickModes, "CRICKET") { selectedMode = DartGameMode.CRICKET; configureTrainingMode() }
         button(quickModes, "ENTRAÎNEMENT") { showTrainingModes() }
         startPanel.addView(quickModes)
-        root.addView(startPanel)
-        root.addView(buildAccountPanel())
+        pageHome.addView(startPanel)
+        pageHome.addView(buildAccountPanel())
 
         val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(2), dp(4), dp(2), dp(8)) }
         modeRow.addView(text("TABLEAU DE BORD", 17f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
         button(modeRow, "CHOISIR MODE") { showGameModes() }
-        root.addView(modeRow)
+        pageGame.addView(modeRow)
 
         val game = panel()
         val players = state.get().optJSONArray("players") ?: JSONArray()
@@ -175,7 +194,7 @@ class MainActivity : ComponentActivity() {
         button(next, "TOUR SUIVANT", true) { action("next_turn") }
         button(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else action("new_game") }
         game.addView(next)
-        root.addView(game)
+        pageGame.addView(game)
 
         val playersPanel = panel()
         playersPanel.addView(text("JOUEURS", 12f, accent, true))
@@ -196,7 +215,7 @@ class MainActivity : ComponentActivity() {
         button(playerActions, "AJOUTER JOUEUR") { editPlayerName(null) }
         button(playerActions, "CONFIGURER X01") { configureX01() }
         playersPanel.addView(playerActions)
-        root.addView(playersPanel)
+        pagePlayers.addView(playersPanel)
 
         val cameraPanel = panel()
         cameraPanel.addView(text("DART VISION • CAMÉRA & CALIBRATION", 13f, accent, true))
@@ -238,8 +257,8 @@ class MainActivity : ComponentActivity() {
         button(choiceButtons, "MODE NORMAL", true) { setCameraMode(false) }
         button(choiceButtons, "MODE CAMÉRA") { setCameraMode(true) }
         choicePanel.addView(choiceButtons)
-        root.addView(choicePanel)
-        root.addView(cameraPanel)
+        pageMenu.addView(choicePanel)
+        pageMenu.addView(cameraPanel)
 
         val settings = panel()
         status = text("PRÊT À JOUER", 12f, accent, true)
@@ -250,24 +269,29 @@ class MainActivity : ComponentActivity() {
         button(settingsRow, "MISES À JOUR") { checkForUpdates(silent = false) }
         button(settingsRow, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingsRow)
-        root.addView(settings)
-        val shell = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(bg)
-        }
+        pageMenu.addView(settings)
+        root.addView(pageHome)
+        root.addView(pageGame)
+        root.addView(pagePlayers)
+        root.addView(pageMenu)
+        val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         val bottomNav = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            setPadding(dp(10), dp(8), dp(10), dp(8))
-            setBackgroundColor(0xFF191E26.toInt())
-            elevation = dp(12).toFloat()
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER
+            setPadding(dp(8), dp(8), dp(8), dp(8)); setBackgroundColor(0xFF191E26.toInt()); elevation = dp(12).toFloat()
         }
-        button(bottomNav, "ACCUEIL", true) { scroll.smoothScrollTo(0, 0) }
-        button(bottomNav, "JOUEURS") { scroll.post { scroll.smoothScrollTo(0, playersPanel.top) } }
-        button(bottomNav, "PARTIE") { scroll.post { scroll.smoothScrollTo(0, game.top) } }
-        button(bottomNav, "MENU") { showMainMenu() }
-        shell.addView(bottomNav, LinearLayout.LayoutParams(-1, dp(68)))
+        fun nav(key: String, label: String) {
+            val b = Button(this).apply {
+                text = label; isAllCaps = false; textSize = 11f; setTextColor(white)
+                minHeight = dp(48); stateListAnimator = null
+                layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
+                setOnClickListener { showPage(key) }
+            }
+            navButtons.add(key to b); bottomNav.addView(b)
+        }
+        nav("home", "ACCUEIL"); nav("game", "PARTIE"); nav("players", "JOUEURS"); nav("menu", "PLUS")
+        showPage("home")
+        shell.addView(bottomNav, LinearLayout.LayoutParams(-1, dp(64)))
         setContentView(shell)
     }
 
