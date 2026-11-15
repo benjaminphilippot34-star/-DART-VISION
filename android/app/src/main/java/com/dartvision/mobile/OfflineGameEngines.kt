@@ -1,0 +1,258 @@
+package com.dartvision.mobile
+
+import kotlin.math.max
+
+/** Impact reconnu ou saisi manuellement. multiplier: 0 miss, 1 simple, 2 double, 3 triple. */
+data class DartHit(val number: Int?, val multiplier: Int) {
+    init {
+        require(multiplier in 0..3)
+        require(number == null || number in 1..20 || number == 25)
+        require(number != null || multiplier == 0)
+        require(number != 25 || multiplier <= 2)
+    }
+    val points: Int get() = when {
+        number == null -> 0
+        number == 25 -> if (multiplier == 2) 50 else 25
+        else -> number * multiplier
+    }
+    val isDouble: Boolean get() = number != null && multiplier == 2
+    val isTriple: Boolean get() = number != null && multiplier == 3
+    companion object { val MISS = DartHit(null, 0) }
+}
+
+data class X01PlayerState(
+    val name: String,
+    val score: Int,
+    val hasEntered: Boolean = false,
+    val legsWon: Int = 0,
+    val setsWon: Int = 0
+)
+
+data class X01TurnResult(
+    val playerIndex: Int,
+    val hits: List<DartHit>,
+    val scoreBefore: Int,
+    val scoreAfter: Int,
+    val bust: Boolean,
+    val legWon: Boolean
+)
+
+data class X01GameState(
+    val settings: X01Settings,
+    val players: List<X01PlayerState>,
+    val activePlayer: Int = 0,
+    val turnNumber: Int = 1,
+    val dartsThrown: Int = 0,
+    val finished: Boolean = false,
+    val history: List<X01TurnResult> = emptyList()
+)
+
+class X01GameEngine(
+    private val settings: X01Settings,
+    playerNames: List<String>
+) {
+    init { require(playerNames.isNotEmpty()) }
+    var state: X01GameState = X01GameState(
+        settings,
+        playerNames.map { X01PlayerState(it, settings.startingScore) }
+    )
+        private set
+
+    fun throwTurn(hits: List<DartHit>): X01TurnResult {
+        require(hits.size in 1..3) { "Un tour doit contenir entre une et trois fléchettes." }
+        check(!state.finished) { "La partie est terminée." }
+        val players = state.players.toMutableList()
+        val index = state.activePlayer
+        val player = players[index]
+        val before = player.score
+        var remaining = before
+        var entered = player.hasEntered
+        var bust = false
+        var won = false
+
+        for (hit in hits) {
+            if (!entered) {
+                val qualifies = when (settings.inRule) {
+                    X01InRule.STRAIGHT_IN -> true
+                    X01InRule.DOUBLE_IN -> hit.isDouble
+                    X01InRule.MASTER_IN -> hit.isDouble || hit.isTriple
+                }
+                if (qualifies) entered = true else continue
+            }
+            val next = remaining - hit.points
+            if (next < 0 || (settings.outRule == X01OutRule.DOUBLE_OUT && next == 1) ||
+                (settings.outRule == X01OutRule.MASTER_OUT && next in 1..1)) {
+                bust = true
+                break
+            }
+            if (next == 0) {
+                val validOut = when (settings.outRule) {
+                    X01OutRule.STRAIGHT_OUT -> true
+                    X01OutRule.DOUBLE_OUT -> hit.isDouble
+                    X01OutRule.MASTER_OUT -> hit.isDouble || hit.isTriple
+                }
+                if (!validOut) { bust = true; break }
+                remaining = 0
+                won = true
+                break
+            }
+            remaining = next
+        }
+
+        if (bust) remaining = before
+        players[index] = player.copy(score = remaining, hasEntered = entered)
+        val result = X01TurnResult(index, hits, before, remaining, bust, won)
+        if (won) {
+            players[index] = players[index].copy(legsWon = player.legsWon + 1)
+        }
+        val nextPlayer = (index + 1) % players.size
+        state = state.copy(
+            players = players,
+            activePlayer = if (won) index else nextPlayer,
+            turnNumber = if (won) state.turnNumber else state.turnNumber + 1,
+            dartsThrown = state.dartsThrown + hits.size,
+            finished = won,
+            history = state.history + result
+        )
+        return result
+    }
+
+    fun undo(): Boolean {
+        if (state.history.isEmpty()) return false
+        val previous = state.history.dropLast(1)
+        val rebuilt = X01GameEngine(settings, state.players.map { it.name })
+        previous.forEach { rebuilt.throwTurn(it.hits) }
+        state = rebuilt.state
+        return true
+    }
+
+    fun newLeg() {
+        val players = state.players.map { it.copy(score = settings.startingScore, hasEntered = false) }
+        state = state.copy(players = players, activePlayer = 0, turnNumber = 1,
+            dartsThrown = 0, finished = false, history = emptyList())
+    }
+}
+
+data class CricketPlayerState(val name: String, val marks: Map<Int, Int>, val points: Int = 0)
+data class CricketGameState(val players: List<CricketPlayerState>, val activePlayer: Int = 0, val finished: Boolean = false)
+
+class CricketGameEngine(playerNames: List<String>, private val includeBull: Boolean = true) {
+    init { require(playerNames.size >= 2) }
+    private val targets = (15..20).toList() + if (includeBull) listOf(25) else emptyList()
+    var state = CricketGameState(playerNames.map { name -> CricketPlayerState(name, targets.associateWith { 0 }) })
+        private set
+
+    fun playTurn(hits: List<DartHit>) {
+        require(hits.size in 1..3)
+        check(!state.finished)
+        val ps = state.players.toMutableList()
+        val i = state.activePlayer
+        var current = ps[i]
+        for (hit in hits) {
+            val n = hit.number ?: continue
+            if (n !in targets) continue
+            val marks = current.marks.toMutableMap()
+            val old = marks[n] ?: 0
+            val total = old + hit.multiplier
+            val closedMarks = total.coerceAtMost(3)
+            val overflow = (total - 3).coerceAtLeast(0)
+            marks[n] = closedMarks
+            val opponentsClosed = ps.indices.filter { it != i }.all { (ps[it].marks[n] ?: 0) >= 3 }
+            val points = if (old >= 3 || overflow == 0 || opponentsClosed) 0 else {
+                val value = if (n == 25) 25 else n
+                value * overflow
+            }
+            current = current.copy(marks = marks, points = current.points + points)
+        }
+        ps[i] = current
+        val allClosed = ps.all { p -> targets.all { (p.marks[it] ?: 0) >= 3 } }
+        val maxPoints = ps.maxOf { it.points }
+        val leaderClosed = current.points >= maxPoints && targets.all { (current.marks[it] ?: 0) >= 3 }
+        state = CricketGameState(ps, (i + 1) % ps.size, allClosed && leaderClosed)
+    }
+}
+
+data class ShanghaiPlayerState(val name: String, val score: Int = 0)
+data class ShanghaiGameState(val players: List<ShanghaiPlayerState>, val round: Int, val winner: Int? = null)
+
+class ShanghaiGameEngine(
+    playerNames: List<String>,
+    private val settings: ShanghaiSettings = ShanghaiSettings()
+) {
+    init { require(playerNames.isNotEmpty()) }
+    var state = ShanghaiGameState(playerNames.map { ShanghaiPlayerState(it) }, settings.firstNumber)
+        private set
+
+    fun playTurn(playerIndex: Int, hits: List<DartHit>) {
+        require(playerIndex in state.players.indices)
+        require(hits.size in 1..3)
+        check(state.winner == null)
+        val target = state.round
+        val relevant = hits.filter { it.number == target }
+        val hasS = relevant.any { it.multiplier == 1 }
+        val hasD = relevant.any { it.multiplier == 2 }
+        val hasT = relevant.any { it.multiplier == 3 }
+        val shanghai = hasS && hasD && hasT
+        if (shanghai) {
+            state = state.copy(winner = playerIndex)
+            return
+        }
+        val tripleRuleFailed = settings.requireTripleEachTurn && !hasT
+        val points = if (tripleRuleFailed || (settings.requireAnyTripleToAvoidReset && !hasT)) 0
+            else relevant.sumOf { it.points }
+        val ps = state.players.toMutableList()
+        ps[playerIndex] = ps[playerIndex].copy(score = ps[playerIndex].score + points)
+        val nextRound = state.round + 1
+        state = ShanghaiGameState(ps, nextRound, if (nextRound > settings.lastNumber) {
+            ps.indices.maxByOrNull { ps[it].score }
+        } else null)
+    }
+}
+
+data class AroundClockState(val playerName: String, val target: Int = 1, val complete: Boolean = false)
+class AroundClockEngine(playerName: String, private val requireDoubles: Boolean = false, private val includeBull: Boolean = true) {
+    var state = AroundClockState(playerName)
+        private set
+    fun playTurn(hits: List<DartHit>) {
+        require(hits.size in 1..3)
+        check(!state.complete)
+        var target = state.target
+        for (hit in hits) {
+            val valid = hit.number == target && (!requireDoubles || hit.isDouble)
+            if (valid) target++
+            if (target > 20 && includeBull && hit.number == 25) target = 21
+        }
+        state = state.copy(target = target.coerceAtMost(if (includeBull) 22 else 21),
+            complete = target > if (includeBull) 21 else 20)
+    }
+}
+
+data class Bobs27State(val score: Int = 27, val doubleNumber: Int = 1, val complete: Boolean = false)
+class Bobs27Engine {
+    var state = Bobs27State()
+        private set
+    fun playTurn(hits: List<DartHit>) {
+        require(hits.size in 1..3)
+        check(!state.complete)
+        val hit = hits.firstOrNull { it.number == state.doubleNumber && it.isDouble }
+        val delta = if (hit != null) 2 * state.doubleNumber else -2 * state.doubleNumber
+        val next = state.score + delta
+        state = Bobs27State(next, state.doubleNumber + 1, state.doubleNumber >= 20)
+    }
+}
+
+data class HalveItState(val score: Int = 0, val roundIndex: Int = 0, val complete: Boolean = false)
+class HalveItEngine(private val targets: List<Int> = listOf(20, 19, 18, 17, 16, 15, 25)) {
+    init { require(targets.isNotEmpty() && targets.all { it in 15..25 }) }
+    var state = HalveItState()
+        private set
+    fun playTurn(hits: List<DartHit>) {
+        require(hits.size in 1..3)
+        check(!state.complete)
+        val target = targets[state.roundIndex]
+        val gained = hits.filter { it.number == target }.sumOf { it.points }
+        val score = if (gained == 0) state.score / 2 else state.score + gained
+        val next = state.roundIndex + 1
+        state = HalveItState(score, next, next >= targets.size)
+    }
+}
