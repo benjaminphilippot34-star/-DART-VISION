@@ -26,7 +26,7 @@ object CheckoutCalculator {
         add(DartHit(25, 2))
     }
 
-    fun routes(score: Int, maxRoutes: Int = 8): List<CheckoutRoute> {
+    fun routes(score: Int, maxRoutes: Int = 8, masterOut: Boolean = false): List<CheckoutRoute> {
         require(maxRoutes > 0)
         if (score !in 2..170) return emptyList()
         val found = mutableListOf<CheckoutRoute>()
@@ -36,7 +36,7 @@ object CheckoutCalculator {
                 val after = remaining - dart.points
                 if (after < 0 || after == 1) continue
                 chosen.add(dart)
-                if (after == 0 && dart.isDouble) {
+                if (after == 0 && (dart.isDouble || (masterOut && dart.isTriple))) {
                     found.add(CheckoutRoute(chosen.toList()))
                 } else if (after > 1 && depth > 1) {
                     search(after, depth - 1, chosen)
