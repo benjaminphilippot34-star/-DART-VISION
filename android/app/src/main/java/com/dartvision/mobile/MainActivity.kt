@@ -71,6 +71,9 @@ class MainActivity : ComponentActivity() {
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var selectedDartMultiplier: Int = 1
     private var x01Engine: X01GameEngine? = null
+    private var x01AccountParticipant: Boolean = false
+    private var x01HistorySaved: Boolean = false
+    private var x01StartedAt: String = java.time.Instant.now().toString()
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
     private var availableUpdate: JSONObject? = null
     private var updateNavButton: Button? = null
@@ -128,6 +131,7 @@ class MainActivity : ComponentActivity() {
                         .putString("user_id", user.userId).putString("email", user.email)
                         .putString("access_token", accessToken).putString("refresh_token", values["refresh_token"]).apply()
                     Toast.makeText(this, "Adresse confirmée. Compte connecté.", Toast.LENGTH_LONG).show()
+                    syncAccountProfile()
                     showAuthenticatedHome()
                 }
             } catch (e: Exception) {
@@ -479,7 +483,7 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFFFF563D.toInt())
         })
         panel.addView(TextView(this).apply {
-            text = "Crée un compte ou connecte-toi. La synchronisation du profil et des parties entre appareils sera activée dans une prochaine version."
+            text = "Ton profil, tes statistiques et ton historique de parties sont sauvegardés avec ton compte."
             textSize = 13f
             setTextColor(0xFFB4BDC8.toInt())
         })
@@ -501,6 +505,22 @@ class MainActivity : ComponentActivity() {
         panel.addView(email)
         panel.addView(password)
         panel.addView(phone)
+        val profileNameInput = EditText(this).apply {
+            hint = "Nom de joueur du profil"
+            setSingleLine(true)
+            setText(getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("display_name", ""))
+        }
+        panel.addView(profileNameInput)
+        panel.addView(Button(this).apply {
+            text = "Enregistrer mon profil"
+            isAllCaps = false
+            setOnClickListener { saveAccountProfile(profileNameInput.text.toString()) }
+        })
+        panel.addView(Button(this).apply {
+            text = "Mes statistiques et mon historique"
+            isAllCaps = false
+            setOnClickListener { showAccountHistory() }
+        })
         val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         fun actionButton(label: String, action: () -> Unit) {
             row.addView(Button(this).apply {
@@ -542,6 +562,144 @@ class MainActivity : ComponentActivity() {
         return panel
     }
 
+    private fun accountId(): String? = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null)
+    private fun accountToken(): String? = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("access_token", null)
+    private fun accountDisplayName(): String = getSharedPreferences("dart_vision_account", MODE_PRIVATE)
+        .getString("display_name", null)?.takeIf { it.isNotBlank() }
+        ?: getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("email", null)?.substringBefore("@")
+            ?.takeIf { it.isNotBlank() } ?: "Mon profil"
+
+    private fun syncAccountProfile() {
+        val id = accountId() ?: return
+        val token = accountToken() ?: return
+        worker.execute {
+            try {
+                val client = SupabaseAuthClient()
+                val existing = client.loadProfile(token, id)
+                val name = existing?.optString("display_name")?.takeIf { it.isNotBlank() } ?: accountDisplayName()
+                if (existing == null) client.saveProfile(token, id, name)
+                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+            } catch (e: Exception) {
+                runOnUiThread { Toast.makeText(this, "Profil conservé localement : ${e.message}", Toast.LENGTH_LONG).show() }
+            }
+        }
+    }
+
+    private fun saveAccountProfile(rawName: String) {
+        val name = rawName.trim()
+        if (name.isBlank()) {
+            Toast.makeText(this, "Saisis un nom de joueur.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val id = accountId()
+        val token = accountToken()
+        if (id == null || token == null) {
+            getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+            Toast.makeText(this, "Nom enregistré sur cet appareil. Connecte-toi pour synchroniser ton profil.", Toast.LENGTH_LONG).show()
+            return
+        }
+        worker.execute {
+            try {
+                SupabaseAuthClient().saveProfile(token, id, name)
+                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+                runOnUiThread { Toast.makeText(this, "Profil joueur synchronisé.", Toast.LENGTH_SHORT).show() }
+            } catch (e: Exception) {
+                runOnUiThread { Toast.makeText(this, e.message ?: "Enregistrement du profil impossible.", Toast.LENGTH_LONG).show() }
+            }
+        }
+    }
+
+    private fun showAccountHistory() {
+        val id = accountId()
+        val token = accountToken()
+        if (id == null || token == null) {
+            showInsightScreen("PROFIL JOUEUR", "CONNECTE-TOI POUR RETROUVER TES STATISTIQUES", emptyList(),
+                listOf("Compte non connecté" to "Les statistiques de partie restent disponibles localement pendant la partie."))
+            return
+        }
+        Toast.makeText(this, "Chargement de tes statistiques…", Toast.LENGTH_SHORT).show()
+        worker.execute {
+            try {
+                val games = SupabaseAuthClient().loadPlayerGames(token, id)
+                var wins = 0
+                var darts = 0
+                var points = 0
+                var best = 0
+                var max180 = 0
+                val rows = mutableListOf<Pair<String, String>>()
+                for (i in 0 until games.length()) {
+                    val game = games.getJSONObject(i)
+                    val summary = game.optJSONObject("summary") ?: JSONObject()
+                    wins += if (game.optString("result") == "won") 1 else 0
+                    darts += summary.optInt("darts")
+                    points += summary.optInt("points")
+                    best = maxOf(best, summary.optInt("best_visit"))
+                    max180 += summary.optInt("180s")
+                    val date = game.optString("finished_at").take(10)
+                    rows.add("${game.optString("game_mode")} • $date" to
+                        "${summary.optString("outcome", game.optString("result"))} • ${summary.optInt("points")} pts • ${summary.optInt("darts")} fléchettes • meilleure volée ${summary.optInt("best_visit")}")
+                }
+                val avg = if (darts == 0) 0.0 else points * 3.0 / darts
+                val metrics = listOf(
+                    "PARTIES" to games.length().toString(),
+                    "VICTOIRES" to wins.toString(),
+                    "MOYENNE / 3 FLÉCHETTES" to String.format("%.2f", avg),
+                    "MEILLEURE VOLÉE" to best.toString(),
+                    "180 RÉALISÉS" to max180.toString()
+                )
+                runOnUiThread { showInsightScreen("MON PROFIL", "STATISTIQUES CUMULÉES • ${accountDisplayName()}", metrics, rows.ifEmpty { mutableListOf("Aucune partie" to "Tes parties terminées apparaîtront ici.") }) }
+            } catch (e: Exception) {
+                runOnUiThread { Toast.makeText(this, e.message ?: "Historique indisponible.", Toast.LENGTH_LONG).show() }
+            }
+        }
+    }
+
+    private fun saveFinishedAccountMatch() {
+        if (!x01AccountParticipant || x01HistorySaved) return
+        val id = accountId() ?: return
+        val token = accountToken() ?: return
+        val snapshot = x01Engine?.state ?: return
+        if (!snapshot.finished) return
+        val turns = snapshot.history
+        val darts = turns.sumOf { it.hits.size }
+        val points = turns.sumOf { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) }
+        val best = turns.maxOfOrNull { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) } ?: 0
+        val count180 = turns.count { !it.bust && it.hits.sumOf { hit -> hit.points } == 180 }
+        val players = JSONArray()
+        snapshot.players.forEach { p -> players.put(JSONObject().put("name", p.name).put("score", p.score).put("legs", p.legsWon).put("sets", p.setsWon)) }
+        val history = JSONArray()
+        turns.forEach { turn ->
+            val hits = JSONArray()
+            turn.hits.forEach { hit -> hits.put(JSONObject().put("number", hit.number ?: JSONObject.NULL).put("multiplier", hit.multiplier).put("points", hit.points)) }
+            history.put(JSONObject().put("player", snapshot.players.getOrNull(turn.playerIndex)?.name ?: "Joueur")
+                .put("score_before", turn.scoreBefore).put("score_after", turn.scoreAfter).put("bust", turn.bust).put("hits", hits))
+        }
+        val accountName = accountDisplayName()
+        val userPlayed = snapshot.players.any { it.name.equals(accountName, true) }
+        if (!userPlayed) return
+        val winner = snapshot.players.maxByOrNull { it.setsWon * 100 + it.legsWon }
+        val outcome = if (winner?.name.equals(accountName, true)) "won" else "lost"
+        val game = JSONObject()
+            .put("game_mode", "X01")
+            .put("result", outcome)
+            .put("started_at", x01StartedAt)
+            .put("finished_at", java.time.Instant.now().toString())
+            .put("summary", JSONObject().put("points", points).put("darts", darts).put("best_visit", best)
+                .put("180s", count180).put("outcome", if (outcome == "won") "Victoire" else "Défaite"))
+            .put("game_data", JSONObject().put("starting_score", snapshot.settings.startingScore)
+                .put("players", players).put("turns", history))
+        x01HistorySaved = true
+        worker.execute {
+            try {
+                SupabaseAuthClient().savePlayerGame(token, id, game)
+                runOnUiThread { Toast.makeText(this, "Partie enregistrée dans ton historique.", Toast.LENGTH_LONG).show() }
+            } catch (e: Exception) {
+                x01HistorySaved = false
+                runOnUiThread { Toast.makeText(this, "Partie terminée, synchronisation à réessayer : ${e.message}", Toast.LENGTH_LONG).show() }
+            }
+        }
+    }
+
     private fun showAuthenticatedHome() {
         // Après inscription/connexion, l’onglet d’accueil devient l’écran d’entrée.
         val root = (findViewById<android.view.View>(android.R.id.content) as? android.view.ViewGroup)
@@ -567,6 +725,7 @@ class MainActivity : ComponentActivity() {
                             .putString("user_id", result.userId).putString("email", result.email)
                             .putString("access_token", result.accessToken)
                             .putString("refresh_token", result.refreshToken).apply()
+                        syncAccountProfile()
                         "Compte connecté : ${result.email ?: result.userId ?: "joueur"}"
                     } else "Demande envoyée. Vérifie ta boîte mail ou tes SMS."
                     status.text = message
