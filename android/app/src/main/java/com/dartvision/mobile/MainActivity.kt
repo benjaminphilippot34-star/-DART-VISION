@@ -773,34 +773,39 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun managePlayers() {
-        val players = state.get().optJSONArray("players") ?: JSONArray()
-        val labels = (0 until players.length()).map { i ->
-            val p = players.optJSONObject(i)
-            "${i + 1}. ${p?.optString("name", "Joueur ${i + 1}") ?: "Joueur ${i + 1}"}"
-        }.toMutableList()
-        labels.add("＋ Ajouter un joueur")
-        AlertDialog.Builder(this)
-            .setTitle("Gestion des joueurs")
-            .setItems(labels.toTypedArray()) { _, which ->
-                if (which == players.length()) editPlayerName(null)
-                else {
-                    val player = players.optJSONObject(which) ?: return@setItems
-                    val actions = arrayOf("Renommer", "Supprimer")
-                    AlertDialog.Builder(this)
-                        .setTitle(player.optString("name", "Joueur ${which + 1}"))
-                        .setItems(actions) { _, action ->
-                            if (action == 0) editPlayerName(which)
-                            else if (players.length() > 1) {
-                                players.remove(which)
-                                val s = state.get()
-                                s.put("players", players)
-                                s.put("active", s.optInt("active", 0).coerceIn(0, players.length() - 1))
-                                state.set(s); saveLocalState(s); refreshUiAfterPlayersChanged()
-                                Toast.makeText(this, "Joueur supprimé.", Toast.LENGTH_SHORT).show()
-                            } else Toast.makeText(this, "Il faut conserver au moins un joueur.", Toast.LENGTH_LONG).show()
-                        }.show()
+        val prefs = getSharedPreferences("dart_vision_players", MODE_PRIVATE)
+        val names = prefs.getString("names", "").orEmpty().split("\n").map { it.trim() }.filter { it.isNotBlank() }.toMutableList()
+        val container = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(18, 12, 18, 8) }
+        val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        fun render() {
+            list.removeAllViews()
+            if (names.isEmpty()) list.addView(TextView(this).apply { text = "Aucun joueur enregistré. Ajoute un pseudo ci-dessous."; textSize = 14f; setTextColor(0xFF91A4B2.toInt()); setPadding(8, 14, 8, 14) })
+            names.forEachIndexed { index, name ->
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(12, 8, 8, 8)
+                    background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF172630.toInt()); cornerRadius = 14f; setStroke(1, 0xFF314653.toInt()) }
+                    layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = 8 }
                 }
-            }.setNegativeButton("Fermer", null).show()
+                row.addView(TextView(this).apply { text = "♙"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); layoutParams = LinearLayout.LayoutParams(38, -2) })
+                row.addView(TextView(this).apply { text = name; textSize = 15f; setTextColor(0xFFF4F8FA.toInt()); layoutParams = LinearLayout.LayoutParams(0, -2, 1f) })
+                row.addView(TextView(this).apply { text = "✎"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); setPadding(12, 8, 12, 8); setOnClickListener { editPlayerName(index) } })
+                row.addView(TextView(this).apply { text = "×"; textSize = 22f; setTextColor(0xFFFF756D.toInt()); setPadding(12, 8, 8, 8); setOnClickListener { names.removeAt(index); prefs.edit().putString("names", names.joinToString("\n")).apply(); render() } })
+                list.addView(row)
+            }
+        }
+        render(); container.addView(list)
+        val addInput = EditText(this).apply { hint = "Nouveau pseudo"; setSingleLine(true); textSize = 16f; setPadding(14, 12, 14, 12); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFFF7FAF9.toInt()); cornerRadius = 12f; setStroke(1, 0xFF28D7C2.toInt()) } }
+        container.addView(addInput)
+        val dialog = AlertDialog.Builder(this).setTitle("MES JOUEURS").setMessage("Enregistre tes pseudos pour les retrouver à chaque nouvelle partie.").setView(container).setPositiveButton("AJOUTER", null).setNegativeButton("FERMER", null).create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val name = addInput.text.toString().trim()
+                if (name.isBlank()) addInput.error = "Saisis un pseudo"
+                else if (names.any { it.equals(name, true) }) addInput.error = "Ce pseudo existe déjà"
+                else { names.add(name); prefs.edit().putString("names", names.joinToString("\n")).apply(); addInput.text.clear(); render() }
+            }
+        }
+        dialog.show()
     }
 
     private fun refreshUiAfterPlayersChanged() {
@@ -1338,23 +1343,27 @@ class MainActivity : ComponentActivity() {
         val playerSpinner = spinner(playerCounts).apply {
             setSelection(((state.get().optJSONArray("players")?.length() ?: 1) - 1).coerceIn(0, 3))
         }
-        val namesInput = EditText(this).apply {
-            hint = "Joueur 1, Joueur 2, ..."
-            setSingleLine(true)
-            textSize = 16f
-            setTextColor(0xFF183B36.toInt())
-            setHintTextColor(0xFF788A86.toInt())
-            setSelectAllOnFocus(false)
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
-            setPadding(14, 12, 14, 12)
-            minimumHeight = 54
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFFFFFFFF.toInt())
-                cornerRadius = 10f
-                setStroke(2, 0xFFB8CECA.toInt())
+        val savedPlayerNames = getSharedPreferences("dart_vision_players", MODE_PRIVATE).getString("names", "").orEmpty().split("\\n").map { it.trim() }.filter { it.isNotBlank() }
+        val existingPlayers = state.get().optJSONArray("players") ?: JSONArray()
+        val playerNameInputs = (0 until 4).map { index ->
+            EditText(this).apply {
+                hint = "Pseudo du joueur ${index + 1}"
+                setSingleLine(true); textSize = 16f
+                setTextColor(0xFF183B36.toInt()); setHintTextColor(0xFF788A86.toInt())
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                setPadding(14, 12, 14, 12); minimumHeight = 52
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFFFFFFFF.toInt()); cornerRadius = 12f; setStroke(1, 0xFFB8CECA.toInt())
+                }
+                setText(savedPlayerNames.getOrNull(index) ?: existingPlayers.optJSONObject(index)?.optString("name", "").orEmpty())
             }
-            val existing = state.get().optJSONArray("players") ?: JSONArray()
-            setText((0 until existing.length()).mapNotNull { existing.optJSONObject(it)?.optString("name") }.joinToString(", "))
+        }
+        playerNameInputs.forEachIndexed { index, input -> input.visibility = if (index < playerSpinner.selectedItemPosition + 1) View.VISIBLE else View.GONE }
+        playerSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                playerNameInputs.forEachIndexed { index, input -> input.visibility = if (index <= position) View.VISIBLE else View.GONE }
+            }
         }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1403,13 +1412,17 @@ class MainActivity : ComponentActivity() {
         val playerSection = section("DÉTAILS DES JOUEURS", "Choisis les participants avant de commencer la partie.")
         addChoice(playerSection, "Nombre de joueurs", playerSpinner)
         playerSection.addView(TextView(this).apply {
-            text = "Noms des joueurs (séparés par des virgules)"
-            textSize = 13f
-            setTextColor(0xFF263D39.toInt())
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding(0, 10, 0, 3)
+            text = "Participants • un pseudo par ligne"
+            textSize = 13f; setTextColor(0xFF263D39.toInt())
+            setTypeface(typeface, android.graphics.Typeface.BOLD); setPadding(0, 10, 0, 5)
         })
-        playerSection.addView(namesInput)
+        playerNameInputs.forEachIndexed { index, input ->
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, 3, 0, 3) }
+            row.addView(TextView(this).apply { text = "0${index + 1}"; textSize = 13f; setTextColor(0xFF28AFA1.toInt()); gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(34, 48) })
+            row.addView(input, LinearLayout.LayoutParams(0, -2, 1f))
+            playerSection.addView(row)
+        }
+        playerSection.addView(Button(this).apply { text = "GÉRER MES JOUEURS"; isAllCaps = false; setOnClickListener { managePlayers() } })
         val includeAccountPlayer = CheckBox(this).apply {
             text = "Ajouter automatiquement mon profil à cette partie"
             textSize = 13f
@@ -1437,11 +1450,10 @@ class MainActivity : ComponentActivity() {
             .setNegativeButton("ANNULER", null)
             .setPositiveButton("COMMENCER LE JEU") { _, _ ->
                 val count = playerSpinner.selectedItemPosition + 1
-                val enteredNames = namesInput.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
-                val names = (0 until count).map { i ->
-                    if (i == 0 && includeAccountPlayer.isChecked) accountDisplayName()
-                    else enteredNames.getOrNull(i) ?: "Joueur ${i + 1}"
-                }
+                val enteredNames = playerNameInputs.take(count).mapIndexed { i, input -> input.text.toString().trim().ifBlank { "Joueur ${i + 1}" } }.toMutableList()
+                if (includeAccountPlayer.isChecked) enteredNames[0] = accountDisplayName()
+                val names = enteredNames.distinctBy { it.lowercase() }
+                getSharedPreferences("dart_vision_players", MODE_PRIVATE).edit().putString("names", names.joinToString("\\n")).apply()
                 val playersJson = JSONArray()
                 names.forEach { playersJson.put(JSONObject().put("name", it).put("score", scores[scoreSpinner.selectedItemPosition].toInt())) }
                 val localState = state.get()
