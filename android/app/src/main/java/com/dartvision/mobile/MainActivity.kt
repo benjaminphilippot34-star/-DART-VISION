@@ -73,11 +73,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF09090B.toInt()
-        val panel = 0xFF171719.toInt()
-        val accent = 0xFFE32636.toInt()
-        val white = 0xFFF5F7FA.toInt()
-        val muted = 0xFF9EABB7.toInt()
+        val bg = 0xFFD7EEEA.toInt()
+        val panel = 0xFFF7FBFA.toInt()
+        val accent = 0xFFFF563D.toInt()
+        val white = 0xFF14221E.toInt()
+        val muted = 0xFF50645E.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun text(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -87,9 +87,9 @@ class MainActivity : ComponentActivity() {
             }
         fun panel(): LinearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), dp(12), dp(14), dp(12))
+            setPadding(dp(18), dp(18), dp(18), dp(18))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(panel); cornerRadius = dp(14).toFloat()
+                setColor(panel); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFFE6F1EF.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
         }
@@ -97,10 +97,11 @@ class MainActivity : ComponentActivity() {
             row.addView(Button(this).apply {
                 text = title; isAllCaps = false; textSize = 13f; setTextColor(white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) accent else 0xFF292326.toInt())
-                    cornerRadius = dp(10).toFloat()
+                    setColor(if (primary) accent else 0xFFFFFFFF.toInt())
+                    cornerRadius = dp(18).toFloat()
+                    if (!primary) setStroke(dp(1), 0xFFDDEAE7.toInt())
                 }
-                minHeight = dp(48)
+                minHeight = dp(54)
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(3))
                 }
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
         val scroll = ScrollView(this).apply { isFillViewport = true }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(10), dp(12), dp(20))
+            setPadding(dp(16), dp(12), dp(16), dp(18))
             setBackgroundColor(bg)
         }
         scroll.addView(root)
@@ -123,7 +124,7 @@ class MainActivity : ComponentActivity() {
         }
         header.addView(logo)
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        brand.addView(text("DART VISION", 20f, white, true))
+        brand.addView(text("DART VISION", 22f, white, true))
         brand.addView(text("PRÉCISION • PERFORMANCE", 10f, muted, true))
         header.addView(brand)
         root.addView(header)
@@ -271,12 +272,13 @@ class MainActivity : ComponentActivity() {
         panel.addView(TextView(this).apply {
             text = "COMPTE DART VISION"
             textSize = 15f
-            setTextColor(0xFFE34B55.toInt())
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(0xFFFF563D.toInt())
         })
         panel.addView(TextView(this).apply {
             text = "Connecte ton compte pour retrouver ton profil sur tes appareils."
             textSize = 13f
-            setTextColor(0xFFF5F7FA.toInt())
+            setTextColor(0xFF263B35.toInt())
         })
         val email = EditText(this).apply {
             hint = "Adresse e-mail"
