@@ -114,3 +114,38 @@ Tester une partie complète :
 2. avec plusieurs téléphones sur le hotspot du téléphone maître, sans Internet ;
 3. avec coupure puis rétablissement du réseau pendant une partie.
 Le mode hors ligne est une condition de sortie, pas une option future.
+
+
+MODES DE JEU — RÉFÉRENCE DARTCOUNTER
+------------------------------------
+Le catalogue de référence est celui de DartCounter (Target), consulté le 15/11/2026.
+Modes recensés sur la page officielle :
+- X01 : 301, 501, 701 et variantes de départ/sortie.
+- 121 Checkout.
+- Around the Clock.
+- Bob's 27.
+- Cricket / Tactics.
+- Doubles Training.
+- Halve-It.
+- Random Checkout.
+- Score Training.
+- Shanghai.
+- Singles Training.
+- Killer.
+
+Références officielles :
+- https://dartcounter.net/games
+- https://dartcounter.net/faq
+- https://dartcounter.net/press/121-checkout
+- https://dartcounter.net/press/new-shanghai
+
+Principes de conception DART VISION :
+- Les modes de partie et d'entraînement doivent fonctionner localement, sans compte et sans Internet.
+- Les fonctions qui dépendent d'un service en ligne (classements, lobby mondial, matchmaking, tournois en ligne et statistiques de compte) restent hors du périmètre hors ligne.
+- X01 conserve 301 comme valeur de départ par défaut, avec choix 301/501/701 et règles d'entrée/sortie configurables.
+- Shanghai doit prévoir le choix 1–7 ou 1–20 et les options de triple publiées par DartCounter.
+- 121 Checkout doit prévoir score initial, nombre de fléchettes, progression et règle Safehouse.
+- Le catalogue Kotlin est une première étape de structuration et de configuration ; il ne signifie pas que tous les moteurs de règles ou écrans sont déjà implémentés.
+
+ÉTAT D'IMPLÉMENTATION AU 15/11/2026 :
+Le dépôt contient maintenant un catalogue Kotlin de 13 modes et des modèles de réglages validés pour X01, Shanghai et 121 Checkout, avec tests unitaires. Les moteurs de partie complets, leurs interfaces et leurs tests de règles restent à construire.
