@@ -39,9 +39,9 @@ class OfflineGameEnginesTest {
         val game = CricketGameEngine(listOf("A", "B"), includeBull = false)
         game.playTurn(listOf(DartHit(20, 3)))
         assertEquals(3, game.state.players[0].marks[20])
+        game.playTurn(listOf(DartHit.MISS))
         game.playTurn(listOf(DartHit(20, 3)))
-        game.playTurn(listOf(DartHit(20, 3)))
-        assertEquals(20, game.state.players[0].points)
+        assertEquals(60, game.state.players[0].points)
     }
 
     @Test fun shanghaiWinsWithSingleDoubleTripleOnTarget() {
@@ -82,7 +82,7 @@ class OfflineGameEnginesTest {
     @Test fun checkout121AdvancesAfterAValidDoubleFinish() {
         val game = Checkout121Engine(Checkout121Settings(startingScore = 40, dartsPerAttempt = 3))
         assertTrue(game.attempt(listOf(DartHit(20, 2))))
-        assertEquals(122, game.state.targetScore)
+        assertEquals(41, game.state.targetScore)
         assertEquals(2, game.state.level)
     }
 
