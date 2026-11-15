@@ -1126,7 +1126,7 @@ class MainActivity : ComponentActivity() {
         val gamePlayers = engine?.state?.players
         if (gamePlayers != null) {
             gamePlayers.forEachIndexed { index, player ->
-                val activePlayer = index == engine.state.currentPlayerIndex
+                val activePlayer = index == engine.state.activePlayer
                 val playerCard = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
