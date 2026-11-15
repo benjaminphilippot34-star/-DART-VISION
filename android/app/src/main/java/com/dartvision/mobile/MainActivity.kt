@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
     private var zoom = 1f
     private var cameraModeEnabled = false
     private var cameraPanelView: LinearLayout? = null
+    private var navigateToMorePage: (() -> Unit)? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var x01Engine: X01GameEngine? = null
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
@@ -184,6 +185,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        navigateToMorePage = { showPage("more") }
         val header = LinearLayout(this).apply {
             gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL
             setPadding(0, 0, 0, dp(13))
@@ -1292,7 +1294,7 @@ class MainActivity : ComponentActivity() {
             layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
             setOnClickListener {
                 dialog.dismiss()
-                showPage("more")
+                navigateToMorePage?.invoke()
                 setCameraMode(true)
             }
         })
