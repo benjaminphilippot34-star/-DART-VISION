@@ -12,6 +12,14 @@ class OfflineGameEnginesTest {
         assertEquals(1, game.state.activePlayer)
     }
 
+    @Test fun dartHitDisplaysAndCountsSimpleDoubleAndTripleValues() {
+        assertEquals(20, DartHit(20, 1).points)
+        assertEquals(40, DartHit(20, 2).points)
+        assertEquals(60, DartHit(20, 3).points)
+        assertEquals(50, DartHit(25, 2).points)
+        assertEquals(25, DartHit(25, 1).points)
+    }
+
     @Test fun x01PreviewUpdatesScoreWithoutCommittingTheTurn() {
         val game = X01GameEngine(X01Settings(301), listOf("A", "B"))
         val preview = game.previewTurn(listOf(DartHit(20, 2), DartHit(5, 3)))
