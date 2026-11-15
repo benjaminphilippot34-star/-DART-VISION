@@ -1118,6 +1118,31 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         content.addView(title, LinearLayout.LayoutParams(-1, dp(42)))
+        // Bandeau des joueurs : tous les participants et le score restant du joueur actif.
+        val playersBand = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(3), 0, dp(8))
+        }
+        val gamePlayers = engine?.state?.players
+        if (gamePlayers != null) {
+            gamePlayers.forEachIndexed { index, player ->
+                val activePlayer = index == engine.state.currentPlayerIndex
+                val playerCard = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER
+                    setPadding(dp(7), dp(7), dp(7), dp(7))
+                    background = rounded(if (activePlayer) 0xFF174E4B.toInt() else white,
+                        if (activePlayer) teal else 0xFFD7E2DE.toInt(), 9)
+                    layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
+                        setMargins(dp(3), 0, dp(3), 0)
+                    }
+                }
+                playerCard.addView(text(player.name, 12f, if (activePlayer) white else ink, true))
+                playerCard.addView(text(player.score.toString(), 19f, if (activePlayer) white else ink, true))
+                playersBand.addView(playerCard)
+            }
+        }
+        content.addView(playersBand)
         val entry = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             background = rounded(white, 0xFFD7E2DE.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
@@ -1141,6 +1166,8 @@ class MainActivity : ComponentActivity() {
         content.addView(entry, LinearLayout.LayoutParams(-1, dp(66)))
         val count = text("0 / 3 fléchettes", 11f, 0xFF71817C.toInt(), true)
         content.addView(count, LinearLayout.LayoutParams(-1, dp(25)))
+        val visitTotal = text("TOTAL DE LA VOLÉE : 0", 15f, coral, true)
+        content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(30)))
         val tabsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val tabs = mutableListOf<TextView>()
         val tabNames = listOf("Simple", "Double", "Treble", "Bull\n50", "Outer\n25")
@@ -1203,6 +1230,7 @@ class MainActivity : ComponentActivity() {
                 slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFFDDF8F2.toInt() else 0xFFF5F8F7.toInt(), 0xFFDCE6E2.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
+            visitTotal.text = "TOTAL DE LA VOLÉE : ${hits.sumOf { it.points }}"
             tabs.forEachIndexed { i, tab ->
                 tab.setTextColor(if (i == selectedTab) white else ink)
                 tab.background = rounded(if (i == selectedTab) coral else pale, if (i == selectedTab) coral else 0xFFD1DEDA.toInt(), 3)
