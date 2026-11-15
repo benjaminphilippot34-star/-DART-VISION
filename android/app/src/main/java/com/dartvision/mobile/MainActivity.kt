@@ -1141,35 +1141,73 @@ class MainActivity : ComponentActivity() {
         }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(32, 8, 32, 8)
+            setPadding(18, 12, 18, 12)
+            setBackgroundColor(0xFFF1F8F7.toInt())
         }
-        fun addChoice(label: String, control: Spinner) {
-            content.addView(TextView(this).apply {
-                text = label
-                textSize = 14f
-                setTextColor(0xFF202020.toInt())
-                setPadding(0, 10, 0, 0)
+        fun section(title: String, subtitle: String? = null): LinearLayout {
+            val card = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(18, 14, 18, 14)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(android.graphics.Color.WHITE)
+                    cornerRadius = 22f
+                    setStroke(1, 0xFFD5E8E5.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                    setMargins(0, 0, 0, 14)
+                }
+            }
+            card.addView(TextView(this).apply {
+                text = title
+                textSize = 17f
+                setTextColor(0xFF102C29.toInt())
+                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+                setPadding(0, 0, 0, 5)
             })
-            content.addView(control)
+            if (subtitle != null) card.addView(TextView(this).apply {
+                text = subtitle
+                textSize = 11f
+                setTextColor(0xFF647A76.toInt())
+                setPadding(0, 0, 0, 8)
+            })
+            content.addView(card)
+            return card
         }
-        addChoice("Nombre de joueurs", playerSpinner)
-        content.addView(TextView(this).apply {
+        fun addChoice(parent: LinearLayout, label: String, control: Spinner) {
+            parent.addView(TextView(this).apply {
+                text = label
+                textSize = 13f
+                setTextColor(0xFF263D39.toInt())
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setPadding(0, 9, 0, 2)
+            })
+            parent.addView(control)
+        }
+        val playerSection = section("DÉTAILS DES JOUEURS", "Choisis les participants avant de commencer la partie.")
+        addChoice(playerSection, "Nombre de joueurs", playerSpinner)
+        playerSection.addView(TextView(this).apply {
             text = "Noms des joueurs (séparés par des virgules)"
-            textSize = 14f
-            setTextColor(0xFF202020.toInt())
-            setPadding(0, 10, 0, 0)
+            textSize = 13f
+            setTextColor(0xFF263D39.toInt())
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(0, 10, 0, 3)
         })
-        content.addView(namesInput)
-        addChoice("Score de départ", scoreSpinner)
-        addChoice("Règle d'entrée", inSpinner)
-        addChoice("Règle de sortie", outSpinner)
-        addChoice("Manches à gagner par set", legsSpinner)
-        addChoice("Sets à gagner", setsSpinner)
+        playerSection.addView(namesInput)
+        val rulesSection = section("PARAMÈTRES DE JEU", "Définis le score de départ et les règles de la partie.")
+        addChoice(rulesSection, "Score de départ", scoreSpinner)
+        addChoice(rulesSection, "Entrée dans la partie", inSpinner)
+        addChoice(rulesSection, "Sortie de la partie", outSpinner)
+        addChoice(rulesSection, "Manches à gagner par set", legsSpinner)
+        addChoice(rulesSection, "Sets à gagner", setsSpinner)
+        val scrollContent = ScrollView(this).apply {
+            isFillViewport = false
+            addView(content)
+        }
         AlertDialog.Builder(this)
-            .setTitle("Configuration X01")
-            .setView(content)
-            .setNegativeButton("Annuler", null)
-            .setPositiveButton("Démarrer") { _, _ ->
+            .setTitle("MATCH")
+            .setView(scrollContent)
+            .setNegativeButton("ANNULER", null)
+            .setPositiveButton("COMMENCER LE JEU") { _, _ ->
                 val count = playerSpinner.selectedItemPosition + 1
                 val enteredNames = namesInput.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
                 val names = (0 until count).map { i -> enteredNames.getOrNull(i) ?: "Joueur ${i + 1}" }
@@ -1196,12 +1234,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun enterManualTurn(initialHit: DartHit? = null) {
-        val engine = x01Engine
+        var engine = x01Engine
         if (engine == null && trainingTurnHandler == null) {
-            AlertDialog.Builder(this).setTitle("Aucun mode sélectionné")
-                .setMessage("Choisis un mode dans « Modes de jeu ».")
-                .setPositiveButton("OK", null).show()
-            return
+            // Permet la saisie depuis le pavé principal même si aucune partie n'a encore été configurée.
+            val savedPlayers = state.get().optJSONArray("players") ?: JSONArray()
+            val names = (0 until savedPlayers.length()).mapNotNull { savedPlayers.optJSONObject(it)?.optString("name") }
+                .filter { it.isNotBlank() }.ifEmpty { listOf("Joueur 1") }
+            val startingScore = state.get().optString("mode", "301").toIntOrNull()?.takeIf { it in listOf(301, 501, 701) } ?: 301
+            x01Engine = X01GameEngine(
+                X01Settings(startingScore = startingScore, inRule = X01InRule.STRAIGHT_IN, outRule = X01OutRule.DOUBLE_OUT),
+                names
+            )
+            selectedMode = DartGameMode.X01
+            saveX01Game()
+            engine = x01Engine
+            refreshX01()
         }
         val d = resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
