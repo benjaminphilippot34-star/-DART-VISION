@@ -119,12 +119,15 @@ class MainActivity : ComponentActivity() {
         val gamePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val playersPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val morePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val accountPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
         val navButtons = mutableListOf<Pair<String, Button>>()
         fun showPage(page: String) {
             home.visibility = if (page == "home") View.VISIBLE else View.GONE
             gamePage.visibility = if (page == "game") View.VISIBLE else View.GONE
             playersPage.visibility = if (page == "players") View.VISIBLE else View.GONE
             morePage.visibility = if (page == "more") View.VISIBLE else View.GONE
+            accountPage.visibility = if (page == "account") View.VISIBLE else View.GONE
             navButtons.forEach { (key, view) ->
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
@@ -182,7 +185,8 @@ class MainActivity : ComponentActivity() {
         tile("Statistiques", "Performances et progression", "▥") { showGameStatistics() }
         tile("Historique", "Retrouve tes dernières manches", "◷") { showTurnHistory() }
         tile("Paramètres", "Application et mises à jour", "⚙") { showPage("more") }
-        home.addView(buildAccountPanel())
+        // L’inscription et la connexion disposent de leur propre onglet.
+        accountPage.addView(buildAccountPanel())
 
         // Tableau de score
         val gameHeading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -318,7 +322,8 @@ class MainActivity : ComponentActivity() {
             navButtons.add(key to button); bottom.addView(button)
         }
         nav("home", "ACCUEIL", "⌂"); nav("game", "JOUER", "◎"); nav("players", "JOUEURS", "♙"); nav("more", "PLUS", "•••")
-        showPage("home")
+        nav("account", if (hasAccountAtStart) "COMPTE" else "INSCRIPTION", "♙")
+        showPage(if (hasAccountAtStart) "home" else "account")
         shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
     }
@@ -403,6 +408,20 @@ class MainActivity : ComponentActivity() {
         return panel
     }
 
+    private fun showAuthenticatedHome() {
+        // Après inscription/connexion, l’onglet d’accueil devient l’écran d’entrée.
+        val root = (findViewById<android.view.View>(android.R.id.content) as? android.view.ViewGroup)
+        val buttons = mutableListOf<Button>()
+        fun collect(view: android.view.View) {
+            if (view is Button && (view.text.toString().contains("INSCRIPTION") || view.text.toString().contains("COMPTE"))) buttons.add(view)
+            if (view is android.view.ViewGroup) for (i in 0 until view.childCount) collect(view.getChildAt(i))
+        }
+        root?.let { collect(it) }
+        buttons.forEach { it.text = "♙\\nCOMPTE" }
+        // La page d’accueil est l’écran par défaut après authentification.
+        recreate()
+    }
+
     private fun runAccountRequest(request: () -> SupabaseAuthClient.AuthResult) {
         Toast.makeText(this, "Connexion à Supabase…", Toast.LENGTH_SHORT).show()
         worker.execute {
@@ -415,6 +434,9 @@ class MainActivity : ComponentActivity() {
                         "Compte connecté : ${result.email ?: result.userId ?: "joueur"}"
                     } else "Demande envoyée. Vérifie ta boîte mail ou tes SMS."
                     status.text = message
+                    if (result.accessToken != null) {
+                        showAuthenticatedHome()
+                    }
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
