@@ -285,9 +285,15 @@ class MainActivity : ComponentActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(10), dp(3), dp(3), dp(3))
-            layoutParams = LinearLayout.LayoutParams(0, -1, 1f)
         }
-        scoreCard.addView(opponentScoresContainer)
+        val opponentScroll = ScrollView(this).apply {
+            isFillViewport = false
+            isVerticalScrollBarEnabled = true
+            overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
+            layoutParams = LinearLayout.LayoutParams(0, dp(190), 1f)
+            addView(opponentScoresContainer, ScrollView.LayoutParams(-1, -2))
+        }
+        scoreCard.addView(opponentScroll)
         refreshOpponentScores(currentPlayers, active, muted, white, teal)
         gamePage.addView(scoreCard)
 
