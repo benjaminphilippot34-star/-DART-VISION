@@ -7,9 +7,13 @@ Obtenir un score fiable à partir d'une caméra de smartphone, sans annoncer un 
 1. ACQUISITION IMAGE
 - Garder la cible entière dans le champ, avec une petite marge autour.
 - Préférer une caméra aussi frontale que possible.
-- Verrouiller autant que possible mise au point, exposition et balance des blancs après installation.
+- Prévoir un éclairage stable, homogène et suffisant sur toute la cible : la régularité compte davantage qu'une lumière très puissante.
+- Privilégier un éclairage diffus, idéalement réparti autour de la cible, pour limiter les ombres portées des fléchettes et les zones trop sombres.
+- Éviter les reflets directs sur les pointes, les fils métalliques et les zones brillantes ; ne pas placer une source lumineuse dans l'axe de l'objectif.
+- Tester la cible avec les éclairages habituels de la pièce allumés et éteints afin de vérifier que la détection ne réagit pas aux variations de lumière.
+- Verrouiller autant que possible mise au point, exposition et balance des blancs après installation ; éviter que l'exposition automatique ne change entre l'image de référence et l'image après lancer.
 - Éviter les changements de zoom pendant une volée.
-- Enregistrer une image de référence après stabilisation de la cible.
+- Enregistrer une image de référence après stabilisation de la cible et de l'éclairage.
 - Détecter les changements de cadrage, vibrations ou déplacement du téléphone et demander une nouvelle calibration si nécessaire.
 
 2. CALIBRATION
