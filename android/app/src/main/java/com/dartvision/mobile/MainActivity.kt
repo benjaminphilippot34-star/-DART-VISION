@@ -305,7 +305,7 @@ class MainActivity : ComponentActivity() {
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
 
-        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage)
+        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage)
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         val bottom = LinearLayout(this).apply {
