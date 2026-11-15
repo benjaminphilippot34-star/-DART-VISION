@@ -73,11 +73,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFFD7EEEA.toInt()
-        val panel = 0xFFF7FBFA.toInt()
-        val accent = 0xFFFF563D.toInt()
-        val white = 0xFF14221E.toInt()
-        val muted = 0xFF50645E.toInt()
+        val bg = 0xFF101318.toInt()
+        val panel = 0xFF1B2028.toInt()
+        val accent = 0xFFE32636.toInt()
+        val white = 0xFFF5F6F8.toInt()
+        val muted = 0xFF9AA3AF.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun text(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -89,19 +89,21 @@ class MainActivity : ComponentActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), dp(18), dp(18), dp(18))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(panel); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFFE6F1EF.toInt())
+                setColor(panel); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0xFF2B323D.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
         }
         fun button(row: LinearLayout, title: String, primary: Boolean = false, click: () -> Unit) {
             row.addView(Button(this).apply {
-                text = title; isAllCaps = false; textSize = 13f; setTextColor(white)
+                text = title; isAllCaps = false; textSize = 12f
+                setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) accent else 0xFFFFFFFF.toInt())
-                    cornerRadius = dp(18).toFloat()
-                    if (!primary) setStroke(dp(1), 0xFFDDEAE7.toInt())
+                    setColor(if (primary) accent else 0xFF252C36.toInt())
+                    cornerRadius = dp(14).toFloat()
+                    if (!primary) setStroke(dp(1), 0xFF343D49.toInt())
                 }
-                minHeight = dp(54)
+                minHeight = dp(48)
+                stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(3))
                 }
@@ -144,17 +146,6 @@ class MainActivity : ComponentActivity() {
         startPanel.addView(quickModes)
         root.addView(startPanel)
         root.addView(buildAccountPanel())
-
-        val navigation = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            setPadding(0, dp(8), 0, dp(12))
-        }
-        button(navigation, "ACCUEIL", true) { showMainMenu() }
-        button(navigation, "JOUEURS") { managePlayers() }
-        button(navigation, "PARTIE") { configureX01() }
-        button(navigation, "MENU") { showMainMenu() }
-        root.addView(navigation)
 
         val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(2), dp(4), dp(2), dp(8)) }
         modeRow.addView(text("TABLEAU DE BORD", 17f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
@@ -259,7 +250,24 @@ class MainActivity : ComponentActivity() {
         button(settingsRow, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingsRow)
         root.addView(settings)
-        setContentView(scroll)
+        val shell = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(bg)
+        }
+        shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        val bottomNav = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(10), dp(8), dp(10), dp(8))
+            setBackgroundColor(0xFF191E26.toInt())
+            elevation = dp(12).toFloat()
+        }
+        button(bottomNav, "ACCUEIL", true) { showMainMenu() }
+        button(bottomNav, "JOUEURS") { managePlayers() }
+        button(bottomNav, "PARTIE") { configureX01() }
+        button(bottomNav, "MENU") { showMainMenu() }
+        shell.addView(bottomNav, LinearLayout.LayoutParams(-1, dp(68)))
+        setContentView(shell)
     }
 
 
@@ -267,7 +275,11 @@ class MainActivity : ComponentActivity() {
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(18, 14, 18, 14)
-            setBackgroundColor(0xFF1B2732.toInt())
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF202630.toInt())
+                cornerRadius = 18f
+                setStroke(1, 0xFF343D49.toInt())
+            }
         }
         panel.addView(TextView(this).apply {
             text = "COMPTE DART VISION"
@@ -278,7 +290,7 @@ class MainActivity : ComponentActivity() {
         panel.addView(TextView(this).apply {
             text = "Connecte ton compte pour retrouver ton profil sur tes appareils."
             textSize = 13f
-            setTextColor(0xFF263B35.toInt())
+            setTextColor(0xFFB4BDC8.toInt())
         })
         val email = EditText(this).apply {
             hint = "Adresse e-mail"
