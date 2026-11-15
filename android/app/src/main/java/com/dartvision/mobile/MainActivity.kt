@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
         buildUi()
         loadBoardCalibration()
         startLocalGame()
+        restoreX01Game()
         checkForUpdates(silent = true)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) startCamera()
         else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 51)
@@ -163,7 +164,7 @@ class MainActivity : ComponentActivity() {
         addButton(row4, "Modes DartCounter") { showGameModes() }
         addButton(row4, "Saisir un tour") { enterManualTurn() }
         addButton(row4, "Nouvelle manche") {
-            try { x01Engine?.newLeg(); refreshX01() }
+            try { x01Engine?.newLeg(); saveX01Game(); refreshX01() }
             catch (_: Exception) { Toast.makeText(this, "Termine d'abord la manche en cours.", Toast.LENGTH_SHORT).show() }
         }
         root.addView(row4)
@@ -345,6 +346,7 @@ class MainActivity : ComponentActivity() {
                 if (names.isEmpty()) names.add("Joueur 1")
                 x01Engine = X01GameEngine(X01Settings(startingScore = score), names)
                 selectedMode = DartGameMode.X01
+                saveX01Game()
                 refreshX01()
                 dialog.dismiss()
             }
@@ -376,6 +378,7 @@ class MainActivity : ComponentActivity() {
                     val message = if (engine != null) {
                         val result = engine.throwTurn(hits)
                         refreshX01()
+                        saveX01Game()
                         when {
                             result.bust -> "Bust : le score du tour est annulé."
                             result.legWon -> "Leg gagné !"
@@ -401,6 +404,85 @@ class MainActivity : ComponentActivity() {
         val numberText = if (value.firstOrNull() in listOf('S', 'D', 'T')) value.drop(1) else value
         val number = numberText.toInt()
         return DartHit(number, multiplier)
+    }
+
+
+    private fun saveX01Game() {
+        val game = x01Engine ?: return
+        val snapshot = game.state
+        val settings = snapshot.settings
+        val json = JSONObject()
+            .put("startingScore", settings.startingScore)
+            .put("inRule", settings.inRule.name)
+            .put("outRule", settings.outRule.name)
+            .put("legsToWin", settings.legsToWin)
+            .put("setsToWin", settings.setsToWin)
+            .put("activePlayer", snapshot.activePlayer)
+            .put("turnNumber", snapshot.turnNumber)
+            .put("dartsThrown", snapshot.dartsThrown)
+            .put("finished", snapshot.finished)
+            .put("legFinished", snapshot.legFinished)
+        val players = JSONArray()
+        snapshot.players.forEach { p ->
+            players.put(JSONObject().put("name", p.name).put("score", p.score)
+                .put("hasEntered", p.hasEntered).put("legsWon", p.legsWon).put("setsWon", p.setsWon))
+        }
+        val history = JSONArray()
+        snapshot.history.forEach { turn ->
+            val hits = JSONArray()
+            turn.hits.forEach { hit ->
+                hits.put(JSONObject().put("number", hit.number ?: JSONObject.NULL).put("multiplier", hit.multiplier))
+            }
+            history.put(JSONObject().put("playerIndex", turn.playerIndex).put("hits", hits)
+                .put("scoreBefore", turn.scoreBefore).put("scoreAfter", turn.scoreAfter)
+                .put("bust", turn.bust).put("legWon", turn.legWon))
+        }
+        json.put("players", players).put("history", history)
+        getSharedPreferences("dart_vision_local", MODE_PRIVATE).edit()
+            .putString("x01_state", json.toString()).apply()
+    }
+
+    private fun restoreX01Game(): Boolean {
+        val raw = getSharedPreferences("dart_vision_local", MODE_PRIVATE).getString("x01_state", null) ?: return false
+        return try {
+            val json = JSONObject(raw)
+            val settings = X01Settings(
+                startingScore = json.getInt("startingScore"),
+                inRule = X01InRule.valueOf(json.getString("inRule")),
+                outRule = X01OutRule.valueOf(json.getString("outRule")),
+                legsToWin = json.getInt("legsToWin"),
+                setsToWin = json.getInt("setsToWin")
+            )
+            val playerJson = json.getJSONArray("players")
+            val players = (0 until playerJson.length()).map { i ->
+                val p = playerJson.getJSONObject(i)
+                X01PlayerState(p.getString("name"), p.getInt("score"), p.optBoolean("hasEntered"),
+                    p.optInt("legsWon"), p.optInt("setsWon"))
+            }
+            val historyJson = json.getJSONArray("history")
+            val history = (0 until historyJson.length()).map { i ->
+                val turn = historyJson.getJSONObject(i)
+                val hitsJson = turn.getJSONArray("hits")
+                val hits = (0 until hitsJson.length()).map { j ->
+                    val h = hitsJson.getJSONObject(j)
+                    val n = h.opt("number")
+                    DartHit(if (n == null || n == JSONObject.NULL) null else (n as Number).toInt(), h.getInt("multiplier"))
+                }
+                X01TurnResult(turn.getInt("playerIndex"), hits, turn.getInt("scoreBefore"),
+                    turn.getInt("scoreAfter"), turn.getBoolean("bust"), turn.getBoolean("legWon"))
+            }
+            val engine = X01GameEngine(settings, players.map { it.name })
+            engine.restore(X01GameState(settings, players, json.getInt("activePlayer"),
+                json.getInt("turnNumber"), json.getInt("dartsThrown"), json.getBoolean("finished"),
+                json.getBoolean("legFinished"), history))
+            x01Engine = engine
+            selectedMode = DartGameMode.X01
+            refreshX01()
+            true
+        } catch (_: Exception) {
+            getSharedPreferences("dart_vision_local", MODE_PRIVATE).edit().remove("x01_state").apply()
+            false
+        }
     }
 
     private fun refreshX01() {
