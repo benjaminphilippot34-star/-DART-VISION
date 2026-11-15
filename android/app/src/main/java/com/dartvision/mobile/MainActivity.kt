@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var scoreView: TextView
     private lateinit var scoreContextView: TextView
     private lateinit var scoreTurnView: TextView
+    private lateinit var playerStatsView: TextView
     private lateinit var opponentScoresContainer: LinearLayout
     private lateinit var preview: PreviewView
     private lateinit var calibrationOverlay: CalibrationOverlay
@@ -345,6 +346,8 @@ class MainActivity : ComponentActivity() {
         scoreTurnView = txt("TOUR " + state.get().optInt("turn", 1) + " • 3 FLÉCHETTES", 9f, teal, true)
             .apply { setPadding(0, dp(5), 0, 0) }
         activePlayerPanel.addView(scoreTurnView)
+        playerStatsView = txt("", 9f, muted, false).apply { setPadding(0, dp(7), 0, 0); maxLines = 3 }
+        activePlayerPanel.addView(playerStatsView)
         scoreCard.addView(activePlayerPanel)
 
         val divider = View(this).apply { setBackgroundColor(0xFF314653.toInt()); layoutParams = LinearLayout.LayoutParams(dp(1), -1) }
@@ -1919,6 +1922,12 @@ class MainActivity : ComponentActivity() {
         scoreContextView.text = active.name
         scoreView.text = active.score.toString()
         scoreTurnView.text = if (s.finished) "MATCH TERMINÉ" else if (s.legFinished) "MANCHE TERMINÉE" else "TOUR ${s.turnNumber} • 3 FLÉCHETTES"
+        val activeHistory = s.history.filter { it.playerIndex == s.activePlayer }
+        val darts = activeHistory.sumOf { it.hits.size }
+        val scored = activeHistory.sumOf { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) }
+        val average = if (darts == 0) 0.0 else scored * 3.0 / darts
+        val previous = activeHistory.lastOrNull()?.scoreBefore?.toString() ?: "—"
+        playerStatsView.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) + "\nSCORE PRÉCÉDENT  " + previous + "\nFLÉCHETTES JETÉES  " + darts
         val opponentJson = JSONArray()
         s.players.forEach { p -> opponentJson.put(JSONObject().put("name", p.name).put("score", p.score)) }
         refreshOpponentScores(opponentJson, s.activePlayer, 0xFF9AADB8.toInt(), 0xFFF2F6F8.toInt(), 0xFF28CDBA.toInt())
@@ -2159,25 +2168,27 @@ class MainActivity : ComponentActivity() {
             if (i == active) continue
             val p = players.optJSONObject(i) ?: continue
             opponents++
+            val history = x01Engine?.state?.history.orEmpty().filter { it.playerIndex == i }
+            val darts = history.sumOf { it.hits.size }
+            val scored = history.sumOf { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) }
+            val average = if (darts == 0) 0.0 else scored * 3.0 / darts
+            val previous = history.lastOrNull()?.scoreBefore?.toString() ?: "—"
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(dp(7), dp(7), dp(4), dp(7))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF1B2A35.toInt()); cornerRadius = dp(10).toFloat()
-                }
-                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(6) }
+                setPadding(dp(7), dp(4), dp(5), dp(4))
+                background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF1B2A35.toInt()); cornerRadius = dp(8).toFloat() }
+                layoutParams = LinearLayout.LayoutParams(-1, dp(58)).apply { bottomMargin = dp(4) }
             }
-            row.addView(TextView(this).apply {
-                text = p.optString("name", "Joueur " + (i + 1))
-                textSize = 11f; setTextColor(muted)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                maxLines = 1
+            val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+            top.addView(TextView(this).apply {
+                text = p.optString("name", "Joueur " + (i + 1)); textSize = 10f; setTextColor(muted)
+                setTypeface(typeface, android.graphics.Typeface.BOLD); maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             })
-            row.addView(TextView(this).apply {
-                text = p.optInt("score", 301).toString()
-                textSize = 20f; setTextColor(white)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-            })
+            top.addView(TextView(this).apply { text = p.optInt("score", 301).toString(); textSize = 22f; setTextColor(white); setTypeface(typeface, android.graphics.Typeface.BOLD) })
+            row.addView(top)
+            row.addView(TextView(this).apply { text = "MOY. " + String.format(java.util.Locale.FRANCE, "%.1f", average) + "  •  PRÉC. " + previous; textSize = 8f; setTextColor(muted); maxLines = 1 })
             opponentScoresContainer.addView(row)
         }
         if (opponents == 0) {
