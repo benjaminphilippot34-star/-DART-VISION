@@ -134,9 +134,9 @@ class X01GameEngine(
 data class CricketPlayerState(val name: String, val marks: Map<Int, Int>, val points: Int = 0)
 data class CricketGameState(val players: List<CricketPlayerState>, val activePlayer: Int = 0, val finished: Boolean = false)
 
-class CricketGameEngine(playerNames: List<String>, private val includeBull: Boolean = true) {
+open class CricketGameEngine(playerNames: List<String>, private val includeBull: Boolean = true, targetNumbers: List<Int> = (15..20).toList()) {
     init { require(playerNames.size >= 2) }
-    private val targets = (15..20).toList() + if (includeBull) listOf(25) else emptyList()
+    private val targets = targetNumbers.distinct().also { require(it.isNotEmpty() && it.all { n -> n in 1..20 }) } + if (includeBull) listOf(25) else emptyList()
     var state = CricketGameState(playerNames.map { name -> CricketPlayerState(name, targets.associateWith { 0 }) })
         private set
 
@@ -258,3 +258,8 @@ class HalveItEngine(private val targets: List<Int> = listOf(20, 19, 18, 17, 16, 
         state = HalveItState(score, next, next >= targets.size)
     }
 }
+
+
+/** Variante d'entraînement Tactics : cibles 10 à 20 et bull, avec marques de Cricket. */
+class TacticsGameEngine(playerNames: List<String>, includeBull: Boolean = true) :
+    CricketGameEngine(playerNames, includeBull, (10..20).toList())
