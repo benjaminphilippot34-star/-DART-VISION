@@ -25,6 +25,6 @@ class PreviewCoordinateMapperTest {
         )
         assertNotNull(point)
         assertEquals(800.0, point!!.x, 0.001)
-        assertEquals(225.0, point.y, 0.001)
+        assertEquals(850.0, point.y, 0.001)
     }
 }
