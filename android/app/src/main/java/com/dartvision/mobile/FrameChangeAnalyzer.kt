@@ -156,7 +156,7 @@ class FrameChangeAnalyzer(
             val offsets = IntArray(reference.size) { i ->
                 (current[i].toInt() and 255) - (reference[i].toInt() and 255)
             }
-            val globalOffset = if (offsets.isEmpty()) 0 else {
+            val globalOffset = if (offsets.size < 64) 0 else {
                 offsets.sort()
                 offsets[offsets.size / 2]
             }
