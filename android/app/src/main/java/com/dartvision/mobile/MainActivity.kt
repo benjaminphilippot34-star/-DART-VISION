@@ -234,7 +234,8 @@ class MainActivity : ComponentActivity() {
 
         val settings = panel()
         status = text("PRÊT À JOUER", 12f, accent, true)
-        settings.addView(text("ÉTAT DE L’APPLICATION", 10f, muted, true))\n        settings.addView(status)
+        settings.addView(text("ÉTAT DE L’APPLICATION", 10f, muted, true))
+        settings.addView(status)
         val settingsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         button(settingsRow, "MODES DE JEU") { showGameModes() }
         button(settingsRow, "MISES À JOUR") { checkForUpdates(silent = false) }
