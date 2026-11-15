@@ -25,11 +25,11 @@ class OfflineGameEnginesTest {
 
     @Test fun x01PreviewBustRestoresTheScoreBeforeTheVisit() {
         val game = X01GameEngine(X01Settings(40, outRule = X01OutRule.DOUBLE_OUT), listOf("A", "B"))
-        val preview = game.previewTurn(listOf(DartHit(20, 1)))
+        val preview = game.previewTurn(listOf(DartHit(20, 3)))
         assertTrue(preview.bust)
         assertEquals(40, preview.scoreAfter)
         assertEquals(40, game.state.players[0].score)
-        val committed = game.throwTurn(listOf(DartHit(20, 1)))
+        val committed = game.throwTurn(listOf(DartHit(20, 3)))
         assertTrue(committed.bust)
         assertEquals(40, game.state.players[0].score)
         assertEquals(1, game.state.activePlayer)
