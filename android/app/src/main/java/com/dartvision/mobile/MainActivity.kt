@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
     private var hostUrl: String? = null
     private var isHost = true
     private var zoom = 1f
+    private var selectedMode: DartGameMode = DartGameMode.X01
+    private var x01Engine: X01GameEngine? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,11 +137,114 @@ class MainActivity : ComponentActivity() {
         addButton(row2, "+ 20") { action("adjust", "delta" to "20") }
         root.addView(row2)
         val row3 = LinearLayout(this)
-        addButton(row3, "Annuler") { action("undo") }
+        addButton(row3, "Annuler") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
         addButton(row3, "Zoom −") { setZoom(zoom / 1.25f) }
         addButton(row3, "Zoom +") { setZoom(zoom * 1.25f) }
         root.addView(row3)
+        val row4 = LinearLayout(this)
+        addButton(row4, "Modes DartCounter") { showGameModes() }
+        addButton(row4, "Saisir un tour") { enterManualTurn() }
+        root.addView(row4)
         setContentView(root)
+    }
+
+
+    private fun showGameModes() {
+        val modes = DartCounterModeCatalog.default.modes
+        val labels = modes.map { "${it.title} — ${it.description}" }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Choisir un mode hors ligne")
+            .setItems(labels) { _, which ->
+                selectedMode = modes[which]
+                if (selectedMode == DartGameMode.X01) configureX01()
+                else AlertDialog.Builder(this)
+                    .setTitle(selectedMode.title)
+                    .setMessage("${selectedMode.description}\n\nLe moteur de règles local est ajouté au projet. L'écran de partie dédié à ce mode est encore en cours d'intégration. Tu peux continuer à utiliser le X01.")
+                    .setPositiveButton("OK", null).show()
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
+    private fun configureX01() {
+        val choices = arrayOf("301", "501", "701")
+        AlertDialog.Builder(this)
+            .setTitle("Score de départ X01")
+            .setSingleChoiceItems(choices, 0) { dialog, which ->
+                val score = choices[which].toInt()
+                val names = mutableListOf<String>()
+                val players = state.get().optJSONArray("players") ?: JSONArray()
+                for (i in 0 until players.length()) names.add(players.getJSONObject(i).optString("name", "Joueur ${i + 1}"))
+                if (names.isEmpty()) names.add("Joueur 1")
+                x01Engine = X01GameEngine(X01Settings(startingScore = score), names)
+                selectedMode = DartGameMode.X01
+                refreshX01()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
+    private fun enterManualTurn() {
+        val engine = x01Engine
+        if (engine == null) {
+            AlertDialog.Builder(this).setTitle("Mode X01 non configuré")
+                .setMessage("Choisis d'abord le mode X01 dans « Modes DartCounter ». La saisie manuelle sert de secours en attendant la détection automatique fiable par caméra.")
+                .setPositiveButton("OK", null).show()
+            return
+        }
+        val input = EditText(this).apply {
+            hint = "Ex. T20, S20, D16"
+            setSingleLine(true)
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Saisir les fléchettes du tour")
+            .setMessage("Formats : S20, D20, T20, S25 (25), D25 (50), MISS. Sépare les impacts par des virgules.")
+            .setView(input)
+            .setNegativeButton("Annuler", null)
+            .setPositiveButton("Valider") { _, _ ->
+                try {
+                    val hits = input.text.toString().split(",").map { parseDartHit(it.trim()) }
+                    require(hits.size in 1..3)
+                    val result = engine.throwTurn(hits)
+                    refreshX01()
+                    val message = when {
+                        result.bust -> "Bust : le score du tour est annulé."
+                        result.legWon -> "Leg gagné !"
+                        else -> "Tour enregistré : ${result.scoreBefore} → ${result.scoreAfter}"
+                    }
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Saisie invalide. Exemple : T20, S20, D16", Toast.LENGTH_LONG).show()
+                }
+            }.show()
+    }
+
+    private fun parseDartHit(raw: String): DartHit {
+        val value = raw.uppercase().replace(" ", "")
+        if (value == "MISS" || value == "0") return DartHit.MISS
+        val multiplier = when {
+            value.startsWith("T") -> 3
+            value.startsWith("D") -> 2
+            value.startsWith("S") -> 1
+            else -> 1
+        }
+        val numberText = if (value.firstOrNull() in listOf('S', 'D', 'T')) value.drop(1) else value
+        val number = numberText.toInt()
+        return DartHit(number, multiplier)
+    }
+
+    private fun refreshX01() {
+        val engine = x01Engine ?: return
+        val s = engine.state
+        val lines = StringBuilder("X01 ${s.settings.startingScore} • Tour ${s.turnNumber}\n")
+        s.players.forEachIndexed { i, p ->
+            lines.append(if (i == s.activePlayer) "▶ " else "   ")
+                .append(p.name).append(" : ").append(p.score).append("  • Legs ").append(p.legsWon).append("\n")
+        }
+        if (s.finished) lines.append("\nLeg terminé — configure une nouvelle manche pour continuer.")
+        scoreView.text = lines.toString()
+        status.text = "MODE X01 • ${s.settings.startingScore} • hors ligne"
     }
 
     private fun addButton(row: LinearLayout, title: String, click: () -> Unit) {
