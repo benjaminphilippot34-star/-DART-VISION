@@ -107,13 +107,14 @@ jobs:
       - name: Update in-app update manifest
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/github-script@v7
-        env:
-          VERSION_CODE: "17"
-          VERSION_NAME: "0.9.7"
         with:
           script: |
             const fs = require('fs');
             const crypto = require('crypto');
+            const gradle = fs.readFileSync('android/app/build.gradle.kts', 'utf8');
+            const versionCode = Number(gradle.match(/versionCode = (\\d+)/)?.[1]);
+            const versionName = gradle.match(/versionName = \"([^\"]+)\"/)?.[1];
+            if (!versionCode || !versionName) throw new Error('Unable to read Android version from build.gradle.kts');
             const apk = fs.readFileSync('android/app/build/outputs/apk/release/app-release.apk');
             const sha256 = crypto.createHash('sha256').update(apk).digest('hex');
             const path = 'latest.json';
@@ -127,16 +128,16 @@ jobs:
               if (error.status !== 404) throw error;
             }
             const content = JSON.stringify({
-              versionCode: Number(process.env.VERSION_CODE),
-              versionName: process.env.VERSION_NAME,
-              apkUrl: `https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v${process.env.VERSION_NAME}/app-release.apk`,
+              versionCode,
+              versionName,
+              apkUrl: `https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v${versionName}/app-release.apk`,
               sha256
             }, null, 2) + "\n";
             await github.rest.repos.createOrUpdateFileContents({
               owner: context.repo.owner,
               repo: context.repo.repo,
               path,
-              message: "Publish DART VISION 0.9.7 update manifest",
+              message: `Publish DART VISION ${versionName} update manifest`,
               content: Buffer.from(content).toString('base64'),
               ...(sha ? { sha } : {})
             });
