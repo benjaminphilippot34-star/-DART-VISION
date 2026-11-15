@@ -1044,6 +1044,8 @@ class MainActivity : ComponentActivity() {
         val hits = mutableListOf<DartHit>()
         var multiplier = 1
         var selectedTab = 0
+        lateinit var render: () -> Unit
+        lateinit var addHit: (DartHit) -> Unit
         lateinit var dialog: AlertDialog
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1069,12 +1071,12 @@ class MainActivity : ComponentActivity() {
         content.addView(title, LinearLayout.LayoutParams(-1, dp(42)))
         val entry = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            background = rounded(white, 0xFFD7E2DE, 30); setPadding(dp(5), dp(5), dp(5), dp(5))
+            background = rounded(white, 0xFFD7E2DE.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
         }
         entry.addView(text("▦", 22f, ink, true), LinearLayout.LayoutParams(dp(42), dp(56)))
         val slots = mutableListOf<TextView>()
         repeat(3) {
-            val slot = text("—", 19f, ink, true).apply { background = rounded(0xFFF5F8F7, 0xFFDCE6E2, 2) }
+            val slot = text("—", 19f, ink, true).apply { background = rounded(0xFFF5F8F7.toInt(), 0xFFDCE6E2.toInt(), 2) }
             slots.add(slot)
             entry.addView(slot, LinearLayout.LayoutParams(0, dp(56), 1f).apply {
                 setMargins(dp(2), 0, dp(2), 0)
@@ -1082,7 +1084,7 @@ class MainActivity : ComponentActivity() {
         }
         val submit = Button(this).apply {
             text = "Submit"; isAllCaps = false; textSize = 13f; setTextColor(ink)
-            background = rounded(0xFF28C980, 0xFF28C980, 28)
+            background = rounded(0xFF28C980.toInt(), 0xFF28C980.toInt(), 28)
             stateListAnimator = null; minHeight = dp(48)
             layoutParams = LinearLayout.LayoutParams(dp(94), dp(48)).apply { setMargins(dp(3), 0, 0, 0) }
         }
@@ -1113,7 +1115,7 @@ class MainActivity : ComponentActivity() {
                 val n = r * 5 + c + 1
                 val cell = text(n.toString(), 25f, ink, true).apply {
                     layoutParams = LinearLayout.LayoutParams(0, dp(66), 1f)
-                    background = rounded(pale, 0xFFD1DEDA, 0)
+                    background = rounded(pale, 0xFFD1DEDA.toInt(), 0)
                     setOnClickListener { if (selectedTab < 3) addHit(DartHit(n, multiplier)) }
                 }
                 cells.add(cell); row.addView(cell)
@@ -1125,7 +1127,7 @@ class MainActivity : ComponentActivity() {
         fun bottomButton(caption: String, weight: Float = 1f, click: () -> Unit) =
             Button(this).apply {
                 text = caption; isAllCaps = false; textSize = 15f; setTextColor(ink)
-                background = rounded(pale, 0xFFD1DEDA, 0)
+                background = rounded(pale, 0xFFD1DEDA.toInt(), 0)
                 layoutParams = LinearLayout.LayoutParams(0, dp(56), weight)
                 setOnClickListener { click() }
             }
@@ -1138,7 +1140,7 @@ class MainActivity : ComponentActivity() {
             setOnClickListener { dialog.dismiss(); setCameraMode(true) }
         })
         content.addView(bottom)
-        fun render() {
+        render = {
             slots.forEachIndexed { i, slot ->
                 val hit = hits.getOrNull(i)
                 slot.text = hit?.let {
@@ -1149,23 +1151,22 @@ class MainActivity : ComponentActivity() {
                         else -> (when (it.multiplier) { 2 -> "D"; 3 -> "T"; else -> "S" }) + it.number
                     }
                 } ?: "—"
-                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFFDDF8F2 else 0xFFF5F8F7, 0xFFDCE6E2, 2)
+                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFFDDF8F2.toInt() else 0xFFF5F8F7.toInt(), 0xFFDCE6E2.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
             tabs.forEachIndexed { i, tab ->
                 tab.setTextColor(if (i == selectedTab) white else ink)
-                tab.background = rounded(if (i == selectedTab) coral else pale, if (i == selectedTab) coral else 0xFFD1DEDA, 3)
+                tab.background = rounded(if (i == selectedTab) coral else pale, if (i == selectedTab) coral else 0xFFD1DEDA.toInt(), 3)
             }
             cells.forEach { it.alpha = if (hits.size == 3 || selectedTab >= 3) .35f else 1f }
             submit.isEnabled = hits.size == 3
             submit.alpha = if (submit.isEnabled) 1f else .45f
         }
-        fun unused() {}
         // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
         tabs[3].setOnClickListener { selectedTab = 3; addHit(DartHit(25, 2)); render() }
         tabs[4].setOnClickListener { selectedTab = 4; addHit(DartHit(25, 1)); render() }
         // Le mode de saisie est une vraie saisie fléchette par fléchette, pas une estimation du total.
-        fun addHit(hit: DartHit) { if (hits.size < 3) { hits.add(hit); render() } }
+        addHit = { hit -> if (hits.size < 3) { hits.add(hit); render() } }
         dialog = AlertDialog.Builder(this).setView(content).create()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         submit.setOnClickListener {
