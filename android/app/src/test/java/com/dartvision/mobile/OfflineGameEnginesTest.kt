@@ -59,7 +59,7 @@ class OfflineGameEnginesTest {
     @Test fun bobs27PenalizesMissedDouble() {
         val game = Bobs27Engine()
         game.playTurn(listOf(DartHit(1, 1), DartHit.MISS, DartHit.MISS))
-        assertEquals(21, game.state.score)
+        assertEquals(25, game.state.score)
         assertEquals(2, game.state.doubleNumber)
     }
 
