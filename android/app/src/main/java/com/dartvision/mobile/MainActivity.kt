@@ -81,6 +81,9 @@ class MainActivity : ComponentActivity() {
     private var updatePageView: LinearLayout? = null
     private var homeUpdateBanner: LinearLayout? = null
     private var updateCheckRunning = false
+    private var gameInProgress = false
+    private var currentPage = "home"
+    private var bottomNavigationBar: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -195,12 +198,14 @@ class MainActivity : ComponentActivity() {
         val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
         val navButtons = mutableListOf<Pair<String, Button>>()
         fun showPage(page: String) {
+            currentPage = page
             home.visibility = if (page == "home") View.VISIBLE else View.GONE
             gamePage.visibility = if (page == "game") View.VISIBLE else View.GONE
             playersPage.visibility = if (page == "players") View.VISIBLE else View.GONE
             morePage.visibility = if (page == "more") View.VISIBLE else View.GONE
             accountPage.visibility = if (page == "account") View.VISIBLE else View.GONE
             updatePage.visibility = if (page == "update") View.VISIBLE else View.GONE
+            bottomNavigationBar?.visibility = if (page == "game" && gameInProgress) View.GONE else View.VISIBLE
             navButtons.forEach { (key, view) ->
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
@@ -426,6 +431,33 @@ class MainActivity : ComponentActivity() {
         cameraPanel.addView(analyze); cameraPanelView = cameraPanel; cameraPanel.visibility = View.GONE
         morePage.addView(cameraPanel)
         val settings = card()
+        btn(settings, "■  ARRÊTER LA PARTIE", false) {
+            if (!gameInProgress) {
+                AlertDialog.Builder(this).setTitle("Aucune partie en cours")
+                    .setMessage("Aucune partie active à arrêter.")
+                    .setPositiveButton("OK", null).show()
+            } else {
+                AlertDialog.Builder(this).setTitle("Arrêter la partie ?")
+                    .setMessage("Veux-tu sauvegarder cette partie pour la reprendre plus tard ?")
+                    .setPositiveButton("SAUVEGARDER") { _, _ ->
+                        x01Engine?.let { saveX01Game() }
+                        saveLocalState(state.get())
+                        gameInProgress = false; x01Engine = null; trainingTurnHandler = null
+                        bottomNavigationBar?.visibility = View.VISIBLE
+                        status.text = "PARTIE SAUVEGARDÉE • Reprise possible depuis JOUER."
+                        showPage("home")
+                    }
+                    .setNegativeButton("ARRÊTER SANS SAUVEGARDER") { _, _ ->
+                        getSharedPreferences("dart_vision_local", MODE_PRIVATE).edit()
+                            .remove("x01_state").remove("game_state").apply()
+                        gameInProgress = false; x01Engine = null; trainingTurnHandler = null
+                        bottomNavigationBar?.visibility = View.VISIBLE
+                        status.text = "PARTIE ARRÊTÉE SANS SAUVEGARDE."
+                        showPage("home")
+                    }
+                    .setNeutralButton("ANNULER", null).show()
+            }
+        }
         status = txt("PRÊT À JOUER", 12f, teal, true)
         settings.addView(txt("ÉTAT DE L’APPLICATION", 10f, muted, true)); settings.addView(status)
         val settingButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -441,6 +473,7 @@ class MainActivity : ComponentActivity() {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER
             setPadding(dp(8), dp(7), dp(8), dp(7)); setBackgroundColor(0xFF0D151D.toInt()); elevation = dp(14).toFloat()
         }
+        bottomNavigationBar = bottom
         fun nav(key: String, title: String, symbol: String) {
             val button = Button(this).apply {
                 text = symbol + "\n" + title; isAllCaps = false; textSize = 10f; setTextColor(white)
@@ -1479,6 +1512,8 @@ class MainActivity : ComponentActivity() {
                     setsToWin = sets[setsSpinner.selectedItemPosition].toInt()
                 )
                 x01Engine = X01GameEngine(settings, names)
+                gameInProgress = true
+                bottomNavigationBar?.visibility = if (currentPage == "game") View.GONE else View.VISIBLE
                 x01AccountParticipant = includeAccountPlayer.isChecked
                 x01HistorySaved = false
                 x01StartedAt = java.time.Instant.now().toString()
@@ -1513,6 +1548,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun enterManualTurn(initialHit: DartHit? = null) {
+        gameInProgress = true
+        bottomNavigationBar?.visibility = if (currentPage == "game") View.GONE else View.VISIBLE
         var engine = x01Engine
         if (engine == null && trainingTurnHandler == null) {
             // Permet la saisie depuis le pavé principal même si aucune partie n'a encore été configurée.
@@ -1635,7 +1672,7 @@ class MainActivity : ComponentActivity() {
             for (c in 0 until 5) {
                 val n = r * 5 + c + 1
                 val cell = text(n.toString(), 25f, ink, true).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f)
+                    layoutParams = LinearLayout.LayoutParams(0, dp(42), 1f)
                     background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
                     setOnClickListener { if (selectedTab < 3) addHit(DartHit(n, multiplier)) }
                 }
