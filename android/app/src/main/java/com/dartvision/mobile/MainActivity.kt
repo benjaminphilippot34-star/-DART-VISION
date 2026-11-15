@@ -1560,41 +1560,34 @@ class MainActivity : ComponentActivity() {
                     if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
                 setPadding(dp(2), dp(3), dp(2), dp(3))
             }
-        val activeName = engine?.state?.players?.getOrNull(engine.state.activePlayer)?.name ?: "Joueur"
-        val title = text("C’EST AU TOUR DE $activeName DE LANCER !", 18f, coral, true).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        }
-        content.addView(title, LinearLayout.LayoutParams(-1, dp(34)))
-        // Bandeau des joueurs : tous les participants et le score restant du joueur actif.
-        val playersBand = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, dp(3), 0, dp(8))
-        }
-        val playerScoreViews = mutableListOf<TextView>()
         val gamePlayers = engine?.state?.players
-        if (gamePlayers != null) {
-            gamePlayers.forEachIndexed { index, player ->
-                val activePlayer = index == engine.state.activePlayer
-                val playerCard = LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    gravity = Gravity.CENTER
-                    setPadding(dp(7), dp(7), dp(7), dp(7))
-                    background = rounded(if (activePlayer) coral else 0xFF173E49.toInt(),
-                        if (activePlayer) coral else teal, 9)
-                    layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply {
-                        setMargins(dp(3), 0, dp(3), 0)
-                    }
-                }
-                playerCard.addView(text(player.name, 12f, if (activePlayer) white else ink, true))
-                val playerScore = text(player.score.toString(), 19f, if (activePlayer) white else ink, true)
-                playerScoreViews.add(playerScore)
-                playerCard.addView(playerScore)
-                playersBand.addView(playerCard)
+        val activeIndex = engine?.state?.activePlayer ?: 0
+        val activeName = gamePlayers?.getOrNull(activeIndex)?.name ?: "Joueur"
+        val title = text("C’EST AU TOUR DE $activeName DE LANCER !", 18f, coral, true).apply { gravity = Gravity.CENTER_VERTICAL; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
+        val playerScoreViews = mutableListOf<TextView>()
+        val scoreboard = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; background = rounded(0xFF1C2A35.toInt(), teal, 18); setPadding(dp(10), dp(10), dp(10), dp(10)) }
+        val activePanel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(8), dp(8), dp(8)); background = rounded(coral, coral, 14); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1.15f) }
+        activePanel.addView(text("JOUEUR ACTIF", 12f, white, true).apply { gravity = Gravity.START })
+        activePanel.addView(text(activeName, 17f, white, true).apply { gravity = Gravity.START; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END })
+        val activeScore = text(gamePlayers?.getOrNull(activeIndex)?.score?.toString() ?: "301", 42f, white, true).apply { gravity = Gravity.START }
+        activePanel.addView(activeScore)
+        activePanel.addView(text("TOUR " + (engine?.state?.turnNumber ?: 1) + " • 3 FLÉCHETTES", 11f, white, true).apply { gravity = Gravity.START })
+        scoreboard.addView(activePanel)
+        val opponents = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(8), 0, 0, 0); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1f) }
+        gamePlayers?.forEachIndexed { index, player ->
+            if (index == activeIndex) playerScoreViews.add(activeScore)
+            else {
+                val scoreLine = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(12), dp(8), dp(8), dp(8)); background = rounded(0xFF173E49.toInt(), teal, 12); layoutParams = LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(0, dp(3), 0, dp(3)) } }
+                scoreLine.addView(text(player.name, 14f, ink, true).apply { gravity = Gravity.START; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END })
+                val score = text(player.score.toString(), 25f, ink, true).apply { gravity = Gravity.START }
+                playerScoreViews.add(score)
+                scoreLine.addView(score)
+                opponents.addView(scoreLine)
             }
         }
-        content.addView(playersBand, LinearLayout.LayoutParams(-1, dp(54)))
+        scoreboard.addView(opponents)
+        content.addView(scoreboard, LinearLayout.LayoutParams(-1, dp(230)).apply { bottomMargin = dp(8) })
+        content.addView(title, LinearLayout.LayoutParams(-1, dp(42)))
         val entry = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
