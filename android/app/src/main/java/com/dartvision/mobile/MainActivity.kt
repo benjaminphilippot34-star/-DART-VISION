@@ -633,29 +633,62 @@ class MainActivity : ComponentActivity() {
 
     private fun handleHostAction(name: String, params: Map<String, String>) {
         synchronized(state) {
-            val s = JSONObject(state.get().toString())
+            val current = state.get()
+            val s = JSONObject(current.toString())
             val players = s.optJSONArray("players") ?: JSONArray()
             when (name) {
-                "new_game" -> {
-                    val fresh = JSONArray()
-                    for (i in 0 until players.length()) fresh.put(JSONObject().put("name", players.getJSONObject(i).optString("name", "Joueur ${i+1}")).put("score", 301))
-                    if (fresh.length() == 0) fresh.put(JSONObject().put("name", "Joueur 1").put("score", 301))
-                    s.put("players", fresh).put("active", 0).put("turn", 1).put("mode", "301")
-                }
-                "add_player" -> players.put(JSONObject().put("name", "Joueur ${players.length()+1}").put("score", 301))
-                "next_turn" -> {
-                    if (players.length() > 0) s.put("active", (s.optInt("active") + 1) % players.length())
-                    s.put("turn", s.optInt("turn") + 1)
-                }
-                "adjust" -> {
-                    if (players.length() > 0) {
-                        val i = s.optInt("active").coerceIn(0, players.length()-1)
-                        val p = players.getJSONObject(i)
-                        val next = (p.optInt("score", 501) - (params["delta"]?.toIntOrNull() ?: 0)).coerceAtLeast(0)
-                        p.put("score", next)
+                "undo" -> {
+                    val history = s.optJSONArray("history") ?: JSONArray()
+                    if (history.length() > 0) {
+                        val previous = history.getJSONObject(history.length() - 1)
+                        s.put("players", JSONArray(previous.getJSONArray("players").toString()))
+                        s.put("active", previous.optInt("active", 0))
+                        s.put("turn", previous.optInt("turn", 1))
+                        s.put("mode", previous.optString("mode", "301"))
+                        history.remove(history.length() - 1)
+                        s.put("history", history)
+                    } else {
+                        s.put("lastAction", "Aucune action à annuler")
+                        state.set(s)
+                        saveLocalState(s)
+                        return
                     }
                 }
-                "undo" -> s.put("lastAction", "Annulation demandée (historique complet à intégrer)")
+                "new_game", "add_player", "next_turn", "adjust" -> {
+                    val history = s.optJSONArray("history") ?: JSONArray()
+                    val previousPlayers = JSONArray(players.toString())
+                    history.put(JSONObject()
+                        .put("players", previousPlayers)
+                        .put("active", s.optInt("active", 0))
+                        .put("turn", s.optInt("turn", 1))
+                        .put("mode", s.optString("mode", "301")))
+                    while (history.length() > 20) history.remove(0)
+                    s.put("history", history)
+                    when (name) {
+                        "new_game" -> {
+                            val fresh = JSONArray()
+                            for (i in 0 until players.length()) {
+                                fresh.put(JSONObject().put("name", players.getJSONObject(i).optString("name", "Joueur ${i+1}")).put("score", 301))
+                            }
+                            if (fresh.length() == 0) fresh.put(JSONObject().put("name", "Joueur 1").put("score", 301))
+                            s.put("players", fresh).put("active", 0).put("turn", 1).put("mode", "301")
+                        }
+                        "add_player" -> players.put(JSONObject().put("name", "Joueur ${players.length()+1}").put("score", 301))
+                        "next_turn" -> {
+                            if (players.length() > 0) s.put("active", (s.optInt("active") + 1) % players.length())
+                            s.put("turn", s.optInt("turn") + 1)
+                        }
+                        "adjust" -> {
+                            if (players.length() > 0) {
+                                val i = s.optInt("active").coerceIn(0, players.length() - 1)
+                                val p = players.getJSONObject(i)
+                                val delta = params["delta"]?.toIntOrNull() ?: 0
+                                p.put("score", (p.optInt("score", 301) + delta).coerceAtLeast(0))
+                            }
+                        }
+                    }
+                }
+                else -> return
             }
             s.put("lastAction", name)
             state.set(s)
