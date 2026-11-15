@@ -119,8 +119,22 @@ class MainActivity : ComponentActivity() {
                     val regions = frameAnalyzer.changedRegions
                     val largest = regions.firstOrNull()
                     if (largest == null) "Différence : %.2f %% • aucune zone assez grande".format(percent)
-                    else "Différence : %.2f %% • %d zone(s) • principale : %d px, centre (%.1f ; %.1f) • contrôle visuel nécessaire"
-                        .format(percent, regions.size, largest.pixelCount, largest.centroidX, largest.centroidY)
+                    else {
+                        val calibrated = boardCalibration
+                        val candidates = if (calibrated == null || frameAnalyzer.imageWidth <= 0 || frameAnalyzer.imageHeight <= 0) ""
+                            else regions.take(5).mapIndexed { index, region ->
+                                val imagePoint = ImagePoint(
+                                    region.centroidX * frameAnalyzer.imageWidth / frameAnalyzer.sampleWidth,
+                                    region.centroidY * frameAnalyzer.imageHeight / frameAnalyzer.sampleHeight
+                                )
+                                val score = calibrated.scoreImagePoint(imagePoint)
+                                if (score == null) "Candidat ${index + 1} : non calculable"
+                                else "Candidat ${index + 1} : ${score.points} pts (${score.zone})${if (score.nearWire) " • près d'un fil" else ""}"
+                            }.joinToString("\\n")
+                        "Différence : %.2f %% • %d zone(s) • principale : %d px, centre (%.1f ; %.1f)".format(percent, regions.size, largest.pixelCount, largest.centroidX, largest.centroidY) +
+                            if (calibrated == null) "\\nCalibre la cible pour afficher des scores candidats."
+                            else "\\nScores candidats non validés :\\n$candidates\\nVérification humaine obligatoire."
+                    }
                 }
         }
         root.addView(analysisRow)
