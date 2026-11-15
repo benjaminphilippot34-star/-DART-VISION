@@ -149,3 +149,67 @@ Principes de conception DART VISION :
 
 ÉTAT D'IMPLÉMENTATION AU 15/11/2026 :
 Le dépôt contient un catalogue de 13 modes, un moteur X01 avec saisie manuelle des tours dans l'interface, ainsi que des moteurs locaux de base pour Cricket, Tactics, Shanghai, Around the Clock, Bob's 27, Halve-It, 121 Checkout, Killer, Doubles Training, Singles Training, Score Training et Random Checkout. Des tests unitaires couvrent les règles principales. Ces moteurs ne sont pas tous reliés à des écrans de partie : à ce stade, seul le X01 dispose d'un parcours de saisie manuelle dans l'interface. Les règles spécifiques de chaque variante doivent encore être confrontées à la documentation officielle et testées en situation.
+
+
+CAHIER DES CHARGES COMPLÉMENTAIRE VALIDÉ AVEC L'UTILISATEUR
+===========================================================
+
+UNE APPLICATION, PAS UN ASSEMBLAGE DE LOGICIELS
+- Toute l'expérience doit être intégrée dans DART VISION.
+- Ne pas imposer DroidCam, ni une application tierce servant de relais caméra.
+- L'application doit être utilisable directement sur un téléphone Android. Un ordinateur Windows peut servir au développement et à l'annotation, mais ne doit jamais être nécessaire pour jouer.
+
+SOURCES VIDÉO ET NOMBRE DE CAMÉRAS
+- Première configuration : une caméra, idéalement le téléphone Android placé face à la cible.
+- Configurations évolutives : deux ou quatre caméras, avec calibration indépendante de chaque vue et fusion des observations.
+- Sources à intégrer dans l'application : caméra arrière du téléphone (CameraX), caméras USB compatibles Android/UVC, flux RTSP et découverte/contrôle ONVIF lorsque l'appareil le permet.
+- La compatibilité dépendra des formats, codecs, protocoles et autorisations de chaque caméra ; l'assistant doit tester le flux avant de déclarer une caméra compatible.
+- Téléphone de référence pour les essais actuels : Xiaomi 14T, utilisé comme caméra Wi-Fi. L'aperçu CameraX et le cadrage fonctionnent sur cet appareil.
+- Environnement de développement disponible : PC Windows, facultatif.
+- Caméra possédée à évaluer : Blink Mini Gen 1 Pan-Tilt. Ne pas promettre de compatibilité directe tant qu'un flux local/RTSP/ONVIF exploitable n'a pas été démontré.
+
+POSITIONNEMENT, ZOOM ET CALIBRATION
+- Favoriser une caméra la plus en face possible de la cible afin de limiter les occultations et les déformations.
+- Garder la totalité de la cible dans l'image avec une marge ; utiliser un cadrage/zoom intelligent pour agrandir la cible sans couper son contour.
+- Préférer le zoom optique lorsqu'il est disponible. Le zoom numérique recadre/interpole l'image et ne doit pas être considéré comme une amélioration intrinsèque de précision.
+- Enregistrer une calibration distincte par caméra et la refaire si la position, l'orientation, le cadrage ou le zoom change.
+- Vérifier que le support est immobile et que l'éclairage reste stable pendant une volée.
+
+IA ET DÉCISION DE SCORE
+- Architecture mixte : vision classique pour stabilisation, géométrie, suivi et extraction de caractéristiques ; modèles IA embarqués pour reconnaître les fléchettes et aider à localiser la pointe.
+- Le point d'impact recherché est l'extrémité de la pointe au contact de la cible, pas le centre du corps de la fléchette.
+- Une validation automatique est souhaitée et autorisée lorsque le score de confiance est élevé, calibré et validé par des essais terrain.
+- En cas d'occultation, de proximité d'un fil, de désaccord entre caméras ou de confiance insuffisante : afficher les hypothèses et demander confirmation.
+- L'utilisateur doit pouvoir corriger le point, annuler le lancer et reprendre une analyse sans perdre l'état de la partie.
+
+TÉLÉPHONES JOUEURS ET CONTRÔLE PARTAGÉ
+Chaque téléphone participant doit pouvoir, selon les droits de la session :
+- afficher le score et l'état complet de la partie ;
+- démarrer ou arrêter une partie ;
+- ajouter/modifier les joueurs ;
+- choisir ou changer de mode ;
+- enregistrer ou corriger les scores ;
+- annuler un lancer ;
+- consulter statistiques et historique.
+Le téléphone maître conserve l'état faisant autorité. Les commandes distantes doivent être authentifiées, ordonnées et idempotentes pour éviter un lancer appliqué deux fois.
+
+RÉSEAU SANS INTERNET
+- Solo : tout fonctionne sur un seul téléphone, sans Wi-Fi et sans Internet.
+- Plusieurs téléphones : rejoindre un Wi-Fi local existant ou utiliser un hotspot local du téléphone maître ; Internet ne doit pas être requis.
+- Prévoir QR code/code court, reconnexion automatique et reprise depuis l'état maître.
+- En cas de déconnexion d'un téléphone joueur, la partie continue sur le maître ; aucune donnée de jeu ne doit dépendre du téléphone secondaire.
+- Un assistant doit guider l'utilisateur dans les réglages Android si la version du système ne permet pas de créer/activer le hotspot automatiquement.
+
+ASSISTANT D'INSTALLATION ET DE DIAGNOSTIC
+L'assistant intégré doit guider : choix de source vidéo, autorisations, test du flux, positionnement, cadrage, zoom, calibration, contrôle de stabilité, test d'éclairage et diagnostic réseau. Il doit expliquer clairement pourquoi une caméra ou une fonction n'est pas compatible au lieu de laisser croire qu'elle fonctionne.
+
+ORDRE DE PRIORITÉ
+1. Finaliser le comptage fiable en mono-caméra sur le Xiaomi 14T.
+2. Ajouter le suivi des fléchettes présentes, nouvelles fléchettes, retraits et rebonds.
+3. Localiser la pointe et établir une mesure de confiance validée.
+4. Ajouter les commandes partagées et la connexion multi-téléphones sans Internet.
+5. Ajouter une seconde caméra, puis la fusion multi-vues.
+6. Intégrer USB, RTSP, ONVIF et les configurations jusqu'à quatre caméras.
+7. Finaliser l'assistant d'installation et le support des différents appareils.
+
+Ces points sont des exigences de conception et des étapes à réaliser ; ils ne doivent pas être présentés comme des fonctions déjà disponibles tant qu'elles ne sont pas implémentées et testées.
