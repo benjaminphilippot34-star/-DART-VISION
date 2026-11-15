@@ -320,9 +320,10 @@ class MainActivity : ComponentActivity() {
         val lines = StringBuilder("X01 ${s.settings.startingScore} • Tour ${s.turnNumber}\n")
         s.players.forEachIndexed { i, p ->
             lines.append(if (i == s.activePlayer) "▶ " else "   ")
-                .append(p.name).append(" : ").append(p.score).append("  • Legs ").append(p.legsWon).append("\n")
+                .append(p.name).append(" : ").append(p.score).append("  • Legs ").append(p.legsWon).append(" • Sets ").append(p.setsWon).append("\n")
         }
-        if (s.finished) lines.append("\nLeg terminé — configure une nouvelle manche pour continuer.")
+        if (s.legFinished && !s.finished) lines.append("\nManche terminée — appuie sur Nouvelle manche.")
+        if (s.finished) lines.append("\nMatch terminé !")
         scoreView.text = lines.toString()
         status.text = "MODE X01 • ${s.settings.startingScore} • hors ligne"
     }
