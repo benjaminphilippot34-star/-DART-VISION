@@ -24,10 +24,10 @@ RÈGLE DE QUALITÉ
 Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences réelles annotées et séparées entre développement et validation. Si la pointe est masquée ou trop proche d'une séparation, l'application doit demander une validation plutôt que d'inventer un score.
 
 ÉTAT ACTUEL
-- Sélecteur des modes ajouté.
-- X01 : écran de configuration 301/501/701 et saisie manuelle des fléchettes ; moteur de base et annulation.
-- Moteurs locaux de base ajoutés pour plusieurs modes d'entraînement et Cricket/Tactics/Shanghai.
-- Les écrans dédiés aux autres modes, la sauvegarde complète de leurs états et la validation des règles restent à faire.
-- La détection caméra n'identifie pas encore les pointes : elle analyse seulement les changements d'image.
+- Catalogue de 13 modes ajouté ; moteurs locaux de base présents pour X01, Cricket, Tactics, Shanghai et plusieurs entraînements.
+- Saisie manuelle d'un tour (1 à 3 fléchettes) reliée aux moteurs ; X01 gère les manches, sets et alternance du premier joueur. Les autres modes restent des versions de base à valider et leurs états ne sont pas tous sauvegardés.
+- Calibration perspective mathématique ajoutée : transformation des quatre coins de la cible vers des coordonnées en millimètres, puis conversion d'un point d'impact déjà localisé en score. Tests unitaires associés.
+- La calibration n'est pas encore intégrée à l'interface caméra : pas encore de sélection tactile des quatre coins ni de conversion fiable des coordonnées PreviewView/ImageAnalysis.
+- La détection caméra n'identifie pas encore les pointes : elle analyse seulement les changements d'image. Aucun score automatique ne doit être considéré comme opérationnel.
 
 Voir docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md pour la synthèse des idées retenues et le pipeline technique.
