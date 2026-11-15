@@ -225,7 +225,11 @@ class MainActivity : ComponentActivity() {
         gamePage.addView(scoreCard)
         val boardCard = card()
         boardCard.addView(txt("CIBLE • APERÇU", 10f, muted, true))
-        boardCard.addView(DartboardView(this).apply { layoutParams = LinearLayout.LayoutParams(-1, dp(235)) })
+        boardCard.addView(TextView(this).apply {
+            text = "◎"; textSize = 112f; gravity = Gravity.CENTER
+            setTextColor(0xFF28D7C2.toInt())
+            layoutParams = LinearLayout.LayoutParams(-1, dp(235))
+        })
         gamePage.addView(boardCard)
         val adjust = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(adjust, "−1") { action("adjust", "delta" to "-1") }
