@@ -1523,6 +1523,7 @@ class MainActivity : ComponentActivity() {
                 selectedMode = DartGameMode.X01
                 saveX01Game()
                 refreshX01()
+                enterManualTurn()
             }
             .show()
     }
@@ -1654,10 +1655,13 @@ class MainActivity : ComponentActivity() {
         content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(23)))
         val tabsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val tabs = mutableListOf<TextView>()
-        val tabNames = listOf("Simple", "Double", "Treble", "Bull\n50", "Outer\n25")
+        val tabNames = listOf("Simple", "Double", "Triple", "Bull 50", "Outer 25")
         tabNames.forEachIndexed { i, name ->
-            val tab = text(name, 13f, ink, true).apply {
-                layoutParams = LinearLayout.LayoutParams(0, dp(43), 1f)
+            val tab = text(name, 11f, ink, true).apply {
+                maxLines = 1
+                includeFontPadding = false
+                setPadding(dp(1), 0, dp(1), 0)
+                layoutParams = LinearLayout.LayoutParams(0, dp(46), 1f)
                 setOnClickListener {
                     selectedTab = i
                     multiplier = when (i) { 1 -> 2; 2 -> 3; else -> 1 }
@@ -1772,7 +1776,7 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     (content.parent as? android.view.ViewGroup)?.removeView(content)
                     manualEntryView = null
-                    showManualEntryPrompt()
+                    enterManualTurn()
                 } else render()
             }
         }
@@ -1791,7 +1795,7 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                 (content.parent as? android.view.ViewGroup)?.removeView(content)
                 manualEntryView = null
-                showManualEntryPrompt()
+                enterManualTurn()
             } catch (e: Exception) {
                 Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
             }
