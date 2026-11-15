@@ -73,11 +73,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFFE9F3EF.toInt()
-        val panelColor = 0xFFF9FCFA.toInt()
-        val teal = 0xFFEF765B.toInt()
-        val white = 0xFF203B3A.toInt()
-        val muted = 0xFF718783.toInt()
+        val bg = 0xFF080E15.toInt()
+        val panelColor = 0xFF121D27.toInt()
+        val teal = 0xFF28D7C2.toInt()
+        val white = 0xFFF4F8FA.toInt()
+        val muted = 0xFF91A4B2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(panelColor); cornerRadius = dp(18).toFloat()
-                setStroke(dp(1), 0xFFD3E4DD.toInt())
+                setStroke(dp(1), 0xFF263744.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -99,9 +99,9 @@ class MainActivity : ComponentActivity() {
                 text = title; isAllCaps = false; textSize = 12f
                 setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) teal else 0xFFF0F7F3.toInt())
+                    setColor(if (primary) teal else 0xFF1B2A35.toInt())
                     cornerRadius = dp(13).toFloat()
-                    if (!primary) setStroke(dp(1), 0xFFD4E4DC.toInt())
+                    if (!primary) setStroke(dp(1), 0xFF314653.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
                 view.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) 0xFFFFE1D8.toInt() else 0xFFF9FCFA.toInt())
+                    setColor(if (selected) 0xFF174E4B.toInt() else 0xFF121D27.toInt())
                     cornerRadius = dp(13).toFloat()
                     if (selected) setStroke(dp(1), teal)
                 }
@@ -146,22 +146,22 @@ class MainActivity : ComponentActivity() {
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         brand.addView(txt("DART VISION", 21f, white, true))
-        brand.addView(txt("LE PLAISIR DU JEU", 9f, teal, true))
+        brand.addView(txt("SMART DARTS EXPERIENCE", 9f, teal, true))
         header.addView(brand)
         header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        header.addView(txt("● CONNECTÉ", 9f, teal, true))
+        header.addView(txt("● LOCAL", 9f, teal, true))
         root.addView(header)
 
         // Accueil premium
         val hero = card().apply {
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF174541.toInt(), 0xFF122B35.toInt(), 0xFFF9FCFA.toInt())
-            ).apply { cornerRadius = dp(21).toFloat(); setStroke(dp(1), 0xFFEFA18D.toInt()) }
+                intArrayOf(0xFF174541.toInt(), 0xFF122B35.toInt(), 0xFF121D27.toInt())
+            ).apply { cornerRadius = dp(21).toFloat(); setStroke(dp(1), 0xFF26766F.toInt()) }
         }
-        hero.addView(txt("DARTCOUNTER • STYLE DE RÉFÉRENCE", 10f, teal, true))
-        hero.addView(txt("À toi de jouer !", 27f, white, true))
-        hero.addView(txt("Choisis ton jeu et suis tes performances.", 11f, muted))
+        hero.addView(txt("BIENVENUE SUR", 10f, teal, true))
+        hero.addView(txt("La précision à\\nchaque fléchette.", 27f, white, true))
+        hero.addView(txt("Joue, progresse et analyse tes performances.", 11f, muted))
         val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, 0) }
         btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
         hero.addView(play)
@@ -213,7 +213,7 @@ class MainActivity : ComponentActivity() {
         val scoreCard = card().apply {
             gravity = Gravity.CENTER_HORIZONTAL
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFFF9FCFA.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFFEFA18D.toInt())
+                setColor(0xFF121D27.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
             }
         }
         scoreCard.addView(txt(selectedMode.title.uppercase(), 11f, teal, true))
@@ -273,7 +273,7 @@ class MainActivity : ComponentActivity() {
         preview = PreviewView(this).apply { scaleType = PreviewView.ScaleType.FIT_CENTER; layoutParams = FrameLayout.LayoutParams(-1, -1) }
         val frame = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(-1, dp(230))
-            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFFDCEAE3.toInt()); cornerRadius = dp(14).toFloat() }
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF0D151D.toInt()); cornerRadius = dp(14).toFloat() }
             clipToOutline = true
         }
         frame.addView(preview)
@@ -303,7 +303,7 @@ class MainActivity : ComponentActivity() {
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         val bottom = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER
-            setPadding(dp(8), dp(7), dp(8), dp(7)); setBackgroundColor(0xFFDCEAE3.toInt()); elevation = dp(14).toFloat()
+            setPadding(dp(8), dp(7), dp(8), dp(7)); setBackgroundColor(0xFF0D151D.toInt()); elevation = dp(14).toFloat()
         }
         fun nav(key: String, title: String, symbol: String) {
             val button = Button(this).apply {
@@ -808,9 +808,9 @@ class MainActivity : ComponentActivity() {
         }
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val coral = 0xFFEF765B.toInt()
-        val ink = 0xFF203B3A.toInt()
-        val muted = 0xFF718783.toInt()
+        val coral = 0xFF28D7C2.toInt()
+        val ink = 0xFFF4F8FA.toInt()
+        val muted = 0xFF91A4B2.toInt()
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
             setPadding(dp(14), dp(8), dp(14), dp(8))
