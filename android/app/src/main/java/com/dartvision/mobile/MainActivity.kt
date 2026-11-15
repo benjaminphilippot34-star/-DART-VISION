@@ -810,7 +810,7 @@ class MainActivity : ComponentActivity() {
         }
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val coral = 0xFF28D7C2.toInt()
+        val accent = 0xFF28D7C2.toInt()
         val ink = 0xFFF4F8FA.toInt()
         val muted = 0xFF91A4B2.toInt()
         val grid = android.widget.GridLayout(this).apply {
@@ -828,15 +828,15 @@ class MainActivity : ComponentActivity() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(13), dp(14), dp(13), dp(14))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFFF8FCF9.toInt())
+                    setColor(0xFF172630.toInt())
                     cornerRadius = dp(16).toFloat()
-                    setStroke(dp(1), 0xFFD5E5DD.toInt())
+                    setStroke(dp(1), 0xFF314653.toInt())
                 }
                 isClickable = true
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(116)
+                    height = dp(132)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
                     setMargins(dp(5), dp(5), dp(5), dp(5))
                 }
@@ -847,7 +847,7 @@ class MainActivity : ComponentActivity() {
                     GameModeCategory.TRAINING -> "ENTRAÎNEMENT"
                     GameModeCategory.PARTY -> "MULTIJOUEUR"
                 }
-                textSize = 9f; setTextColor(coral)
+                textSize = 9f; setTextColor(accent)
                 setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
             })
             tile.addView(TextView(this).apply {
@@ -858,6 +858,7 @@ class MainActivity : ComponentActivity() {
             tile.addView(TextView(this).apply {
                 text = mode.description; textSize = 10f; setTextColor(muted)
                 maxLines = 3
+                setLineSpacing(dp(2).toFloat(), 1f)
             })
             tile.setOnClickListener {
                 selectedMode = mode
