@@ -143,10 +143,10 @@ class MainActivity : ComponentActivity() {
         game.addView(scoreView)
         game.addView(text("SCORE RESTANT", 10f, muted, true).apply { gravity = Gravity.CENTER })
         val scoreButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(scoreButtons, "−20") { action("adjust", "delta" to "20") }
-        button(scoreButtons, "−1") { action("adjust", "delta" to "1") }
-        button(scoreButtons, "+1") { action("adjust", "delta" to "-1") }
-        button(scoreButtons, "+20") { action("adjust", "delta" to "-20") }
+        button(scoreButtons, "−20") { action("adjust", "delta" to "-20") }
+        button(scoreButtons, "−1") { action("adjust", "delta" to "-1") }
+        button(scoreButtons, "+1") { action("adjust", "delta" to "1") }
+        button(scoreButtons, "+20") { action("adjust", "delta" to "20") }
         game.addView(scoreButtons)
         val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         button(actions, "SAISIR 3 FLÉCHETTES", true) { enterManualTurn() }
