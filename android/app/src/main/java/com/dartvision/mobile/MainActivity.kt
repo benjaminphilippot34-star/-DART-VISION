@@ -1034,109 +1034,162 @@ class MainActivity : ComponentActivity() {
                 .setPositiveButton("OK", null).show()
             return
         }
-        val density = resources.displayMetrics.density
-        fun dp(v: Int) = (v * density).toInt()
-        val teal = 0xFF28D7C2.toInt()
-        val panel = 0xFF1B2A35.toInt()
-        val white = 0xFFF4F8FA.toInt()
-        var score = 0
+        val d = resources.displayMetrics.density
+        fun dp(v: Int) = (v * d).toInt()
+        val ink = 0xFF14221F.toInt()
+        val teal = 0xFF28CDBA.toInt()
+        val coral = 0xFFFF563D.toInt()
+        val pale = 0xFFE5F2EF.toInt()
+        val white = android.graphics.Color.WHITE
+        val hits = mutableListOf<DartHit>()
+        var multiplier = 1
+        var selectedTab = 0
+        lateinit var dialog: AlertDialog
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(8), dp(18), dp(12))
+            setPadding(dp(14), dp(8), dp(14), dp(10))
+            setBackgroundColor(pale)
         }
-        val scoreDisplay = TextView(this).apply {
-            text = "SCORE DE LA VOLÉE\n0"
-            textSize = 25f
-            gravity = Gravity.CENTER
-            setTextColor(teal)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding(0, dp(12), 0, dp(14))
-        }
-        content.addView(scoreDisplay)
-        val scoreInput = EditText(this).apply {
-            hint = "Saisir le score (0 à 180)"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            textSize = 20f
-            gravity = Gravity.CENTER
-            setTextColor(white)
-            setHintTextColor(0xFF91A4B2.toInt())
-            setSingleLine(true)
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(panel); cornerRadius = dp(12).toFloat()
-                setStroke(dp(1), 0xFF40515C.toInt())
+        fun rounded(color: Int, stroke: Int = color, radius: Int = 10) =
+            android.graphics.drawable.GradientDrawable().apply {
+                setColor(color); cornerRadius = dp(radius).toFloat()
+                if (stroke != color) setStroke(dp(1), stroke)
             }
-            setPadding(dp(12), dp(10), dp(12), dp(10))
-        }
-        content.addView(scoreInput, LinearLayout.LayoutParams(-1, dp(54)))
-        fun updateScore(value: Int) {
-            score = value.coerceIn(0, 180)
-            scoreInput.setText(score.toString())
-            scoreInput.setSelection(scoreInput.text.length)
-            scoreDisplay.text = "SCORE DE LA VOLÉE\n$score"
-        }
-        scoreInput.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                score = s?.toString()?.toIntOrNull()?.coerceIn(0, 180) ?: 0
-                scoreDisplay.text = "SCORE DE LA VOLÉE\n$score"
+        fun text(value: String, size: Float, color: Int = ink, bold: Boolean = false) =
+            TextView(this).apply {
+                text = value; textSize = size; gravity = Gravity.CENTER
+                setTextColor(color)
+                setTypeface(android.graphics.Typeface.create("sans-serif-condensed",
+                    if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
+                setPadding(dp(2), dp(3), dp(2), dp(3))
             }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
-        val quick = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        fun quickButton(label: String, delta: Int) {
-            quick.addView(Button(this).apply {
-                text = label; isAllCaps = false; textSize = 14f
-                setTextColor(white)
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(panel); cornerRadius = dp(12).toFloat()
-                    setStroke(dp(1), 0xFF40515C.toInt())
-                }
-                layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply {
-                    setMargins(dp(3), dp(5), dp(3), dp(5))
-                }
-                setOnClickListener { updateScore(score + delta) }
+        val title = text("C’EST AU TOUR DE LANCER !", 20f, coral, true).apply {
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        content.addView(title, LinearLayout.LayoutParams(-1, dp(42)))
+        val entry = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            background = rounded(white, 0xFFD7E2DE, 30); setPadding(dp(5), dp(5), dp(5), dp(5))
+        }
+        entry.addView(text("▦", 22f, ink, true), LinearLayout.LayoutParams(dp(42), dp(56)))
+        val slots = mutableListOf<TextView>()
+        repeat(3) {
+            val slot = text("—", 19f, ink, true).apply { background = rounded(0xFFF5F8F7, 0xFFDCE6E2, 2) }
+            slots.add(slot)
+            entry.addView(slot, LinearLayout.LayoutParams(0, dp(56), 1f).apply {
+                setMargins(dp(2), 0, dp(2), 0)
             })
         }
-        quickButton("−1", -1)
-        quickButton("−20", -20)
-        quickButton("+20", 20)
-        content.addView(quick)
-        content.addView(TextView(this).apply {
-            text = "Entre le total des 3 fléchettes. Le score sera réparti automatiquement sur la volée."
-            textSize = 11f; setTextColor(0xFF9AA3AF.toInt())
-            setPadding(0, dp(8), 0, dp(4))
-        })
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("SAISIR 3 FLÉCHETTES")
-            .setView(content)
-            .setNegativeButton("ANNULER", null)
-            .setPositiveButton("VALIDER LA VOLÉE", null)
-            .create()
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                try {
-                    val finalScore = scoreInput.text.toString().toIntOrNull()
-                        ?: throw IllegalArgumentException("Saisis un score entre 0 et 180.")
-                    require(finalScore in 0..180) { "Le score doit être compris entre 0 et 180." }
-                    val hits = scoreToDarts(finalScore)
-                    val message = if (engine != null) {
-                        val result = engine.throwTurn(hits)
-                        refreshX01()
-                        saveX01Game()
-                        when {
-                            result.bust -> "Bust : le score de la volée est annulé."
-                            result.legWon -> "Leg gagné !"
-                            else -> "Volée enregistrée : ${result.scoreBefore} → ${result.scoreAfter}"
-                        }
-                    } else trainingTurnHandler!!.invoke(hits)
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                    dialog.dismiss()
-                } catch (e: Exception) {
-                    Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
+        val submit = Button(this).apply {
+            text = "Submit"; isAllCaps = false; textSize = 13f; setTextColor(ink)
+            background = rounded(0xFF28C980, 0xFF28C980, 28)
+            stateListAnimator = null; minHeight = dp(48)
+            layoutParams = LinearLayout.LayoutParams(dp(94), dp(48)).apply { setMargins(dp(3), 0, 0, 0) }
+        }
+        entry.addView(submit)
+        content.addView(entry, LinearLayout.LayoutParams(-1, dp(66)))
+        val count = text("0 / 3 fléchettes", 11f, 0xFF71817C.toInt(), true)
+        content.addView(count, LinearLayout.LayoutParams(-1, dp(25)))
+        val tabsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val tabs = mutableListOf<TextView>()
+        val tabNames = listOf("Simple", "Double", "Treble", "Bull\n50", "Outer\n25")
+        tabNames.forEachIndexed { i, name ->
+            val tab = text(name, 13f, ink, true).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f)
+                setOnClickListener {
+                    selectedTab = i
+                    multiplier = when (i) { 1 -> 2; 2 -> 3; else -> 1 }
+                    render()
                 }
             }
+            tabs.add(tab); tabsRow.addView(tab)
         }
+        content.addView(tabsRow)
+        val grid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val cells = mutableListOf<TextView>()
+        for (r in 0 until 4) {
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for (c in 0 until 5) {
+                val n = r * 5 + c + 1
+                val cell = text(n.toString(), 25f, ink, true).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, dp(66), 1f)
+                    background = rounded(pale, 0xFFD1DEDA, 0)
+                    setOnClickListener { if (selectedTab < 3) addHit(DartHit(n, multiplier)) }
+                }
+                cells.add(cell); row.addView(cell)
+            }
+            grid.addView(row)
+        }
+        content.addView(grid, LinearLayout.LayoutParams(-1, -2))
+        val bottom = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        fun bottomButton(caption: String, weight: Float = 1f, click: () -> Unit) =
+            Button(this).apply {
+                text = caption; isAllCaps = false; textSize = 15f; setTextColor(ink)
+                background = rounded(pale, 0xFFD1DEDA, 0)
+                layoutParams = LinearLayout.LayoutParams(0, dp(56), weight)
+                setOnClickListener { click() }
+            }
+        bottom.addView(bottomButton("↶") { if (hits.isNotEmpty()) { hits.removeAt(hits.lastIndex); render() } })
+        bottom.addView(bottomButton("MANQUÉ") { addHit(DartHit.MISS) })
+        bottom.addView(Button(this).apply {
+            text = "▣"; isAllCaps = false; textSize = 21f; setTextColor(white)
+            background = rounded(0xFFFF9826.toInt(), 0xFFFF9826.toInt(), 12)
+            layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
+            setOnClickListener { dialog.dismiss(); setCameraMode(true) }
+        })
+        content.addView(bottom)
+        fun render() {
+            slots.forEachIndexed { i, slot ->
+                val hit = hits.getOrNull(i)
+                slot.text = hit?.let {
+                    when {
+                        it.number == null -> "MISS"
+                        it.number == 25 && it.multiplier == 2 -> "50"
+                        it.number == 25 -> "25"
+                        else -> (when (it.multiplier) { 2 -> "D"; 3 -> "T"; else -> "S" }) + it.number
+                    }
+                } ?: "—"
+                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFFDDF8F2 else 0xFFF5F8F7, 0xFFDCE6E2, 2)
+            }
+            count.text = "${hits.size} / 3 fléchettes"
+            tabs.forEachIndexed { i, tab ->
+                tab.setTextColor(if (i == selectedTab) white else ink)
+                tab.background = rounded(if (i == selectedTab) coral else pale, if (i == selectedTab) coral else 0xFFD1DEDA, 3)
+            }
+            cells.forEach { it.alpha = if (hits.size == 3 || selectedTab >= 3) .35f else 1f }
+            submit.isEnabled = hits.size == 3
+            submit.alpha = if (submit.isEnabled) 1f else .45f
+        }
+        fun unused() {}
+        // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
+        tabs[3].setOnClickListener { selectedTab = 3; addHit(DartHit(25, 2)); render() }
+        tabs[4].setOnClickListener { selectedTab = 4; addHit(DartHit(25, 1)); render() }
+        // Le mode de saisie est une vraie saisie fléchette par fléchette, pas une estimation du total.
+        fun addHit(hit: DartHit) { if (hits.size < 3) { hits.add(hit); render() } }
+        dialog = AlertDialog.Builder(this).setView(content).create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        submit.setOnClickListener {
+            if (hits.size != 3) return@setOnClickListener
+            try {
+                val message = if (engine != null) {
+                    val result = engine.throwTurn(hits.toList())
+                    refreshX01(); saveX01Game()
+                    when {
+                        result.bust -> "Bust : le score de la volée est annulé."
+                        result.legWon -> "Leg gagné !"
+                        else -> "Volée enregistrée : ${result.scoreBefore} → ${result.scoreAfter}"
+                    }
+                } else trainingTurnHandler!!.invoke(hits.toList())
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                dialog.dismiss()
+            } catch (e: Exception) {
+                Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
+            }
+        }
+        dialog.setOnShowListener { dialog.window?.setLayout(-1, -1); render() }
         dialog.show()
+        dialog.window?.setLayout(-1, -1)
+        render()
     }
 
     private fun scoreToDarts(total: Int): List<DartHit> {
