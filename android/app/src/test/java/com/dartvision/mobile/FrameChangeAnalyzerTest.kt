@@ -11,4 +11,29 @@ class FrameChangeAnalyzerTest {
  @Test fun disconnectedAreasStaySeparate(){val a=ByteArray(25){100};val b=a.copyOf();b[0]=180.toByte();b[24]=180.toByte();assertEquals(2,FrameChangeAnalyzer.detectChangedRegions(a,b,5,5,28,1).size)}
  @Test fun tinyRegionsAreFiltered(){val a=ByteArray(25){100};val b=a.copyOf();b[0]=180.toByte();b[12]=180.toByte();assertTrue(FrameChangeAnalyzer.detectChangedRegions(a,b,5,5,28,2).isEmpty())}
  @Test fun regionsAreSortedBySize(){val a=ByteArray(25){100};val b=a.copyOf();b[0]=180.toByte();b[6]=180.toByte();b[7]=180.toByte();b[11]=180.toByte();assertEquals(3,FrameChangeAnalyzer.detectChangedRegions(a,b,5,5,28,1).first().pixelCount)}
+ @Test fun transientChangeDoesNotBecomeStable() {
+  val reference=byteArrayOf(100)
+  val persistence=ByteArray(1)
+  val transient=FrameChangeAnalyzer.updatePersistenceMask(reference,byteArrayOf(180.toByte()),persistence,28,3)
+  assertEquals(0,transient[0].toInt())
+  val restored=FrameChangeAnalyzer.updatePersistenceMask(reference,byteArrayOf(100),persistence,28,3)
+  assertEquals(0,restored[0].toInt())
+ }
+ @Test fun persistentChangeAppearsAfterRequiredFrames() {
+  val reference=byteArrayOf(100)
+  val persistence=ByteArray(1)
+  repeat(2) {
+   val mask=FrameChangeAnalyzer.updatePersistenceMask(reference,byteArrayOf(180.toByte()),persistence,28,3)
+   assertEquals(0,mask[0].toInt())
+  }
+  val stable=FrameChangeAnalyzer.updatePersistenceMask(reference,byteArrayOf(180.toByte()),persistence,28,3)
+  assertEquals(1,stable[0].toInt())
+ }
+ @Test fun persistenceResetsWhenPixelReturnsToReference() {
+  val reference=byteArrayOf(100)
+  val persistence=byteArrayOf(2)
+  FrameChangeAnalyzer.updatePersistenceMask(reference,byteArrayOf(100),persistence,28,3)
+  assertEquals(0,persistence[0].toInt())
+ }
+
 }
