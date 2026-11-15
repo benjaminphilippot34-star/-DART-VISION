@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity() {
         button(quickModes, "ENTRAÎNEMENT") { showTrainingModes() }
         startPanel.addView(quickModes)
         root.addView(startPanel)
+        root.addView(buildAccountPanel())
 
         val navigation = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -258,6 +259,106 @@ class MainActivity : ComponentActivity() {
         settings.addView(settingsRow)
         root.addView(settings)
         setContentView(scroll)
+    }
+
+
+    private fun buildAccountPanel(): LinearLayout {
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(18, 14, 18, 14)
+            setBackgroundColor(0xFF1B2732.toInt())
+        }
+        panel.addView(TextView(this).apply {
+            text = "COMPTE DART VISION"
+            textSize = 15f
+            setTextColor(0xFFE34B55.toInt())
+        })
+        panel.addView(TextView(this).apply {
+            text = "Connecte ton compte pour retrouver ton profil sur tes appareils."
+            textSize = 13f
+            setTextColor(0xFFF5F7FA.toInt())
+        })
+        val email = EditText(this).apply {
+            hint = "Adresse e-mail"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            setSingleLine(true)
+        }
+        val password = EditText(this).apply {
+            hint = "Mot de passe (8 caractères minimum)"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setSingleLine(true)
+        }
+        val phone = EditText(this).apply {
+            hint = "Téléphone au format +33612345678"
+            inputType = android.text.InputType.TYPE_CLASS_PHONE
+            setSingleLine(true)
+        }
+        panel.addView(email)
+        panel.addView(password)
+        panel.addView(phone)
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        fun actionButton(label: String, action: () -> Unit) {
+            row.addView(Button(this).apply {
+                text = label
+                isAllCaps = false
+                setOnClickListener { action() }
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            })
+        }
+        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient(this).signUp(email.text.toString().trim(), password.text.toString()) } }
+        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient(this).signIn(email.text.toString().trim(), password.text.toString()) } }
+        panel.addView(row)
+        val phoneRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        phoneRow.addView(Button(this).apply {
+            text = "Code SMS"
+            isAllCaps = false
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            setOnClickListener {
+                val number = phone.text.toString().trim()
+                if (!number.startsWith("+") || number.length < 8) {
+                    Toast.makeText(this@MainActivity, "Saisis le numéro au format international (+33...).", Toast.LENGTH_LONG).show()
+                } else runAccountRequest { SupabaseAuthClient(this@MainActivity).requestPhoneOtp(number) }
+            }
+        })
+        phoneRow.addView(Button(this).apply {
+            text = "Valider SMS"
+            isAllCaps = false
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            setOnClickListener {
+                val number = phone.text.toString().trim()
+                val code = EditText(this@MainActivity).apply { hint = "Code reçu par SMS"; inputType = android.text.InputType.TYPE_CLASS_NUMBER }
+                AlertDialog.Builder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
+                    .setPositiveButton("Valider") { _, _ ->
+                        runAccountRequest { SupabaseAuthClient(this@MainActivity).verifyPhoneOtp(number, code.text.toString().trim()) }
+                    }.setNegativeButton("Annuler", null).show()
+            }
+        })
+        panel.addView(phoneRow)
+        return panel
+    }
+
+    private fun runAccountRequest(request: () -> SupabaseAuthClient.AuthResult) {
+        Toast.makeText(this, "Connexion à Supabase…", Toast.LENGTH_SHORT).show()
+        worker.execute {
+            try {
+                val result = request()
+                runOnUiThread {
+                    val message = if (result.accessToken != null) {
+                        getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                            .putString("user_id", result.userId).putString("email", result.email).apply()
+                        "Compte connecté : ${result.email ?: result.userId ?: "joueur"}"
+                    } else "Demande envoyée. Vérifie ta boîte mail ou tes SMS."
+                    status.text = message
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    val message = e.message ?: "Connexion impossible."
+                    status.text = message
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun showMainMenu() {
