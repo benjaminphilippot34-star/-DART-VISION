@@ -128,6 +128,17 @@ class MainActivity : ComponentActivity() {
         header.addView(brand)
         root.addView(header)
 
+        val navigation = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, dp(8), 0, dp(12))
+        }
+        button(navigation, "ACCUEIL", true) { showMainMenu() }
+        button(navigation, "JOUEURS") { managePlayers() }
+        button(navigation, "PARTIE") { configureX01() }
+        button(navigation, "MENU") { showMainMenu() }
+        root.addView(navigation)
+
         val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         modeRow.addView(text("301", 22f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
         button(modeRow, "CHOISIR MODE") { showGameModes() }
@@ -225,6 +236,154 @@ class MainActivity : ComponentActivity() {
         settings.addView(settingsRow)
         root.addView(settings)
         setContentView(scroll)
+    }
+
+    private fun showMainMenu() {
+        val items = arrayOf(
+            "Nouvelle partie / configuration X01",
+            "Choisir un mode de jeu",
+            "Gérer les joueurs",
+            "Statistiques de la partie",
+            "Historique des tours",
+            "Mode caméra",
+            "Paramètres et mises à jour"
+        )
+        AlertDialog.Builder(this)
+            .setTitle("DART VISION • MENU")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> configureX01()
+                    1 -> showGameModes()
+                    2 -> managePlayers()
+                    3 -> showGameStatistics()
+                    4 -> showTurnHistory()
+                    5 -> setCameraMode(true)
+                    6 -> showAppSettings()
+                }
+            }
+            .setNegativeButton("Fermer", null)
+            .show()
+    }
+
+    private fun managePlayers() {
+        val players = state.get().optJSONArray("players") ?: JSONArray()
+        val labels = (0 until players.length()).map { i ->
+            val p = players.optJSONObject(i)
+            "${i + 1}. ${p?.optString("name", "Joueur ${i + 1}") ?: "Joueur ${i + 1}"}"
+        }.toMutableList()
+        labels.add("＋ Ajouter un joueur")
+        AlertDialog.Builder(this)
+            .setTitle("Gestion des joueurs")
+            .setItems(labels.toTypedArray()) { _, which ->
+                if (which == players.length()) editPlayerName(null)
+                else {
+                    val player = players.optJSONObject(which) ?: return@setItems
+                    val actions = arrayOf("Renommer", "Supprimer")
+                    AlertDialog.Builder(this)
+                        .setTitle(player.optString("name", "Joueur ${which + 1}"))
+                        .setItems(actions) { _, action ->
+                            if (action == 0) editPlayerName(which)
+                            else if (players.length() > 1) {
+                                players.remove(which)
+                                val s = state.get()
+                                s.put("players", players)
+                                s.put("active", s.optInt("active", 0).coerceIn(0, players.length() - 1))
+                                state.set(s); saveLocalState(s); refreshScore()
+                                Toast.makeText(this, "Joueur supprimé.", Toast.LENGTH_SHORT).show()
+                            } else Toast.makeText(this, "Il faut conserver au moins un joueur.", Toast.LENGTH_LONG).show()
+                        }.show()
+                }
+            }.setNegativeButton("Fermer", null).show()
+    }
+
+    private fun editPlayerName(index: Int?) {
+        val input = EditText(this).apply {
+            hint = "Nom du joueur"
+            setSingleLine(true)
+            if (index != null) {
+                val ps = state.get().optJSONArray("players") ?: JSONArray()
+                setText(ps.optJSONObject(index)?.optString("name", ""))
+            }
+        }
+        AlertDialog.Builder(this)
+            .setTitle(if (index == null) "Ajouter un joueur" else "Renommer le joueur")
+            .setView(input)
+            .setNegativeButton("Annuler", null)
+            .setPositiveButton("Valider") { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isBlank()) {
+                    Toast.makeText(this, "Saisis un nom.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                val s = state.get()
+                val ps = s.optJSONArray("players") ?: JSONArray()
+                if (index == null) ps.put(JSONObject().put("name", name).put("score", s.optInt("mode", "301".toIntOrNull() ?: 301)))
+                else ps.optJSONObject(index)?.put("name", name)
+                s.put("players", ps); state.set(s); saveLocalState(s); refreshScore()
+                Toast.makeText(this, "Joueurs mis à jour.", Toast.LENGTH_SHORT).show()
+            }.show()
+    }
+
+    private fun showGameStatistics() {
+        val engine = x01Engine
+        val message = if (engine != null) {
+            val s = engine.state
+            val turns = s.history
+            val darts = turns.sumOf { it.hits.size }
+            val points = turns.sumOf { turn -> turn.hits.sumOf { it.points } }
+            val average = if (darts == 0) 0.0 else points * 3.0 / darts
+            buildString {
+                append("Mode X01 ${s.settings.startingScore}\n")
+                append("Tours enregistrés : ${turns.size}\nFléchettes lancées : $darts\n")
+                append("Moyenne par volée : ${"%.2f".format(average)}\n\n")
+                s.players.forEach { append("${it.name} : ${it.score} restant • ${it.legsWon} legs • ${it.setsWon} sets\n") }
+            }
+        } else {
+            val ps = state.get().optJSONArray("players") ?: JSONArray()
+            buildString {
+                append("Partie en cours • ${state.get().optString("mode", "301")}\n")
+                for (i in 0 until ps.length()) {
+                    val p = ps.optJSONObject(i) ?: continue
+                    append("${p.optString("name")} : ${p.optInt("score")} points restants\n")
+                }
+                append("\nLes statistiques détaillées seront disponibles pour les parties X01 suivies par le moteur.")
+            }
+        }
+        AlertDialog.Builder(this).setTitle("Statistiques").setMessage(message)
+            .setPositiveButton("OK", null).show()
+    }
+
+    private fun showTurnHistory() {
+        val engine = x01Engine
+        val lines = if (engine == null || engine.state.history.isEmpty()) {
+            "Aucun tour X01 enregistré pour le moment."
+        } else engine.state.history.takeLast(20).asReversed().mapIndexed { i, turn ->
+            val player = engine.state.players.getOrNull(turn.playerIndex)?.name ?: "Joueur"
+            val hits = turn.hits.joinToString(" • ") { hit ->
+                when {
+                    hit.number == null -> "MISS"
+                    hit.number == 25 && hit.multiplier == 2 -> "Bull"
+                    hit.number == 25 -> "25"
+                    else -> "${if (hit.multiplier == 1) "S" else if (hit.multiplier == 2) "D" else "T"}${hit.number}"
+                }
+            }
+            "${i + 1}. $player : $hits • ${turn.scoreBefore} → ${turn.scoreAfter}${if (turn.bust) " • BUST" else ""}"
+        }.joinToString("\n")
+        AlertDialog.Builder(this).setTitle("Historique des tours").setMessage(lines)
+            .setPositiveButton("OK", null).show()
+    }
+
+    private fun showAppSettings() {
+        val items = arrayOf("Activer le mode normal", "Activer le mode caméra", "Effacer le calibrage", "Rechercher une mise à jour")
+        AlertDialog.Builder(this).setTitle("Paramètres")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> setCameraMode(false)
+                    1 -> setCameraMode(true)
+                    2 -> clearBoardCalibration()
+                    3 -> checkForUpdates(silent = false)
+                }
+            }.setNegativeButton("Fermer", null).show()
     }
 
     private fun beginBoardCalibration() {
