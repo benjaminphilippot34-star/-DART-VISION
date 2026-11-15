@@ -42,6 +42,7 @@ data class X01GameState(
     val turnNumber: Int = 1,
     val dartsThrown: Int = 0,
     val finished: Boolean = false,
+    val legFinished: Boolean = false,
     val history: List<X01TurnResult> = emptyList()
 )
 
@@ -58,7 +59,7 @@ class X01GameEngine(
 
     fun throwTurn(hits: List<DartHit>): X01TurnResult {
         require(hits.size in 1..3) { "Un tour doit contenir entre une et trois fléchettes." }
-        check(!state.finished) { "La partie est terminée." }
+        check(!state.finished && !state.legFinished) { "La manche est terminée." }
         val players = state.players.toMutableList()
         val index = state.activePlayer
         val player = players[index]
@@ -100,8 +101,19 @@ class X01GameEngine(
         if (bust) remaining = before
         players[index] = player.copy(score = remaining, hasEntered = entered)
         val result = X01TurnResult(index, hits, before, remaining, bust, won)
+        var matchWon = false
         if (won) {
-            players[index] = players[index].copy(legsWon = player.legsWon + 1)
+            val legs = player.legsWon + 1
+            val setWon = legs >= settings.legsToWin
+            val sets = player.setsWon + if (setWon) 1 else 0
+            matchWon = sets >= settings.setsToWin
+            players[index] = players[index].copy(
+                legsWon = if (setWon) 0 else legs,
+                setsWon = sets
+            )
+            if (setWon) {
+                for (i in players.indices) if (i != index) players[i] = players[i].copy(legsWon = 0)
+            }
         }
         val nextPlayer = (index + 1) % players.size
         state = state.copy(
@@ -109,7 +121,8 @@ class X01GameEngine(
             activePlayer = if (won) index else nextPlayer,
             turnNumber = if (won) state.turnNumber else state.turnNumber + 1,
             dartsThrown = state.dartsThrown + hits.size,
-            finished = won,
+            finished = matchWon,
+            legFinished = won,
             history = state.history + result
         )
         return result
@@ -125,9 +138,11 @@ class X01GameEngine(
     }
 
     fun newLeg() {
+        check(state.legFinished && !state.finished) { "Aucune nouvelle manche à démarrer." }
         val players = state.players.map { it.copy(score = settings.startingScore, hasEntered = false) }
-        state = state.copy(players = players, activePlayer = 0, turnNumber = 1,
-            dartsThrown = 0, finished = false, history = emptyList())
+        val starter = (state.activePlayer + 1) % players.size
+        state = state.copy(players = players, activePlayer = starter, turnNumber = 1,
+            dartsThrown = 0, finished = false, legFinished = false, history = emptyList())
     }
 }
 
