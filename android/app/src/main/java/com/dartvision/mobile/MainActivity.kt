@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.appcompat.app.AlertDialog
+import android.app.AlertDialog
 import androidx.core.content.FileProvider
 import android.os.Bundle
 import android.view.Gravity
