@@ -573,7 +573,6 @@ class MainActivity : ComponentActivity() {
                 cornerRadius = dp(12).toFloat()
             }
             contentDescription = "Fermer l’écran"
-            setOnClickListener { dialog.dismiss() }
         })
         content.addView(header)
         if (metrics.isNotEmpty()) {
