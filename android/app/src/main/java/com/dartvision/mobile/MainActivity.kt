@@ -1493,12 +1493,18 @@ class MainActivity : ComponentActivity() {
             cells.forEach { it.alpha = if (hits.size == 3 || selectedTab >= 3) .35f else 1f }
             submit.isEnabled = hits.size == 3
             submit.alpha = if (submit.isEnabled) 1f else .45f
-            if (engine != null && hits.isNotEmpty()) {
-                val live = engine.previewTurn(hits.toList())
-                playerScoreViews.getOrNull(live.playerIndex)?.text = live.scoreAfter.toString()
-                if (live.playerIndex == engine.state.activePlayer) {
-                    scoreView.text = live.scoreAfter.toString()
-                    scoreTurnView.text = if (live.bust) "BUST • SCORE RESTAURÉ" else "TOUR ${engine.state.turnNumber} • ${hits.size}/3 FLÉCHETTES"
+            if (engine != null) {
+                if (hits.isNotEmpty()) {
+                    val live = engine.previewTurn(hits.toList())
+                    playerScoreViews.getOrNull(live.playerIndex)?.text = live.scoreAfter.toString()
+                    if (live.playerIndex == engine.state.activePlayer) {
+                        scoreView.text = live.scoreAfter.toString()
+                        scoreTurnView.text = if (live.bust) "BUST • SCORE RESTAURÉ" else "TOUR ${engine.state.turnNumber} • ${hits.size}/3 FLÉCHETTES"
+                    }
+                } else {
+                    playerScoreViews.getOrNull(engine.state.activePlayer)?.text = engine.state.players[engine.state.activePlayer].score.toString()
+                    scoreView.text = engine.state.players[engine.state.activePlayer].score.toString()
+                    scoreTurnView.text = "TOUR ${engine.state.turnNumber} • 3 FLÉCHETTES"
                 }
             }
         }
