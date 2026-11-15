@@ -23,8 +23,8 @@ data class ChangedRegion(
  * détection de pointe et aucun score ne doit être validé automatiquement.
  */
 class FrameChangeAnalyzer(
-    val sampleWidth: Int = 160,
-    val sampleHeight: Int = 160,
+    val sampleWidth: Int = 320,
+    val sampleHeight: Int = 320,
     private val pixelThreshold: Int = 28,
     private val minRegionPixels: Int = 3,
     private val requiredStableFrames: Int = 3
