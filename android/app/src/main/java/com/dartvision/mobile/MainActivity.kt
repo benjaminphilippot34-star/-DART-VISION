@@ -73,228 +73,252 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF101318.toInt()
-        val panel = 0xFF1B2028.toInt()
-        val accent = 0xFFE32636.toInt()
-        val white = 0xFFF5F6F8.toInt()
-        val muted = 0xFF9AA3AF.toInt()
+        val bg = 0xFF080E15.toInt()
+        val panelColor = 0xFF121D27.toInt()
+        val teal = 0xFF28D7C2.toInt()
+        val white = 0xFFF4F8FA.toInt()
+        val muted = 0xFF91A4B2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
-        fun text(value: String, size: Float, color: Int = white, bold: Boolean = false) =
+        fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
                 text = value; textSize = size; setTextColor(color)
                 if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setPadding(dp(4), dp(5), dp(4), dp(5))
+                setPadding(dp(2), dp(3), dp(2), dp(3))
             }
-        fun panel(): LinearLayout = LinearLayout(this).apply {
+        fun card(): LinearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(18), dp(18), dp(18))
+            setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(panel); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0xFF2B323D.toInt())
+                setColor(panelColor); cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), 0xFF263744.toInt())
             }
-            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
-        fun button(row: LinearLayout, title: String, primary: Boolean = false, click: () -> Unit) {
+        fun btn(row: LinearLayout, title: String, primary: Boolean = false, click: () -> Unit) {
             row.addView(Button(this).apply {
                 text = title; isAllCaps = false; textSize = 12f
-                setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
+                setTextColor(if (primary) 0xFF071512.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) accent else 0xFF252C36.toInt())
-                    cornerRadius = dp(14).toFloat()
-                    if (!primary) setStroke(dp(1), 0xFF343D49.toInt())
+                    setColor(if (primary) teal else 0xFF1B2A35.toInt())
+                    cornerRadius = dp(13).toFloat()
+                    if (!primary) setStroke(dp(1), 0xFF314653.toInt())
                 }
-                minHeight = dp(48)
-                stateListAnimator = null
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
-                    setMargins(dp(3), dp(3), dp(3), dp(3))
-                }
+                minHeight = dp(46); stateListAnimator = null
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
                 setOnClickListener { click() }
             })
         }
-        val scroll = ScrollView(this).apply { isFillViewport = true }
+        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(12), dp(16), dp(18))
-            setBackgroundColor(bg)
+            setPadding(dp(16), dp(12), dp(16), dp(18)); setBackgroundColor(bg)
         }
         scroll.addView(root)
-        val pageHome = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val pageGame = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val pagePlayers = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val pageMenu = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val gamePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val playersPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val morePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val navButtons = mutableListOf<Pair<String, Button>>()
         fun showPage(page: String) {
-            pageHome.visibility = if (page == "home") View.VISIBLE else View.GONE
-            pageGame.visibility = if (page == "game") View.VISIBLE else View.GONE
-            pagePlayers.visibility = if (page == "players") View.VISIBLE else View.GONE
-            pageMenu.visibility = if (page == "menu") View.VISIBLE else View.GONE
+            home.visibility = if (page == "home") View.VISIBLE else View.GONE
+            gamePage.visibility = if (page == "game") View.VISIBLE else View.GONE
+            playersPage.visibility = if (page == "players") View.VISIBLE else View.GONE
+            morePage.visibility = if (page == "more") View.VISIBLE else View.GONE
             navButtons.forEach { (key, view) ->
                 val selected = key == page
-                view.alpha = if (selected) 1f else 0.62f
+                view.alpha = if (selected) 1f else 0.58f
                 view.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) accent else 0xFF191E26.toInt())
-                    cornerRadius = dp(14).toFloat()
+                    setColor(if (selected) 0xFF174E4B.toInt() else 0xFF121D27.toInt())
+                    cornerRadius = dp(13).toFloat()
+                    if (selected) setStroke(dp(1), teal)
                 }
             }
         }
-        val header = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL }
-        val logo = ImageView(this).apply {
+        val header = LinearLayout(this).apply {
+            gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 0, 0, dp(13))
+        }
+        header.addView(ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(58), dp(48))
+            layoutParams = LinearLayout.LayoutParams(dp(52), dp(48))
             contentDescription = "Logo DART VISION"
-        }
-        header.addView(logo)
+        })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        brand.addView(text("DART VISION", 22f, white, true))
-        brand.addView(text("PRÉCISION • PERFORMANCE", 10f, muted, true))
+        brand.addView(txt("DART VISION", 21f, white, true))
+        brand.addView(txt("SMART DARTS EXPERIENCE", 9f, teal, true))
         header.addView(brand)
+        header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+        header.addView(txt("● LOCAL", 9f, teal, true))
         root.addView(header)
 
-        // Accueil : accès immédiat aux parties et aux modes de jeu.
-        val startPanel = panel()
-        startPanel.addView(text("DART VISION  •  PRÊT À JOUER", 12f, accent, true))
-        startPanel.addView(text("LE JEU COMMENCE ICI", 13f, muted, true))
-        val startActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(startActions, "NOUVELLE PARTIE", true) { showPage("game"); showGameModes() }
-        button(startActions, "JOUEURS") { showPage("players"); managePlayers() }
-        startPanel.addView(startActions)
-        val quickModes = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(quickModes, "X01") { showPage("game"); selectedMode = DartGameMode.X01; configureX01() }
-        button(quickModes, "CRICKET") { showPage("game"); selectedMode = DartGameMode.CRICKET; configureTrainingMode() }
-        button(quickModes, "ENTRAÎNEMENT") { showPage("game"); showTrainingModes() }
-        startPanel.addView(quickModes)
-        pageHome.addView(startPanel)
-        pageHome.addView(buildAccountPanel())
+        // Accueil premium
+        val hero = card().apply {
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF174541.toInt(), 0xFF122B35.toInt(), 0xFF121D27.toInt())
+            ).apply { cornerRadius = dp(21).toFloat(); setStroke(dp(1), 0xFF26766F.toInt()) }
+        }
+        hero.addView(txt("BIENVENUE SUR", 10f, teal, true))
+        hero.addView(txt("La précision à\nchaque fléchette.", 27f, white, true))
+        hero.addView(txt("Joue, progresse et analyse tes performances.", 11f, muted))
+        val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, 0) }
+        btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
+        hero.addView(play)
+        home.addView(hero)
+        home.addView(txt("ESPACE DE JEU", 11f, muted, true).apply { setPadding(dp(3), dp(4), 0, dp(7)) })
+        fun tile(title: String, sub: String, glyph: String, click: () -> Unit) {
+            val item = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(13), dp(10), dp(13), dp(10)) }
+            item.addView(txt(glyph, 25f, teal, true).apply { gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(dp(46), dp(46)) })
+            val copy = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
+            copy.addView(txt(title, 14f, white, true)); copy.addView(txt(sub, 10f, muted))
+            item.addView(copy); item.addView(txt("›", 25f, teal, true))
+            item.setOnClickListener { click() }; home.addView(item)
+        }
+        tile("Modes de jeu", "501, Cricket, Shanghai, entraînement", "◎") { showPage("game"); showGameModes() }
+        tile("Caméra & calibrage", "Cadre et calibre ta cible", "⌖") { showPage("more"); setCameraMode(true) }
+        tile("Joueurs & équipes", "Profils et participants", "♙") { showPage("players"); managePlayers() }
+        tile("Statistiques", "Performances et progression", "▥") { showGameStatistics() }
+        tile("Historique", "Retrouve tes dernières manches", "◷") { showTurnHistory() }
+        tile("Paramètres", "Application et mises à jour", "⚙") { showPage("more") }
+        home.addView(buildAccountPanel())
 
-        val modeRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(2), dp(4), dp(2), dp(8)) }
-        modeRow.addView(text("TABLEAU DE BORD", 17f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
-        button(modeRow, "CHOISIR MODE") { showGameModes() }
-        pageGame.addView(modeRow)
-
-        val game = panel()
-        val players = state.get().optJSONArray("players") ?: JSONArray()
-        val active = state.get().optInt("active", 0).coerceIn(0, (players.length() - 1).coerceAtLeast(0))
-        val currentName = players.optJSONObject(active)?.optString("name", "Joueur 1") ?: "Joueur 1"
-        game.addView(text("PARTIE EN COURS  •  AU TOUR DE", 11f, accent, true))
-        game.addView(text(currentName.uppercase(), 25f, white, true))
-        scoreView = text(players.optJSONObject(active)?.optInt("score", 301)?.toString() ?: "301", 54f, white, true).apply { gravity = Gravity.CENTER }
-        game.addView(scoreView)
-        game.addView(text("SCORE RESTANT", 10f, muted, true).apply { gravity = Gravity.CENTER })
-        val scoreButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(scoreButtons, "−20") { action("adjust", "delta" to "-20") }
-        button(scoreButtons, "−1") { action("adjust", "delta" to "-1") }
-        button(scoreButtons, "+1") { action("adjust", "delta" to "1") }
-        button(scoreButtons, "+20") { action("adjust", "delta" to "20") }
-        game.addView(scoreButtons)
-        val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(actions, "SAISIR 3 FLÉCHETTES", true) { enterManualTurn() }
-        button(actions, "ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
-        game.addView(actions)
+        // Tableau de score
+        val gameHeading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val headingText = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
+        headingText.addView(txt("PARTIE EN COURS", 19f, white, true))
+        headingText.addView(txt("SCORE EN DIRECT • HORS LIGNE", 9f, teal, true))
+        gameHeading.addView(headingText)
+        btn(gameHeading, "MODES", false) { showGameModes() }
+        gamePage.addView(gameHeading)
+        val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
+        val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
+        val playerStrip = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(8), 0, dp(5)) }
+        for (i in 0 until currentPlayers.length()) {
+            val p = currentPlayers.optJSONObject(i) ?: continue
+            val selected = i == active
+            val chip = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(8), dp(8), dp(8), dp(8))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(if (selected) 0xFF123D3A.toInt() else panelColor); cornerRadius = dp(13).toFloat()
+                    setStroke(dp(1), if (selected) teal else 0xFF263744.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), 0, dp(3), dp(7)) }
+            }
+            chip.addView(txt(p.optString("name", "Joueur " + (i + 1)), 11f, if (selected) teal else muted, true))
+            chip.addView(txt(p.optInt("score", 301).toString(), 19f, white, true))
+            playerStrip.addView(chip)
+        }
+        gamePage.addView(playerStrip)
+        val scoreCard = card().apply {
+            gravity = Gravity.CENTER_HORIZONTAL
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF101A23.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFF28504F.toInt())
+            }
+        }
+        scoreCard.addView(txt(selectedMode.title.uppercase(), 11f, teal, true))
+        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 301)?.toString() ?: "301", 64f, white, true)
+            .apply { gravity = Gravity.CENTER; setPadding(0, dp(3), 0, 0) }
+        scoreCard.addView(scoreView)
+        scoreCard.addView(txt("SCORE RESTANT", 9f, muted, true))
+        scoreCard.addView(txt("TOUR " + state.get().optInt("turn", 1), 10f, teal, true).apply { setPadding(0, dp(8), 0, dp(3)) })
+        gamePage.addView(scoreCard)
+        val boardCard = card()
+        boardCard.addView(txt("CIBLE • APERÇU", 10f, muted, true))
+        boardCard.addView(DartboardView(this).apply { layoutParams = LinearLayout.LayoutParams(-1, dp(235)) })
+        gamePage.addView(boardCard)
+        val adjust = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(adjust, "−1") { action("adjust", "delta" to "-1") }
+        btn(adjust, "−20") { action("adjust", "delta" to "-20") }
+        btn(adjust, "+20") { action("adjust", "delta" to "20") }
+        gamePage.addView(adjust)
+        val entry = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(entry, "ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
+        btn(entry, "SAISIR 3 FLÉCHETTES", true) { enterManualTurn() }
+        gamePage.addView(entry)
         val next = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(next, "TOUR SUIVANT", true) { action("next_turn") }
-        button(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else action("new_game") }
-        game.addView(next)
-        pageGame.addView(game)
+        btn(next, "TOUR SUIVANT", true) { action("next_turn") }
+        btn(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else showGameModes() }
+        gamePage.addView(next)
 
-        val playersPanel = panel()
-        playersPanel.addView(text("JOUEURS", 12f, accent, true))
-        for (index in 0 until players.length()) {
-            val player = players.optJSONObject(index) ?: continue
-            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-            row.addView(text((if (index == active) "▶  " else "") + player.optString("name", "Joueur ${index + 1}"), 16f, if (index == active) accent else white, index == active), LinearLayout.LayoutParams(0, -2, 1f))
-            row.addView(text(player.optInt("score", 301).toString(), 20f, white, true))
+        // Joueurs
+        playersPage.addView(txt("JOUEURS & ÉQUIPES", 20f, white, true))
+        playersPage.addView(txt("Gère les participants de tes parties.", 11f, muted))
+        val roster = card()
+        roster.addView(txt("LISTE DES JOUEURS", 10f, teal, true))
+        for (i in 0 until currentPlayers.length()) {
+            val p = currentPlayers.optJSONObject(i) ?: continue
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, dp(7), 0, dp(7)) }
+            row.addView(txt((if (i == active) "●  " else "") + p.optString("name", "Joueur " + (i + 1)), 14f, if (i == active) teal else white, true), LinearLayout.LayoutParams(0, -2, 1f))
+            row.addView(txt(p.optInt("score", 301).toString(), 17f, white, true))
             row.addView(Button(this).apply {
-                text = "✎"
-                contentDescription = "Modifier le nom de ${player.optString("name", "Joueur ${index + 1}")}"
-                isAllCaps = false
-                setOnClickListener { editPlayerName(index) }
+                text = "✎"; isAllCaps = false; setTextColor(teal)
+                background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+                setOnClickListener { editPlayerName(i) }
             })
-            playersPanel.addView(row)
+            roster.addView(row)
         }
+        roster.addView(txt("Les modifications sont enregistrées sur cet appareil.", 10f, muted))
         val playerActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(playerActions, "AJOUTER JOUEUR") { editPlayerName(null) }
-        button(playerActions, "CONFIGURER X01") { configureX01() }
-        playersPanel.addView(playerActions)
-        pagePlayers.addView(playersPanel)
+        btn(playerActions, "＋ AJOUTER") { editPlayerName(null) }
+        btn(playerActions, "CONFIGURER X01", true) { configureX01() }
+        roster.addView(playerActions); playersPage.addView(roster)
 
-        val cameraPanel = panel()
-        cameraPanel.addView(text("DART VISION • CAMÉRA & CALIBRATION", 13f, accent, true))
-        cameraPanel.addView(text("Aide au cadrage et analyse des changements d’image. La reconnaissance automatique de la pointe et du score n’est pas encore disponible : vérifie chaque résultat manuellement.", 12f, muted))
-        preview = PreviewView(this).apply {
-            scaleType = PreviewView.ScaleType.FIT_CENTER
-            layoutParams = FrameLayout.LayoutParams(-1, -1)
-        }
+        // Outils
+        morePage.addView(txt("OUTILS & PARAMÈTRES", 20f, white, true))
+        morePage.addView(txt("Configure ton installation DART VISION.", 11f, muted))
+        val cameraPanel = card()
+        cameraPanel.addView(txt("CAMÉRA & CALIBRAGE", 13f, teal, true))
+        cameraPanel.addView(txt("Aide au cadrage et analyse des changements d’image. La reconnaissance automatique de la pointe et du score n’est pas encore disponible : vérifie chaque résultat manuellement.", 11f, muted))
+        preview = PreviewView(this).apply { scaleType = PreviewView.ScaleType.FIT_CENTER; layoutParams = FrameLayout.LayoutParams(-1, -1) }
         val frame = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(-1, dp(230))
-            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF05090D.toInt()); cornerRadius = dp(12).toFloat() }
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF05090D.toInt()); cornerRadius = dp(14).toFloat() }
             clipToOutline = true
         }
         frame.addView(preview)
         calibrationOverlay = CalibrationOverlay(this).apply { layoutParams = FrameLayout.LayoutParams(-1, -1); onPoint = ::onCalibrationTap }
-        frame.addView(calibrationOverlay)
-        cameraPanel.addView(frame)
-        val camButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(camButtons, "− ZOOM") { setZoom(zoom / 1.25f) }
-        button(camButtons, "+ ZOOM") { setZoom(zoom * 1.25f) }
-        button(camButtons, "CALIBRER") { beginBoardCalibration() }
-        cameraPanel.addView(camButtons)
-        val aiButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(aiButtons, "IMAGE AVANT TIR") {
-            status.text = if (frameAnalyzer.captureReference()) "Image de référence enregistrée." else "Caméra en attente."
-        }
-        button(aiButtons, "ANALYSER") {
-            status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence."
-            else "Analyse : ${"%.2f".format(frameAnalyzer.changedPercent ?: 0.0)} % de différence. Vérifie le score proposé."
-        }
-        cameraPanel.addView(aiButtons)
-        cameraPanelView = cameraPanel
-        cameraPanel.visibility = View.GONE
+        frame.addView(calibrationOverlay); cameraPanel.addView(frame)
+        val zoomRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(zoomRow, "− ZOOM") { setZoom(zoom / 1.25f) }
+        btn(zoomRow, "+ ZOOM") { setZoom(zoom * 1.25f) }
+        btn(zoomRow, "CALIBRER", true) { beginBoardCalibration() }
+        cameraPanel.addView(zoomRow)
+        val analyze = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(analyze, "IMAGE AVANT TIR") { status.text = if (frameAnalyzer.captureReference()) "Image de référence enregistrée." else "Caméra en attente." }
+        btn(analyze, "ANALYSER") { status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence." else "Analyse : " + "%.2f".format(frameAnalyzer.changedPercent ?: 0.0) + " % de différence. Vérifie le score proposé." }
+        cameraPanel.addView(analyze); cameraPanelView = cameraPanel; cameraPanel.visibility = View.GONE
+        morePage.addView(cameraPanel)
+        val settings = card()
+        status = txt("PRÊT À JOUER", 12f, teal, true)
+        settings.addView(txt("ÉTAT DE L’APPLICATION", 10f, muted, true)); settings.addView(status)
+        val settingButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(settingButtons, "MODES") { showPage("game"); showGameModes() }
+        btn(settingButtons, "MISES À JOUR") { checkForUpdates(silent = false) }
+        btn(settingButtons, "RÉGLAGES") { showAppSettings() }
+        settings.addView(settingButtons); morePage.addView(settings)
 
-        val choicePanel = panel()
-        choicePanel.addView(text("MODE DE JEU", 13f, accent, true))
-        choicePanel.addView(text("Tu peux jouer sans caméra ou l'activer quand tu le souhaites.", 12f, muted))
-        val choiceButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(choiceButtons, "MODE NORMAL", true) { setCameraMode(false) }
-        button(choiceButtons, "MODE CAMÉRA") { setCameraMode(true) }
-        choicePanel.addView(choiceButtons)
-        pageMenu.addView(choicePanel)
-        pageMenu.addView(cameraPanel)
-
-        val settings = panel()
-        status = text("PRÊT À JOUER", 12f, accent, true)
-        settings.addView(text("ÉTAT DE L’APPLICATION", 10f, muted, true))
-        settings.addView(status)
-        val settingsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(settingsRow, "MODES DE JEU") { showPage("game"); showGameModes() }
-        button(settingsRow, "MISES À JOUR") { checkForUpdates(silent = false) }
-        button(settingsRow, "RÉGLAGES") { showAppSettings() }
-        settings.addView(settingsRow)
-        pageMenu.addView(settings)
-        root.addView(pageHome)
-        root.addView(pageGame)
-        root.addView(pagePlayers)
-        root.addView(pageMenu)
+        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage)
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        val bottomNav = LinearLayout(this).apply {
+        val bottom = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER
-            setPadding(dp(8), dp(8), dp(8), dp(8)); setBackgroundColor(0xFF191E26.toInt()); elevation = dp(12).toFloat()
+            setPadding(dp(8), dp(7), dp(8), dp(7)); setBackgroundColor(0xFF0D151D.toInt()); elevation = dp(14).toFloat()
         }
-        fun nav(key: String, label: String) {
-            val b = Button(this).apply {
-                text = label; isAllCaps = false; textSize = 11f; setTextColor(white)
-                minHeight = dp(48); stateListAnimator = null
-                layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
+        fun nav(key: String, title: String, symbol: String) {
+            val button = Button(this).apply {
+                text = symbol + "\n" + title; isAllCaps = false; textSize = 10f; setTextColor(white)
+                minHeight = dp(54); stateListAnimator = null
+                layoutParams = LinearLayout.LayoutParams(0, dp(54), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
                 setOnClickListener { showPage(key) }
             }
-            navButtons.add(key to b); bottomNav.addView(b)
+            navButtons.add(key to button); bottom.addView(button)
         }
-        nav("home", "ACCUEIL"); nav("game", "PARTIE"); nav("players", "JOUEURS"); nav("menu", "PLUS")
+        nav("home", "ACCUEIL", "⌂"); nav("game", "JOUER", "◎"); nav("players", "JOUEURS", "♙"); nav("more", "PLUS", "•••")
         showPage("home")
-        shell.addView(bottomNav, LinearLayout.LayoutParams(-1, dp(64)))
+        shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
     }
-
 
     private fun buildAccountPanel(): LinearLayout {
         val panel = LinearLayout(this).apply {
