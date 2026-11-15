@@ -1035,93 +1035,84 @@ class MainActivity : ComponentActivity() {
         fun dp(v: Int) = (v * density).toInt()
         val options = mutableListOf("MISS", "25", "BULL")
         for (n in 1..20) {
-            options.add("S$n")
-            options.add("D$n")
-            options.add("T$n")
+            options.add("S$n"); options.add("D$n"); options.add("T$n")
         }
-        val labels = listOf("FLÉCHETTE 1", "FLÉCHETTE 2", "FLÉCHETTE 3")
-        val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(8), dp(16), dp(8))
-        }
-        val totalView = TextView(this).apply {
-            text = "TOTAL : 0"
-            textSize = 25f
-            gravity = Gravity.CENTER
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(0xFFE32636.toInt())
-            setPadding(0, dp(12), 0, dp(12))
-        }
-        content.addView(totalView)
-        val selectors = mutableListOf<Spinner>()
         fun dartValue(label: String): DartHit = when {
             label == "MISS" -> DartHit.MISS
             label == "25" -> DartHit(25, 1)
             label == "BULL" -> DartHit(25, 2)
-            else -> {
-                val multiplier = when (label.first()) { 'D' -> 2; 'T' -> 3; else -> 1 }
-                DartHit(label.drop(1).toInt(), multiplier)
-            }
+            else -> DartHit(label.drop(1).toInt(), when (label.first()) { 'D' -> 2; 'T' -> 3; else -> 1 })
         }
-        fun points(label: String): Int = dartValue(label).points
-        fun updateTotal() {
-            totalView.text = "TOTAL : ${selectors.sumOf { points(it.selectedItem.toString()) }}"
+        val selected = MutableList(3) { "MISS" }
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(8), dp(18), dp(12))
         }
-        labels.forEachIndexed { index, title ->
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(0, dp(5), 0, dp(5))
-            }
-            row.addView(TextView(this).apply {
-                text = title
-                textSize = 12f
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(0xFF9AA3AF.toInt())
-            })
-            val spinner = Spinner(this).apply {
-                adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, options)
-                setSelection(0)
-                onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
-                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        updateTotal()
-                    }
+        val total = TextView(this).apply {
+            text = "TOTAL DE LA VOLÉE\n0"
+            textSize = 25f; gravity = Gravity.CENTER
+            setTextColor(0xFF28D7C2.toInt())
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(0, dp(12), 0, dp(16))
+        }
+        content.addView(total)
+        val dartButtons = mutableListOf<Button>()
+        fun refresh() {
+            val points = selected.sumOf { dartValue(it).points }
+            total.text = "TOTAL DE LA VOLÉE\n$points"
+            dartButtons.forEachIndexed { i, button -> button.text = "FLÉCHETTE ${i + 1}     ${selected[i]}  •  ${dartValue(selected[i]).points} pts" }
+        }
+        repeat(3) { index ->
+            val button = Button(this).apply {
+                isAllCaps = false; textSize = 13f
+                setTextColor(0xFFF5F6F8.toInt())
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF202B35.toInt()); cornerRadius = dp(12).toFloat()
+                    setStroke(dp(1), 0xFF40515C.toInt())
+                }
+                minHeight = dp(54)
+                setOnClickListener {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("FLÉCHETTE ${index + 1}")
+                        .setItems(options.toTypedArray()) { _, which ->
+                            selected[index] = options[which]
+                            refresh()
+                        }.show()
                 }
             }
-            selectors.add(spinner)
-            row.addView(spinner)
-            content.addView(row)
+            dartButtons.add(button)
+            content.addView(button, LinearLayout.LayoutParams(-1, dp(58)).apply { bottomMargin = dp(7) })
         }
+        refresh()
         content.addView(TextView(this).apply {
-            text = "Choisis le segment et le multiplicateur de chaque fléchette. Les MISS sont prises en compte."
-            textSize = 12f
-            setTextColor(0xFF50645E.toInt())
-            setPadding(0, dp(8), 0, 0)
+            text = "Sélectionne le secteur touché pour chaque fléchette : simple, double, triple, 25, bull ou raté."
+            textSize = 11f; setTextColor(0xFF9AA3AF.toInt())
+            setPadding(0, dp(8), 0, dp(4))
         })
         val dialog = AlertDialog.Builder(this)
-            .setTitle("SAISIE DES 3 FLÉCHETTES")
+            .setTitle("SAISIE MANUELLE • 3 FLÉCHETTES")
             .setView(content)
             .setNegativeButton("ANNULER", null)
-            .setPositiveButton("VALIDER LE TOUR", null)
+            .setPositiveButton("VALIDER LA VOLÉE", null)
             .create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 try {
-                    val hits = selectors.map { dartValue(it.selectedItem.toString()) }
+                    val hits = selected.map(::dartValue)
                     val message = if (engine != null) {
                         val result = engine.throwTurn(hits)
                         refreshX01()
                         saveX01Game()
                         when {
-                            result.bust -> "Bust : le score du tour est annulé."
+                            result.bust -> "Bust : le score de la volée est annulé."
                             result.legWon -> "Leg gagné !"
-                            else -> "Tour enregistré : ${result.scoreBefore} → ${result.scoreAfter}"
+                            else -> "Volée enregistrée : ${result.scoreBefore} → ${result.scoreAfter}"
                         }
                     } else trainingTurnHandler!!.invoke(hits)
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     dialog.dismiss()
                 } catch (e: Exception) {
-                    Toast.makeText(this, e.message ?: "Impossible d'enregistrer ce tour.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, e.message ?: "Impossible d'enregistrer cette volée.", Toast.LENGTH_LONG).show()
                 }
             }
         }
