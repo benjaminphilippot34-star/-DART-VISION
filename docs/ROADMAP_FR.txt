@@ -1,16 +1,24 @@
 ROADMAP DART VISION
 ===================
-0.5 — Base mobile multi-téléphone (source)
-0.6 — Appairage QR, découverte réseau, reconnexion et sécurité locale
-0.7 — Moteur de jeu complet : 501/301, Cricket, modes personnalisés, historique et undo
-0.8 — Calibration géométrique de la cible et contrôle qualité de prise de vue
-0.9 — Détection des fléchettes et impacts, validation sur séquences réelles
-1.0 — Application stable, statistiques, profils, tests multi-appareils
+0.5 — Base mobile Android et caméra CameraX
+0.6 — Calibration guidée, stabilité de l'image et outil de diagnostic
+0.7 — Suivi des fléchettes présentes, détection des nouvelles fléchettes et retraits
+0.8 — Localisation de la pointe, calcul de zone et validation manuelle
+0.9 — Corpus de tests réels, mesure de précision et gestion des cas ambigus
+1.0 — Moteur de jeu complet, appairage QR sécurisé et synchronisation multi-téléphones
+1.1 — Seconde caméra facultative et fusion des deux vues
+1.2 — Commandes vocales, annonces, profils et statistiques
 Après Android : portage iOS et synchronisation cloud facultative.
 
 ARCHITECTURE CIBLE
-- Téléphone principal : caméra, traitement IA embarqué, état maître de la partie.
-- Téléphones secondaires : interface complète de pilotage et affichage synchronisé.
-- Réseau local : fonctionnement sans Internet.
+- Téléphone principal : caméra, traitement IA embarqué, calibration et état maître de la partie.
+- Téléphone secondaire caméra : angle indépendant facultatif pour lever les occultations.
+- Téléphones joueurs : affichage et commandes synchronisés.
+- Réseau local : fonctionnement sans Internet ; appairage sécurisé par QR code.
 - Cloud facultatif : comptes, sauvegardes et statistiques à distance.
 - PC facultatif : outils de développement/entraînement, jamais requis pour jouer.
+
+RÈGLE DE QUALITÉ
+Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences réelles annotées et séparées entre développement et validation. Si la pointe est masquée ou trop proche d'une séparation, l'application doit demander une validation plutôt que d'inventer un score.
+
+Voir docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md pour la synthèse des idées retenues et le pipeline technique.
