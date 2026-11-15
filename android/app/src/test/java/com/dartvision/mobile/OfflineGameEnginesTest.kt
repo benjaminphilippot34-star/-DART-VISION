@@ -12,6 +12,17 @@ class OfflineGameEnginesTest {
         assertEquals(1, game.state.activePlayer)
     }
 
+    @Test fun x01HistoryCanIdentifyACompletedWinnerAndPreserveTurnStats() {
+        val game = X01GameEngine(X01Settings(40, outRule = X01OutRule.DOUBLE_OUT), listOf("Ben", "Flo"))
+        val result = game.throwTurn(listOf(DartHit(20, 2)))
+        assertTrue(result.legWon)
+        assertTrue(game.state.legFinished)
+        assertEquals("Ben", game.state.players[result.playerIndex].name)
+        assertEquals(1, game.state.players[result.playerIndex].legsWon)
+        assertEquals(1, game.state.history.size)
+        assertEquals(40, game.state.history.first().hits.first().points)
+    }
+
     @Test fun dartHitDisplaysAndCountsSimpleDoubleAndTripleValues() {
         assertEquals(20, DartHit(20, 1).points)
         assertEquals(40, DartHit(20, 2).points)
