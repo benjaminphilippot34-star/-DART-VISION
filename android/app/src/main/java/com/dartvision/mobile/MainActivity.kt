@@ -1560,10 +1560,13 @@ class MainActivity : ComponentActivity() {
                     if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
                 setPadding(dp(2), dp(3), dp(2), dp(3))
             }
-        val title = text("C’EST AU TOUR DE LANCER !", 20f, coral, true).apply {
+        val activeName = engine?.state?.players?.getOrNull(engine.state.activePlayer)?.name ?: "Joueur"
+        val title = text("C’EST AU TOUR DE $activeName DE LANCER !", 18f, coral, true).apply {
             gravity = Gravity.CENTER_VERTICAL
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
         }
-        content.addView(title, LinearLayout.LayoutParams(-1, dp(42)))
+        content.addView(title, LinearLayout.LayoutParams(-1, dp(34)))
         // Bandeau des joueurs : tous les participants et le score restant du joueur actif.
         val playersBand = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -1578,9 +1581,9 @@ class MainActivity : ComponentActivity() {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
                     setPadding(dp(7), dp(7), dp(7), dp(7))
-                    background = rounded(if (activePlayer) 0xFF174E4B.toInt() else 0xFF1C2A35.toInt(),
-                        if (activePlayer) teal else 0xFF3A4D59.toInt(), 9)
-                    layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
+                    background = rounded(if (activePlayer) coral else 0xFF173E49.toInt(),
+                        if (activePlayer) coral else teal, 9)
+                    layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f).apply {
                         setMargins(dp(3), 0, dp(3), 0)
                     }
                 }
@@ -1591,17 +1594,17 @@ class MainActivity : ComponentActivity() {
                 playersBand.addView(playerCard)
             }
         }
-        content.addView(playersBand)
+        content.addView(playersBand, LinearLayout.LayoutParams(-1, dp(54)))
         val entry = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
         }
-        entry.addView(text("▦", 22f, ink, true), LinearLayout.LayoutParams(dp(42), dp(56)))
+        entry.addView(text("▦", 22f, ink, true), LinearLayout.LayoutParams(dp(34), dp(46)))
         val slots = mutableListOf<TextView>()
         repeat(3) {
             val slot = text("—", 19f, ink, true).apply { background = rounded(0xFF172630.toInt(), 0xFF3A4D59.toInt(), 6) }
             slots.add(slot)
-            entry.addView(slot, LinearLayout.LayoutParams(0, dp(56), 1f).apply {
+            entry.addView(slot, LinearLayout.LayoutParams(0, dp(46), 1f).apply {
                 setMargins(dp(2), 0, dp(2), 0)
             })
         }
@@ -1609,20 +1612,20 @@ class MainActivity : ComponentActivity() {
             text = "SAISIR"; isAllCaps = false; textSize = 13f; setTextColor(0xFF062A27.toInt())
             background = rounded(teal, teal, 28)
             stateListAnimator = null; minHeight = dp(48)
-            layoutParams = LinearLayout.LayoutParams(dp(94), dp(48)).apply { setMargins(dp(3), 0, 0, 0) }
+            layoutParams = LinearLayout.LayoutParams(dp(82), dp(42)).apply { setMargins(dp(3), 0, 0, 0) }
         }
         entry.addView(submit)
-        content.addView(entry, LinearLayout.LayoutParams(-1, dp(66)))
+        content.addView(entry, LinearLayout.LayoutParams(-1, dp(52)))
         val count = text("0 / 3 fléchettes", 11f, 0xFF9AADB8.toInt(), true)
-        content.addView(count, LinearLayout.LayoutParams(-1, dp(25)))
+        content.addView(count, LinearLayout.LayoutParams(-1, dp(18)))
         val visitTotal = text("TOTAL DE LA VOLÉE : 0", 15f, coral, true)
-        content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(30)))
+        content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(23)))
         val tabsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val tabs = mutableListOf<TextView>()
         val tabNames = listOf("Simple", "Double", "Treble", "Bull\n50", "Outer\n25")
         tabNames.forEachIndexed { i, name ->
             val tab = text(name, 13f, ink, true).apply {
-                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f)
+                layoutParams = LinearLayout.LayoutParams(0, dp(43), 1f)
                 setOnClickListener {
                     selectedTab = i
                     multiplier = when (i) { 1 -> 2; 2 -> 3; else -> 1 }
@@ -1639,7 +1642,7 @@ class MainActivity : ComponentActivity() {
             for (c in 0 until 5) {
                 val n = r * 5 + c + 1
                 val cell = text(n.toString(), 25f, ink, true).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, dp(66), 1f)
+                    layoutParams = LinearLayout.LayoutParams(0, dp(48), 1f)
                     background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
                     setOnClickListener { if (selectedTab < 3) addHit(DartHit(n, multiplier)) }
                 }
@@ -1653,7 +1656,7 @@ class MainActivity : ComponentActivity() {
             Button(this).apply {
                 text = caption; isAllCaps = false; textSize = 15f; setTextColor(ink)
                 background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
-                layoutParams = LinearLayout.LayoutParams(0, dp(56), weight)
+                layoutParams = LinearLayout.LayoutParams(0, dp(42), weight)
                 setOnClickListener { click() }
             }
         bottom.addView(bottomButton("↶") { if (hits.isNotEmpty()) { hits.removeAt(hits.lastIndex); render() } })
@@ -1677,7 +1680,7 @@ class MainActivity : ComponentActivity() {
                 // Affiche la valeur réellement comptabilisée pour la fléchette :
                 // Simple 20 = 20, Double 20 = 40, Triple 20 = 60.
                 slot.text = hit?.let { if (it.number == null) "MISS" else it.points.toString() } ?: "—"
-                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFF174E4B.toInt() else 0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 2)
+                slot.background = rounded(if (i == hits.size && hits.size < 3) coral else 0xFF1C2A35.toInt(), if (i == hits.size && hits.size < 3) coral else 0xFF3A4D59.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
             visitTotal.text = "TOTAL DE LA VOLÉE : ${hits.sumOf { it.points }}"
