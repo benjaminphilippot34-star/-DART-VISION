@@ -21,6 +21,22 @@ class BoardCalibrationTest {
         assertEquals(0.0, centre.yMm, 1.0)
     }
 
+    @Test fun calibratedImageImpactFeedsDartboardScoring() {
+        val calibration = BoardCalibration.fromFourCorners(
+            listOf(ImagePoint(100.0, 80.0), ImagePoint(500.0, 100.0),
+                ImagePoint(480.0, 500.0), ImagePoint(80.0, 480.0))
+        )
+        val bull = calibration.scoreImagePoint(ImagePoint(290.0, 290.0))
+        assertNotNull(bull)
+        assertEquals(50, bull!!.points)
+        assertEquals("Bull", bull.zone)
+
+        val tripleTwenty = calibration.scoreImagePoint(ImagePoint(290.0, 169.0))
+        assertNotNull(tripleTwenty)
+        assertEquals(60, tripleTwenty!!.points)
+        assertEquals("Triple", tripleTwenty.zone)
+    }
+
     @Test fun rejectsDegenerateCornerGeometry() {
         try {
             BoardCalibration.fromFourCorners(
