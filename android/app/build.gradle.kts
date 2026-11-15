@@ -13,8 +13,8 @@ android {
         applicationId = "com.dartvision.mobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 18
-        versionName = "0.9.8"
+        versionCode = 19
+        versionName = "0.9.9"
         buildConfigField("String", "SUPABASE_URL", "\"https://evfvekajquaxrvyozpua.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_xFBcy-XA9F8RVjzzRb2xkg_rHxjKFLL\"")
     }
