@@ -83,10 +83,13 @@ class MainActivity : ComponentActivity() {
         val uri = callbackIntent?.data ?: return
         if (uri.scheme != "dartvision" || uri.host != "auth-callback") return
         val fragment = uri.fragment.orEmpty()
-        val values = fragment.split("&").mapNotNull { part ->
-            val bits = part.split("=", limit = 2)
-            if (bits.size == 2) bits[0] to Uri.decode(bits[1]) else null
-        }.toMap()
+        // Supabase peut renvoyer les paramètres dans le fragment ou dans la query string.
+        val values = listOfNotNull(uri.query, fragment)
+            .flatMap { it.split("&") }
+            .mapNotNull { part ->
+                val bits = part.split("=", limit = 2)
+                if (bits.size == 2) bits[0] to Uri.decode(bits[1]) else null
+            }.toMap()
         val error = values["error_description"] ?: values["error"]
         if (!error.isNullOrBlank()) {
             status.post { status.text = "Confirmation impossible : $error"; Toast.makeText(this, "Confirmation impossible : $error", Toast.LENGTH_LONG).show() }
@@ -471,7 +474,9 @@ class MainActivity : ComponentActivity() {
                 runOnUiThread {
                     val message = if (result.accessToken != null) {
                         getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
-                            .putString("user_id", result.userId).putString("email", result.email).apply()
+                            .putString("user_id", result.userId).putString("email", result.email)
+                            .putString("access_token", result.accessToken)
+                            .putString("refresh_token", result.refreshToken).apply()
                         "Compte connecté : ${result.email ?: result.userId ?: "joueur"}"
                     } else "Demande envoyée. Vérifie ta boîte mail ou tes SMS."
                     status.text = message
