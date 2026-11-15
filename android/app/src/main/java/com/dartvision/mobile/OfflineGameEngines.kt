@@ -98,7 +98,7 @@ class X01GameEngine(
             remaining = next
         }
 
-        if (bust) remaining = before
+        if (bust) { remaining = before; entered = player.hasEntered }
         players[index] = player.copy(score = remaining, hasEntered = entered)
         val result = X01TurnResult(index, hits, before, remaining, bust, won)
         var matchWon = false
