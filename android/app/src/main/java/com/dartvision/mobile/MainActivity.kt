@@ -467,51 +467,191 @@ class MainActivity : ComponentActivity() {
 
     private fun showGameStatistics() {
         val engine = x01Engine
-        val message = if (engine != null) {
+        val title = "STATISTIQUES"
+        val rows = mutableListOf<Pair<String, String>>()
+        val metrics = mutableListOf<Pair<String, String>>()
+        if (engine != null) {
             val s = engine.state
             val turns = s.history
             val darts = turns.sumOf { it.hits.size }
             val points = turns.sumOf { turn -> turn.hits.sumOf { it.points } }
             val average = if (darts == 0) 0.0 else points * 3.0 / darts
-            buildString {
-                append("Mode X01 ${s.settings.startingScore}\n")
-                append("Tours enregistrés : ${turns.size}\nFléchettes lancées : $darts\n")
-                append("Moyenne par volée : ${"%.2f".format(average)}\n\n")
-                s.players.forEach { append("${it.name} : ${it.score} restant • ${it.legsWon} legs • ${it.setsWon} sets\n") }
+            val bestVisit = turns.maxOfOrNull { turn -> turn.hits.sumOf { it.points } } ?: 0
+            metrics.add("TOURS" to turns.size.toString())
+            metrics.add("FLÉCHETTES" to darts.toString())
+            metrics.add("MOYENNE" to String.format("%.2f", average))
+            metrics.add("MEILLEURE VOLÉE" to bestVisit.toString())
+            s.players.forEach { player ->
+                rows.add(player.name to "${player.score} restants   •   ${player.legsWon} legs   •   ${player.setsWon} sets")
             }
         } else {
             val ps = state.get().optJSONArray("players") ?: JSONArray()
-            buildString {
-                append("Partie en cours • ${state.get().optString("mode", "301")}\n")
-                for (i in 0 until ps.length()) {
-                    val p = ps.optJSONObject(i) ?: continue
-                    append("${p.optString("name")} : ${p.optInt("score")} points restants\n")
-                }
-                append("\nLes statistiques détaillées seront disponibles pour les parties X01 suivies par le moteur.")
+            metrics.add("MODE" to state.get().optString("mode", "301"))
+            metrics.add("JOUEURS" to ps.length().toString())
+            metrics.add("TOUR" to state.get().optInt("turn", 1).toString())
+            metrics.add("HISTORIQUE" to (state.get().optJSONArray("history")?.length() ?: 0).toString())
+            for (i in 0 until ps.length()) {
+                val p = ps.optJSONObject(i) ?: continue
+                rows.add(p.optString("name", "Joueur ${i + 1}") to "${p.optInt("score")} points restants")
             }
         }
-        AlertDialog.Builder(this).setTitle("Statistiques").setMessage(message)
-            .setPositiveButton("OK", null).show()
+        showInsightScreen(title, "VUE D’ENSEMBLE DE LA PARTIE", metrics, rows)
     }
 
     private fun showTurnHistory() {
         val engine = x01Engine
-        val lines = if (engine == null || engine.state.history.isEmpty()) {
-            "Aucun tour X01 enregistré pour le moment."
-        } else engine.state.history.takeLast(20).asReversed().mapIndexed { i, turn ->
+        val rows = if (engine == null || engine.state.history.isEmpty()) {
+            listOf("Aucun tour enregistré" to "Les tours apparaîtront ici après la première volée.")
+        } else engine.state.history.takeLast(30).asReversed().mapIndexed { index, turn ->
             val player = engine.state.players.getOrNull(turn.playerIndex)?.name ?: "Joueur"
-            val hits = turn.hits.joinToString(" • ") { hit ->
+            val hits = turn.hits.joinToString("   •   ") { hit ->
                 when {
                     hit.number == null -> "MISS"
-                    hit.number == 25 && hit.multiplier == 2 -> "Bull"
+                    hit.number == 25 && hit.multiplier == 2 -> "BULL"
                     hit.number == 25 -> "25"
                     else -> "${if (hit.multiplier == 1) "S" else if (hit.multiplier == 2) "D" else "T"}${hit.number}"
                 }
             }
-            "${i + 1}. $player : $hits • ${turn.scoreBefore} → ${turn.scoreAfter}${if (turn.bust) " • BUST" else ""}"
-        }.joinToString("\n")
-        AlertDialog.Builder(this).setTitle("Historique des tours").setMessage(lines)
-            .setPositiveButton("OK", null).show()
+            val result = if (turn.bust) "BUST" else "${turn.scoreBefore}  →  ${turn.scoreAfter}"
+            "VOLÉE ${engine.state.history.size - index} • $player" to "$hits\n$result"
+        }
+        showInsightScreen("HISTORIQUE", "30 DERNIÈRES VOLÉES", emptyList(), rows)
+    }
+
+    private fun showInsightScreen(
+        title: String,
+        subtitle: String,
+        metrics: List<Pair<String, String>>,
+        rows: List<Pair<String, String>>
+    ) {
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        val backgroundColor = 0xFF101318.toInt()
+        val cardColor = 0xFF1B2028.toInt()
+        val accentColor = 0xFFE32636.toInt()
+        val whiteColor = 0xFFF5F6F8.toInt()
+        val mutedColor = 0xFF9AA3AF.toInt()
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(18), dp(20), dp(24))
+            setBackgroundColor(backgroundColor)
+        }
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val heading = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        heading.addView(TextView(this).apply {
+            text = title
+            textSize = 23f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(whiteColor)
+        })
+        heading.addView(TextView(this).apply {
+            text = subtitle
+            textSize = 10f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(accentColor)
+            setPadding(0, dp(3), 0, 0)
+        })
+        header.addView(heading, LinearLayout.LayoutParams(0, -2, 1f))
+        header.addView(Button(this).apply {
+            text = "FERMER"
+            isAllCaps = false
+            setTextColor(whiteColor)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF303844.toInt())
+                cornerRadius = dp(12).toFloat()
+            }
+            setOnClickListener { (it.parent as? View)?.let { _ -> } }
+            contentDescription = "Fermer l’écran"
+        })
+        content.addView(header)
+        if (metrics.isNotEmpty()) {
+            val grid = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, dp(20), 0, dp(8))
+            }
+            metrics.chunked(2).forEach { pair ->
+                val metricRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                pair.forEach { (label, value) ->
+                    val metric = LinearLayout(this).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setPadding(dp(14), dp(12), dp(10), dp(12))
+                        background = android.graphics.drawable.GradientDrawable().apply {
+                            setColor(cardColor)
+                            cornerRadius = dp(14).toFloat()
+                            setStroke(dp(1), 0xFF2B323D.toInt())
+                        }
+                    }
+                    metric.addView(TextView(this).apply {
+                        text = label
+                        textSize = 9f
+                        setTextColor(mutedColor)
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    })
+                    metric.addView(TextView(this).apply {
+                        text = value
+                        textSize = 24f
+                        setTextColor(whiteColor)
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    })
+                    metric.layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
+                        setMargins(dp(3), dp(3), dp(3), dp(3))
+                    }
+                    metricRow.addView(metric)
+                }
+                if (pair.size == 1) {
+                    metricRow.addView(View(this), LinearLayout.LayoutParams(0, dp(1), 1f))
+                }
+                grid.addView(metricRow)
+            }
+            content.addView(grid)
+        }
+        val section = TextView(this).apply {
+            text = if (title == "HISTORIQUE") "DÉTAIL DES VOLÉES" else "JOUEURS"
+            textSize = 11f
+            setTextColor(accentColor)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(dp(3), dp(14), dp(3), dp(8))
+        }
+        content.addView(section)
+        rows.forEachIndexed { index, (label, detail) ->
+            val item = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(14), dp(12), dp(14), dp(12))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(cardColor)
+                    cornerRadius = dp(14).toFloat()
+                    setStroke(dp(1), 0xFF2B323D.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                    setMargins(0, dp(4), 0, dp(4))
+                }
+            }
+            item.addView(TextView(this).apply {
+                text = label
+                textSize = 14f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(whiteColor)
+            })
+            item.addView(TextView(this).apply {
+                text = detail
+                textSize = 12f
+                setTextColor(mutedColor)
+                setPadding(0, dp(4), 0, 0)
+            })
+            content.addView(item)
+        }
+        val scroll = ScrollView(this).apply { isFillViewport = true; addView(content) }
+        val dialog = android.app.Dialog(this)
+        dialog.setContentView(scroll)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+        dialog.window?.setLayout(-1, -1)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        // Le bouton de fermeture est relié après l’affichage pour utiliser le contexte de la fenêtre.
+        (header.getChildAt(1) as? Button)?.setOnClickListener { dialog.dismiss() }
     }
 
     private fun showAppSettings() {
