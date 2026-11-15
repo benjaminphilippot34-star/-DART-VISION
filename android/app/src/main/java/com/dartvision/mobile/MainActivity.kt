@@ -482,9 +482,10 @@ class MainActivity : ComponentActivity() {
             val s = engine.state
             val turns = s.history
             val darts = turns.sumOf { it.hits.size }
-            val points = turns.sumOf { turn -> turn.hits.sumOf { it.points } }
+            // En X01, une volée BUST ne retire aucun point : elle doit compter pour zéro dans les moyennes.
+            val points = turns.sumOf { turn -> if (turn.bust) 0 else (turn.scoreBefore - turn.scoreAfter).coerceAtLeast(0) }
             val average = if (darts == 0) 0.0 else points * 3.0 / darts
-            val bestVisit = turns.maxOfOrNull { turn -> turn.hits.sumOf { it.points } } ?: 0
+            val bestVisit = turns.maxOfOrNull { turn -> if (turn.bust) 0 else (turn.scoreBefore - turn.scoreAfter).coerceAtLeast(0) } ?: 0
             metrics.add("TOURS" to turns.size.toString())
             metrics.add("FLÉCHETTES" to darts.toString())
             metrics.add("MOYENNE" to String.format("%.2f", average))
