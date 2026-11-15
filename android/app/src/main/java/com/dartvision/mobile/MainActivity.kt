@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
             TextView(this).apply {
                 text = value; textSize = size; setTextColor(color)
                 if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setPadding(dp(2), dp(3), dp(2), dp(3))
+                setPadding(dp(2), dp(3), dp(2), dp(3))\n                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
             }
         fun card(): LinearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -795,32 +795,77 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showTrainingModes() {
-        val modes = DartCounterModeCatalog.default.modes.filter { it.category != GameModeCategory.CLASSIC || it == DartGameMode.X01 }
-            .filter { it != DartGameMode.X01 }
-        val labels = modes.map { "${it.title} — ${it.description}" }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Entraînement et jeux")
-            .setItems(labels) { _, which ->
-                selectedMode = modes[which]
-                configureTrainingMode()
-            }
-            .setNegativeButton("Retour", null)
-            .show()
+        showModeCatalogue(trainingOnly = true)
     }
 
     private fun showGameModes() {
-        val modes = DartCounterModeCatalog.default.modes
-        val labels = modes.map { "${it.title} — ${it.description}" }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Choisir un mode hors ligne")
-            .setItems(labels) { _, which ->
-                selectedMode = modes[which]
-                if (selectedMode == DartGameMode.X01) configureX01() else configureTrainingMode()
-            }
-            .setNegativeButton("Annuler", null)
-            .show()
+        showModeCatalogue(trainingOnly = false)
     }
 
+    private fun showModeCatalogue(trainingOnly: Boolean) {
+        val modes = DartCounterModeCatalog.default.modes.filter {
+            if (trainingOnly) it.category == GameModeCategory.TRAINING else true
+        }
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        val coral = 0xFFEF765B.toInt()
+        val ink = 0xFF203B3A.toInt()
+        val muted = 0xFF718783.toInt()
+        val grid = android.widget.GridLayout(this).apply {
+            columnCount = 2
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+            useDefaultMargins = false
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(if (trainingOnly) "ENTRAÎNEMENT" else "CHOISIR UN MODE")
+            .setView(ScrollView(this).apply { addView(grid) })
+            .setNegativeButton("FERMER", null)
+            .create()
+        modes.forEach { mode ->
+            val tile = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(13), dp(14), dp(13), dp(14))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFFF8FCF9.toInt())
+                    cornerRadius = dp(16).toFloat()
+                    setStroke(dp(1), 0xFFD5E5DD.toInt())
+                }
+                isClickable = true
+                isFocusable = true
+                layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = dp(116)
+                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                    setMargins(dp(5), dp(5), dp(5), dp(5))
+                }
+            }
+            tile.addView(TextView(this).apply {
+                text = when (mode.category) {
+                    GameModeCategory.CLASSIC -> "CLASSIQUE"
+                    GameModeCategory.TRAINING -> "ENTRAÎNEMENT"
+                    GameModeCategory.PARTY -> "MULTIJOUEUR"
+                }
+                textSize = 9f; setTextColor(coral)
+                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+            })
+            tile.addView(TextView(this).apply {
+                text = mode.title; textSize = 16f; setTextColor(ink)
+                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+                setPadding(0, dp(5), 0, dp(3))
+            })
+            tile.addView(TextView(this).apply {
+                text = mode.description; textSize = 10f; setTextColor(muted)
+                maxLines = 3
+            })
+            tile.setOnClickListener {
+                selectedMode = mode
+                dialog.dismiss()
+                if (mode == DartGameMode.X01) configureX01() else configureTrainingMode()
+            }
+            grid.addView(tile)
+        }
+        dialog.show()
+    }
 
     private fun configureTrainingMode() {
         x01Engine = null
