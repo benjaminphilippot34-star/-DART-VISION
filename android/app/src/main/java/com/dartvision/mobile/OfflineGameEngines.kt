@@ -57,6 +57,13 @@ class X01GameEngine(
     )
         private set
 
+    /** Calculates the live score without changing the game state. */
+    fun previewTurn(hits: List<DartHit>): X01TurnResult {
+        val preview = X01GameEngine(settings, state.players.map { it.name })
+        preview.restore(state)
+        return preview.throwTurn(hits)
+    }
+
     fun throwTurn(hits: List<DartHit>): X01TurnResult {
         require(hits.size in 1..3) { "Un tour doit contenir entre une et trois fléchettes." }
         check(!state.finished && !state.legFinished) { "La manche est terminée." }
