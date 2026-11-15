@@ -961,7 +961,7 @@ class MainActivity : ComponentActivity() {
                 .setPositiveButton("OK", null).show()
             return
         }
-        val routes = CheckoutCalculator.routes(score, 12)
+        val routes = CheckoutCalculator.routes(score, 12, masterOut = state.settings.outRule == X01OutRule.MASTER_OUT)
         val message = if (routes.isEmpty()) {
             if (score > 170) "Il n'existe pas de sortie en trois fléchettes au-dessus de 170."
             else "Aucune sortie directe en trois fléchettes pour $score."
