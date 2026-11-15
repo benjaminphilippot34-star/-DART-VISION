@@ -89,6 +89,7 @@ class MainActivity : ComponentActivity() {
         startLocalGame()
         restoreX01Game()
         handleAuthCallback(intent)
+        syncAccountProfile()
     }
 
     override fun onResume() {
