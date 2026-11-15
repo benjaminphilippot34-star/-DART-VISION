@@ -38,6 +38,7 @@ Cet APK est une version de développement, pas encore une version finale publié
 - [Comparatif des applications et architecture](docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md)
 - [Feuille de route](docs/ROADMAP_FR.txt)
 - [Plan de tests terrain](docs/PLAN_TESTS_TERRAIN_FR.md)
+- [Guide de première bêta Android](docs/GUIDE_PREMIERE_BETA_ANDROID_FR.md)
 
 ## Construction
 
