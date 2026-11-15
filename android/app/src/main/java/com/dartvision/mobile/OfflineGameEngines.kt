@@ -165,10 +165,9 @@ class CricketGameEngine(playerNames: List<String>, private val includeBull: Bool
             current = current.copy(marks = marks, points = current.points + points)
         }
         ps[i] = current
-        val allClosed = ps.all { p -> targets.all { (p.marks[it] ?: 0) >= 3 } }
-        val maxPoints = ps.maxOf { it.points }
-        val leaderClosed = current.points >= maxPoints && targets.all { (current.marks[it] ?: 0) >= 3 }
-        state = CricketGameState(ps, (i + 1) % ps.size, allClosed && leaderClosed)
+        val currentClosed = targets.all { (current.marks[it] ?: 0) >= 3 }
+        val opponentsHaveNoMorePoints = ps.indices.filter { it != i }.all { current.points >= ps[it].points }
+        state = CricketGameState(ps, (i + 1) % ps.size, currentClosed && opponentsHaveNoMorePoints)
     }
 }
 
@@ -234,10 +233,12 @@ class Bobs27Engine {
     fun playTurn(hits: List<DartHit>) {
         require(hits.size in 1..3)
         check(!state.complete)
-        val hit = hits.firstOrNull { it.number == state.doubleNumber && it.isDouble }
-        val delta = if (hit != null) 2 * state.doubleNumber else -2 * state.doubleNumber
+        val target = state.doubleNumber
+        val delta = hits.sumOf { hit ->
+            if (hit.number == target && hit.isDouble) 2 * target else -2 * target
+        }
         val next = state.score + delta
-        state = Bobs27State(next, state.doubleNumber + 1, state.doubleNumber >= 20)
+        state = Bobs27State(next, target + 1, target >= 20)
     }
 }
 
