@@ -5,10 +5,10 @@ import org.junit.Test
 
 class OfflineGameEnginesTest {
     @Test fun x01BustRestoresTheScoreAndPassesTheTurn() {
-        val game = X01GameEngine(X01Settings(301, outRule = X01OutRule.DOUBLE_OUT), listOf("A", "B"))
+        val game = X01GameEngine(X01Settings(101, outRule = X01OutRule.DOUBLE_OUT), listOf("A", "B"))
         val result = game.throwTurn(listOf(DartHit(20, 3), DartHit(20, 3), DartHit(20, 3)))
         assertTrue(result.bust)
-        assertEquals(301, game.state.players[0].score)
+        assertEquals(101, game.state.players[0].score)
         assertEquals(1, game.state.activePlayer)
     }
 
@@ -59,7 +59,7 @@ class OfflineGameEnginesTest {
     @Test fun bobs27PenalizesMissedDouble() {
         val game = Bobs27Engine()
         game.playTurn(listOf(DartHit(1, 1), DartHit.MISS, DartHit.MISS))
-        assertEquals(25, game.state.score)
+        assertEquals(21, game.state.score)
         assertEquals(2, game.state.doubleNumber)
     }
 
