@@ -1117,7 +1117,36 @@ class MainActivity : ComponentActivity() {
 
     private fun configureX01() {
         fun spinner(values: List<String>): Spinner = Spinner(this).apply {
-            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, values)
+            val spinnerAdapter = object : ArrayAdapter<String>(
+                this@MainActivity, android.R.layout.simple_spinner_item, values
+            ) {
+                override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+                    val label = (convertView as? TextView) ?: TextView(this@MainActivity)
+                    label.text = getItem(position) ?: ""
+                    label.textSize = 16f
+                    label.setTextColor(0xFF263D39.toInt())
+                    label.gravity = Gravity.CENTER_VERTICAL
+                    label.setPadding(12, 10, 12, 10)
+                    return label
+                }
+                override fun getDropDownView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+                    val label = (convertView as? TextView) ?: TextView(this@MainActivity)
+                    label.text = getItem(position) ?: ""
+                    label.textSize = 16f
+                    label.setTextColor(0xFF263D39.toInt())
+                    label.setBackgroundColor(android.graphics.Color.WHITE)
+                    label.setPadding(18, 16, 18, 16)
+                    return label
+                }
+            }
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            adapter = spinnerAdapter
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFFF7FAF9.toInt())
+                cornerRadius = 10f
+                setStroke(1, 0xFFB8CECA.toInt())
+            }
+            minimumHeight = 50
         }
         val scores = listOf("301", "501", "701")
         val inRules = listOf("Entrée libre", "Entrée double", "Entrée master")
@@ -1136,6 +1165,18 @@ class MainActivity : ComponentActivity() {
         val namesInput = EditText(this).apply {
             hint = "Joueur 1, Joueur 2, ..."
             setSingleLine(true)
+            textSize = 16f
+            setTextColor(0xFF183B36.toInt())
+            setHintTextColor(0xFF788A86.toInt())
+            setSelectAllOnFocus(false)
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
+            setPadding(14, 12, 14, 12)
+            minimumHeight = 54
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFFFFFFFF.toInt())
+                cornerRadius = 10f
+                setStroke(2, 0xFFB8CECA.toInt())
+            }
             val existing = state.get().optJSONArray("players") ?: JSONArray()
             setText((0 until existing.length()).mapNotNull { existing.optJSONObject(it)?.optString("name") }.joinToString(", "))
         }
