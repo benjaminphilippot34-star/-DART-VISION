@@ -13,12 +13,12 @@ class OfflineGameEnginesTest {
     }
 
     @Test fun x01HistoryCanIdentifyACompletedWinnerAndPreserveTurnStats() {
-        val game = X01GameEngine(X01Settings(40, outRule = X01OutRule.DOUBLE_OUT), listOf("Ben", "Flo"))
+        val game = X01GameEngine(X01Settings(40, outRule = X01OutRule.DOUBLE_OUT, legsToWin = 1, setsToWin = 1), listOf("Ben", "Flo"))
         val result = game.throwTurn(listOf(DartHit(20, 2)))
         assertTrue(result.legWon)
         assertTrue(game.state.legFinished)
         assertEquals("Ben", game.state.players[result.playerIndex].name)
-        assertEquals(1, game.state.players[result.playerIndex].legsWon)
+        assertEquals(1, game.state.players[result.playerIndex].setsWon)
         assertEquals(1, game.state.history.size)
         assertEquals(40, game.state.history.first().hits.first().points)
     }
