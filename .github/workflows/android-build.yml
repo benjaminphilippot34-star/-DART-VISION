@@ -96,9 +96,13 @@ jobs:
         run: |
           VERSION_NAME="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts | head -n 1)"
           TAG="v$VERSION_NAME"
-          gh release create "$TAG" android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk \
-            --title "DART VISION $VERSION_NAME" \
-            --notes "Correctif de stabilité et compatibilité des boîtes de dialogue. Mise à jour sans désinstallation."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk --clobber
+          else
+            gh release create "$TAG" android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk \
+              --title "DART VISION $VERSION_NAME" \
+              --notes "Mode normal ou caméra au choix. Mise à jour intégrée à l'application."
+          fi
 
       - name: Update in-app update manifest
         if: ${{ github.event_name != 'pull_request' }}
