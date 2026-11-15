@@ -1619,6 +1619,13 @@ class MainActivity : ComponentActivity() {
         val activeScore = text(gamePlayers?.getOrNull(activeIndex)?.score?.toString() ?: "301", 42f, white, true).apply { gravity = Gravity.START }
         activePanel.addView(activeScore)
         activePanel.addView(text("TOUR " + (engine?.state?.turnNumber ?: 1) + " • 3 FLÉCHETTES", 11f, white, true).apply { gravity = Gravity.START })
+        val activeStats = text("", 10f, white, true).apply {
+            gravity = Gravity.START
+            setPadding(0, dp(7), 0, 0)
+            maxLines = 3
+            setLineSpacing(dp(1).toFloat(), 1f)
+        }
+        activePanel.addView(activeStats)
         scoreboard.addView(activePanel)
         val opponents = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(8), 0, 0, 0); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1f) }
         gamePlayers?.forEachIndexed { index, player ->
@@ -1766,6 +1773,16 @@ class MainActivity : ComponentActivity() {
                     scoreView.text = engine.state.players[engine.state.activePlayer].score.toString()
                     scoreTurnView.text = "TOUR ${engine.state.turnNumber} • 3 FLÉCHETTES"
                 }
+                val history = engine.state.history.filter { it.playerIndex == engine.state.activePlayer }
+                val dartsThrown = history.sumOf { it.hits.size }
+                val pointsScored = history.sumOf { if (it.bust) 0 else (it.scoreBefore - it.scoreAfter).coerceAtLeast(0) }
+                val average = if (dartsThrown == 0) 0.0 else pointsScored * 3.0 / dartsThrown
+                val previous = history.lastOrNull()?.scoreBefore?.toString() ?: engine.state.settings.startingScore.toString()
+                activeStats.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) +
+                    "\\nSCORE PRÉCÉDENT  " + previous +
+                    "\\nFLÉCHETTES JETÉES  " + dartsThrown
+            } else {
+                activeStats.text = "MOYENNE  —\\nSCORE PRÉCÉDENT  —\\nFLÉCHETTES JETÉES  0"
             }
         }
         // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
