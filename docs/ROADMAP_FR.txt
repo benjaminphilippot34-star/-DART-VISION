@@ -27,7 +27,7 @@ Aucun pourcentage de précision ne sera annoncé avant mesure sur des séquences
 - Catalogue de 13 modes ajouté ; moteurs locaux de base présents pour X01, Cricket, Tactics, Shanghai et plusieurs entraînements.
 - Saisie manuelle d'un tour (1 à 3 fléchettes) reliée aux moteurs ; X01 gère les manches, sets et alternance du premier joueur. Les autres modes restent des versions de base à valider et leurs états ne sont pas tous sauvegardés.
 - Calibration perspective mathématique ajoutée : transformation des quatre coins de la cible vers des coordonnées en millimètres, puis conversion d'un point d'impact déjà localisé en score. Tests unitaires associés.
-- La calibration n'est pas encore intégrée à l'interface caméra : pas encore de sélection tactile des quatre coins ni de conversion fiable des coordonnées PreviewView/ImageAnalysis.
+- Calibration désormais accessible depuis l'écran caméra : sélection tactile des quatre coins extérieurs dans l'ordre haut-gauche, haut-droite, bas-droite, bas-gauche ; conversion PreviewView FIT_CENTER vers le buffer ImageAnalysis en tenant compte de la rotation ; sauvegarde locale et restauration. La transformation est calculée et validée, mais elle ne localise pas à elle seule la pointe d'une fléchette.
 - La détection caméra n'identifie pas encore les pointes : elle analyse seulement les changements d'image. Aucun score automatique ne doit être considéré comme opérationnel.
 
 Voir docs/COMPARATIF_APPLICATIONS_ET_ARCHITECTURE_FR.md pour la synthèse des idées retenues et le pipeline technique.
