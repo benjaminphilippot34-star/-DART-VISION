@@ -1292,11 +1292,7 @@ class MainActivity : ComponentActivity() {
             layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
             setOnClickListener {
                 dialog.dismiss()
-                cameraPanelView?.let { panel ->
-                    (panel.parent as? android.view.ViewGroup)?.removeView(panel)
-                    panel.visibility = View.VISIBLE
-                    gamePage.addView(panel)
-                }
+                showPage("more")
                 setCameraMode(true)
             }
         })
