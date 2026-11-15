@@ -92,14 +92,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v0.9.0 android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk \
-            --title "DART VISION 0.9.0" \
-            --notes "Première version Android signée avec la clé de publication permanente. Installation propre requise pour les utilisateurs de la version bêta signée différemment."
+          gh release create v0.9.1 android/app/build/outputs/apk/release/app-release.apk#dart-vision.apk \
+            --title "DART VISION 0.9.1" \
+            --notes "Mise à jour de l’interface DART VISION. Mise à jour de la version 0.9.0 sans désinstallation."
 
       - name: Update in-app update manifest
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/github-script@v7
-        env:
         with:
           script: |
             const fs = require('fs');
@@ -117,16 +116,16 @@ jobs:
               if (error.status !== 404) throw error;
             }
             const content = JSON.stringify({
-              versionCode: 10,
-              versionName: "0.9.0",
-              apkUrl: "https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v0.9.0/dart-vision.apk",
+              versionCode: 11,
+              versionName: "0.9.1",
+              apkUrl: "https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v0.9.1/dart-vision.apk",
               sha256
             }, null, 2) + "\n";
             await github.rest.repos.createOrUpdateFileContents({
               owner: context.repo.owner,
               repo: context.repo.repo,
               path,
-              message: "Publish DART VISION 0.9.0 update manifest",
+              message: "Publish DART VISION 0.9.1 update manifest",
               content: Buffer.from(content).toString('base64'),
               ...(sha ? { sha } : {})
             });
