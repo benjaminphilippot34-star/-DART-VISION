@@ -1335,7 +1335,7 @@ class MainActivity : ComponentActivity() {
         val teal = 0xFF28CDBA.toInt()
         val coral = 0xFFFF654F.toInt()
         val pale = 0xFF101B24.toInt()
-        val white = 0xFF1C2A35.toInt()
+        val white = android.graphics.Color.WHITE
         val hits = mutableListOf<DartHit>()
         initialHit?.let { hits.add(it) }
         var multiplier = selectedDartMultiplier
@@ -1377,7 +1377,7 @@ class MainActivity : ComponentActivity() {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
                     setPadding(dp(7), dp(7), dp(7), dp(7))
-                    background = rounded(if (activePlayer) 0xFF174E4B.toInt() else white,
+                    background = rounded(if (activePlayer) 0xFF174E4B.toInt() else 0xFF1C2A35.toInt(),
                         if (activePlayer) teal else 0xFF3A4D59.toInt(), 9)
                     layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
                         setMargins(dp(3), 0, dp(3), 0)
@@ -1391,12 +1391,12 @@ class MainActivity : ComponentActivity() {
         content.addView(playersBand)
         val entry = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            background = rounded(white, 0xFFD7E2DE.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
+            background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 30); setPadding(dp(5), dp(5), dp(5), dp(5))
         }
         entry.addView(text("▦", 22f, ink, true), LinearLayout.LayoutParams(dp(42), dp(56)))
         val slots = mutableListOf<TextView>()
         repeat(3) {
-            val slot = text("—", 19f, ink, true).apply { background = rounded(0xFFF5F8F7.toInt(), 0xFFDCE6E2.toInt(), 2) }
+            val slot = text("—", 19f, ink, true).apply { background = rounded(0xFF172630.toInt(), 0xFF3A4D59.toInt(), 6) }
             slots.add(slot)
             entry.addView(slot, LinearLayout.LayoutParams(0, dp(56), 1f).apply {
                 setMargins(dp(2), 0, dp(2), 0)
@@ -1410,7 +1410,7 @@ class MainActivity : ComponentActivity() {
         }
         entry.addView(submit)
         content.addView(entry, LinearLayout.LayoutParams(-1, dp(66)))
-        val count = text("0 / 3 fléchettes", 11f, 0xFF71817C.toInt(), true)
+        val count = text("0 / 3 fléchettes", 11f, 0xFF9AADB8.toInt(), true)
         content.addView(count, LinearLayout.LayoutParams(-1, dp(25)))
         val visitTotal = text("TOTAL DE LA VOLÉE : 0", 15f, coral, true)
         content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(30)))
@@ -1449,7 +1449,7 @@ class MainActivity : ComponentActivity() {
         fun bottomButton(caption: String, weight: Float = 1f, click: () -> Unit) =
             Button(this).apply {
                 text = caption; isAllCaps = false; textSize = 15f; setTextColor(ink)
-                background = rounded(pale, 0xFFD1DEDA.toInt(), 0)
+                background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
                 layoutParams = LinearLayout.LayoutParams(0, dp(56), weight)
                 setOnClickListener { click() }
             }
