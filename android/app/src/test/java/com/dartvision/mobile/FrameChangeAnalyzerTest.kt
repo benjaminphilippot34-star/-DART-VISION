@@ -36,4 +36,20 @@ class FrameChangeAnalyzerTest {
   assertEquals(0,persistence[0].toInt())
  }
 
+ @Test fun uniformExposureShiftDoesNotCreateChangedRegions() {
+  val reference=ByteArray(100){100.toByte()}
+  val brighter=ByteArray(100){140.toByte()}
+  val mask=FrameChangeAnalyzer.updatePersistenceMask(reference,brighter,ByteArray(100),28,3)
+  assertEquals(0,mask.count{it.toInt()!=0})
+ }
+ @Test fun localObjectChangeSurvivesGlobalExposureCompensation() {
+  val reference=ByteArray(100){100.toByte()}
+  val current=ByteArray(100){140.toByte()}
+  current[55]=210.toByte()
+  val persistence=ByteArray(100)
+  repeat(3) { FrameChangeAnalyzer.updatePersistenceMask(reference,current,persistence,28,3) }
+  val mask=FrameChangeAnalyzer.updatePersistenceMask(reference,current,persistence,28,3)
+  assertEquals(1,mask.count{it.toInt()!=0})
+ }
+
 }
