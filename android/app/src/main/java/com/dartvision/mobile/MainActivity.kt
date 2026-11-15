@@ -1259,7 +1259,7 @@ class MainActivity : ComponentActivity() {
             text = "▣"; isAllCaps = false; textSize = 21f; setTextColor(white)
             background = rounded(0xFFFF9826.toInt(), 0xFFFF9826.toInt(), 12)
             layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
-            setOnClickListener { dialog.dismiss(); setCameraMode(true) }
+            setOnClickListener { dialog.dismiss(); showPage("more"); setCameraMode(true) }
         })
         content.addView(bottom)
         render = {
