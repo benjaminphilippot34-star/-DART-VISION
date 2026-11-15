@@ -75,6 +75,7 @@ class MainActivity : ComponentActivity() {
     private var updateNavButton: Button? = null
     private var updateVersionLabel: TextView? = null
     private var updatePageView: LinearLayout? = null
+    @Volatile private var updateCheckRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +84,10 @@ class MainActivity : ComponentActivity() {
         startLocalGame()
         restoreX01Game()
         handleAuthCallback(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
         checkForUpdates(silent = true)
     }
 
@@ -1866,8 +1871,18 @@ class MainActivity : ComponentActivity() {
 
     private fun httpGet(url: String): String {
         val c = URL(url).openConnection() as HttpURLConnection
-        c.connectTimeout = 2500; c.readTimeout = 2500; c.requestMethod = "GET"
-        return c.inputStream.bufferedReader().use { it.readText() }.also { c.disconnect() }
+        c.connectTimeout = 12000
+        c.readTimeout = 12000
+        c.requestMethod = "GET"
+        c.useCaches = false
+        c.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0")
+        c.setRequestProperty("Pragma", "no-cache")
+        return try {
+            if (c.responseCode !in 200..299) throw IllegalStateException("HTTP ${c.responseCode}")
+            c.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            c.disconnect()
+        }
     }
 
     // Manifeste public du canal bêta ; le workflow de publication le met à jour.
@@ -1875,6 +1890,7 @@ class MainActivity : ComponentActivity() {
     private var downloadedUpdate: File? = null
 
     private fun checkForUpdates(silent: Boolean) {
+        if (updateCheckRunning) return
         if (updateManifestUrl.contains("OWNER/REPO")) {
             if (!silent) AlertDialog.Builder(this)
                 .setTitle("Mises à jour DART VISION")
@@ -1882,6 +1898,7 @@ class MainActivity : ComponentActivity() {
                 .setPositiveButton("OK", null).show()
             return
         }
+        updateCheckRunning = true
         worker.execute {
             try {
                 val manifest = JSONObject(httpGet(updateManifestUrl))
@@ -1911,7 +1928,9 @@ class MainActivity : ComponentActivity() {
                     updateNavButton?.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
-                if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("Vérification impossible").setMessage("Connexion ou publication indisponible. Réessaie plus tard.").setPositiveButton("OK", null).show() }
+                if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("Vérification impossible").setMessage("Impossible de joindre le serveur de mises à jour (${e.message ?: "erreur réseau"}). Vérifie ta connexion puis réessaie depuis PLUS > MISES À JOUR.").setPositiveButton("OK", null).show() }
+            } finally {
+                updateCheckRunning = false
             }
         }
     }
