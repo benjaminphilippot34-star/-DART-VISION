@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
     private var gamePageView: LinearLayout? = null
     private var manualEntryView: LinearLayout? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
+    private var selectedDartMultiplier: Int = 1
     private var x01Engine: X01GameEngine? = null
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
     private var availableUpdate: JSONObject? = null
@@ -322,7 +323,7 @@ class MainActivity : ComponentActivity() {
         gamePage.addView(entryTitle)
         val multiplierRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         listOf("SIMPLE", "DOUBLE", "TRIPLE", "BULL", "OUTER").forEachIndexed { index, label ->
-            btn(multiplierRow, label, index == 0) { enterManualTurn() }
+            btn(multiplierRow, label, index == 0) { selectedDartMultiplier = when (index) { 1 -> 2; 2 -> 3; else -> 1 }; enterManualTurn() }
         }
         gamePage.addView(multiplierRow)
         val keypad = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -330,14 +331,14 @@ class MainActivity : ComponentActivity() {
             val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
             for (col in 0 until 5) {
                 val number = r * 5 + col + 1
-                btn(row, number.toString(), false) { enterManualTurn() }
+                btn(row, number.toString(), false) { enterManualTurn(DartHit(number, selectedDartMultiplier)) }
             }
             keypad.addView(row)
         }
         gamePage.addView(keypad)
         val entryActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         btn(entryActions, "↶ ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
-        btn(entryActions, "MANQUÉ") { enterManualTurn() }
+        btn(entryActions, "MANQUÉ") { enterManualTurn(DartHit.MISS) }
         btn(entryActions, "SAISIR", true) { enterManualTurn() }
         gamePage.addView(entryActions)
         val cameraShortcut = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END }
@@ -1194,7 +1195,7 @@ class MainActivity : ComponentActivity() {
             .show()
     }
 
-    private fun enterManualTurn() {
+    private fun enterManualTurn(initialHit: DartHit? = null) {
         val engine = x01Engine
         if (engine == null && trainingTurnHandler == null) {
             AlertDialog.Builder(this).setTitle("Aucun mode sélectionné")
@@ -1210,8 +1211,9 @@ class MainActivity : ComponentActivity() {
         val pale = 0xFFE5F2EF.toInt()
         val white = android.graphics.Color.WHITE
         val hits = mutableListOf<DartHit>()
-        var multiplier = 1
-        var selectedTab = 0
+        initialHit?.let { hits.add(it) }
+        var multiplier = selectedDartMultiplier
+        var selectedTab = when (multiplier) { 2 -> 1; 3 -> 2; else -> 0 }
         lateinit var render: () -> Unit
         lateinit var addHit: (DartHit) -> Unit
         val content = LinearLayout(this).apply {
