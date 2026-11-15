@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
 data class ChangedRegion(val minX:Int,val minY:Int,val maxX:Int,val maxY:Int,val pixelCount:Int,val centroidX:Double,val centroidY:Double)
 /** Compare des empreintes de luminance. Une région n'est pas une détection de fléchette ni de pointe. */
-class FrameChangeAnalyzer(private val sampleWidth:Int=160,private val sampleHeight:Int=160,private val pixelThreshold:Int=28,private val minRegionPixels:Int=3):ImageAnalysis.Analyzer {
+class FrameChangeAnalyzer(val sampleWidth:Int=160,val sampleHeight:Int=160,private val pixelThreshold:Int=28,private val minRegionPixels:Int=3):ImageAnalysis.Analyzer {
  private val latestFrame=AtomicReference<ByteArray?>(null)
  @Volatile private var referenceFrame:ByteArray?=null
  @Volatile var changedPercent:Double?=null; private set
