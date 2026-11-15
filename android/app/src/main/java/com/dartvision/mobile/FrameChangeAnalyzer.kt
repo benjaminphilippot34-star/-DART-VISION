@@ -11,8 +11,11 @@ class FrameChangeAnalyzer(private val sampleWidth:Int=160,private val sampleHeig
  @Volatile var changedPercent:Double?=null; private set
  @Volatile var changedRegions:List<ChangedRegion> = emptyList(); private set
  @Volatile var framesReceived:Long=0; private set
+ @Volatile var imageWidth:Int=0; private set
+ @Volatile var imageHeight:Int=0; private set
+ @Volatile var rotationDegrees:Int=0; private set
  init { require(sampleWidth>0&&sampleHeight>0);require(pixelThreshold in 1..255);require(minRegionPixels>=1) }
- override fun analyze(image:ImageProxy){try{val p=image.planes.firstOrNull()?:return;val b=p.buffer;val d=ByteArray(b.remaining());b.get(d);val s=sampleLuma(d,image.width,image.height,p.rowStride,p.pixelStride,sampleWidth,sampleHeight);latestFrame.set(s);framesReceived++;referenceFrame?.let{changedPercent=changedPixelPercent(it,s,pixelThreshold);changedRegions=detectChangedRegions(it,s,sampleWidth,sampleHeight,pixelThreshold,minRegionPixels)}}finally{image.close()}}
+ override fun analyze(image:ImageProxy){try{imageWidth=image.width;imageHeight=image.height;rotationDegrees=image.imageInfo.rotationDegrees;val p=image.planes.firstOrNull()?:return;val b=p.buffer;val d=ByteArray(b.remaining());b.get(d);val s=sampleLuma(d,image.width,image.height,p.rowStride,p.pixelStride,sampleWidth,sampleHeight);latestFrame.set(s);framesReceived++;referenceFrame?.let{changedPercent=changedPixelPercent(it,s,pixelThreshold);changedRegions=detectChangedRegions(it,s,sampleWidth,sampleHeight,pixelThreshold,minRegionPixels)}}finally{image.close()}}
  fun captureReference():Boolean{val c=latestFrame.get()?:return false;referenceFrame=c.copyOf();changedPercent=0.0;changedRegions=emptyList();return true}
  fun clearReference(){referenceFrame=null;changedPercent=null;changedRegions=emptyList()}
  fun hasReference()=referenceFrame!=null
