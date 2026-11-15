@@ -148,4 +148,4 @@ Principes de conception DART VISION :
 - Le catalogue Kotlin est une première étape de structuration et de configuration ; il ne signifie pas que tous les moteurs de règles ou écrans sont déjà implémentés.
 
 ÉTAT D'IMPLÉMENTATION AU 15/11/2026 :
-Le dépôt contient maintenant un catalogue Kotlin de 13 modes et des modèles de réglages validés pour X01, Shanghai et 121 Checkout, avec tests unitaires. Les moteurs de partie complets, leurs interfaces et leurs tests de règles restent à construire.
+Le dépôt contient un catalogue de 13 modes, un moteur X01 avec saisie manuelle des tours dans l'interface, ainsi que des moteurs locaux de base pour Cricket, Tactics, Shanghai, Around the Clock, Bob's 27, Halve-It, 121 Checkout, Killer, Doubles Training, Singles Training, Score Training et Random Checkout. Des tests unitaires couvrent les règles principales. Ces moteurs ne sont pas tous reliés à des écrans de partie : à ce stade, seul le X01 dispose d'un parcours de saisie manuelle dans l'interface. Les règles spécifiques de chaque variante doivent encore être confrontées à la documentation officielle et testées en situation.
