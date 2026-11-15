@@ -157,4 +157,15 @@ class OfflineGameEnginesTest {
         assertEquals(301, restored.state.players[0].score)
     }
 
+    @Test fun x01BustRestoresDoubleInEntryStatus() {
+        val game = X01GameEngine(
+            X01Settings(40, inRule = X01InRule.DOUBLE_IN, outRule = X01OutRule.DOUBLE_OUT),
+            listOf("A", "B")
+        )
+        val result = game.throwTurn(listOf(DartHit(20, 2), DartHit(20, 1)))
+        assertTrue(result.bust)
+        assertFalse(game.state.players[0].hasEntered)
+        assertEquals(40, game.state.players[0].score)
+    }
+
 }
