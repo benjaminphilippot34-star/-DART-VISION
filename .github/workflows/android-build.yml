@@ -112,7 +112,7 @@ jobs:
             const fs = require('fs');
             const crypto = require('crypto');
             const gradle = fs.readFileSync('android/app/build.gradle.kts', 'utf8');
-            const versionCode = Number(gradle.match(/versionCode = (\\d+)/)?.[1]);
+            const versionCode = Number(gradle.match(/versionCode = (\d+)/)?.[1]);
             const versionName = gradle.match(/versionName = \"([^\"]+)\"/)?.[1];
             if (!versionCode || !versionName) throw new Error('Unable to read Android version from build.gradle.kts');
             const apk = fs.readFileSync('android/app/build/outputs/apk/release/app-release.apk');
