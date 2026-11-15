@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
     private var cameraPanelView: LinearLayout? = null
     private var navigateToMorePage: (() -> Unit)? = null
     private var gamePageView: LinearLayout? = null
+    private var manualEntryHost: LinearLayout? = null
     private var manualEntryView: LinearLayout? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var selectedDartMultiplier: Int = 1
@@ -353,28 +354,9 @@ class MainActivity : ComponentActivity() {
         refreshOpponentScores(currentPlayers, active, muted, white, teal)
         gamePage.addView(scoreCard)
 
-        val entryTitle = txt("SAISIE DE LA VOLÉE", 11f, muted, true).apply { setPadding(dp(3), dp(5), 0, dp(3)) }
-        gamePage.addView(entryTitle)
-        val multiplierRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        listOf("SIMPLE", "DOUBLE", "TRIPLE", "BULL", "OUTER").forEachIndexed { index, label ->
-            btn(multiplierRow, label, index == 0) { selectedDartMultiplier = when (index) { 1 -> 2; 2 -> 3; else -> 1 }; enterManualTurn() }
-        }
-        gamePage.addView(multiplierRow)
-        val keypad = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        for (r in 0 until 4) {
-            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            for (col in 0 until 5) {
-                val number = r * 5 + col + 1
-                btn(row, number.toString(), false) { enterManualTurn(DartHit(number, selectedDartMultiplier)) }
-            }
-            keypad.addView(row)
-        }
-        gamePage.addView(keypad)
-        val entryActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        btn(entryActions, "↶ ANNULER") { if (x01Engine?.undo() == true) refreshX01() else action("undo") }
-        btn(entryActions, "MANQUÉ") { enterManualTurn(DartHit.MISS) }
-        btn(entryActions, "SAISIR", true) { enterManualTurn() }
-        gamePage.addView(entryActions)
+        manualEntryHost = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        gamePage.addView(manualEntryHost)
+        showManualEntryPrompt()
         val cameraShortcut = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END }
         btn(cameraShortcut, "▣ CAMÉRA", false) {
             cameraPanelView?.let { panel ->
@@ -1308,6 +1290,28 @@ class MainActivity : ComponentActivity() {
             .show()
     }
 
+    private fun showManualEntryPrompt() {
+        val host = manualEntryHost ?: return
+        host.removeAllViews()
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        val prompt = TextView(this).apply {
+            text = "✦  SAISIR LES 3 FLÉCHETTES"
+            textSize = 15f
+            setTextColor(0xFF28CDBA.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(dp(12), dp(17), dp(12), dp(17))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF1C2A35.toInt())
+                cornerRadius = dp(14).toFloat()
+                setStroke(dp(1), 0xFF28CDBA.toInt())
+            }
+            setOnClickListener { enterManualTurn() }
+        }
+        host.addView(prompt, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
+    }
+
     private fun enterManualTurn(initialHit: DartHit? = null) {
         var engine = x01Engine
         if (engine == null && trainingTurnHandler == null) {
@@ -1327,11 +1331,11 @@ class MainActivity : ComponentActivity() {
         }
         val d = resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
-        val ink = 0xFF14221F.toInt()
+        val ink = 0xFFF2F6F8.toInt()
         val teal = 0xFF28CDBA.toInt()
-        val coral = 0xFFFF563D.toInt()
-        val pale = 0xFFE5F2EF.toInt()
-        val white = android.graphics.Color.WHITE
+        val coral = 0xFFFF654F.toInt()
+        val pale = 0xFF101B24.toInt()
+        val white = 0xFF1C2A35.toInt()
         val hits = mutableListOf<DartHit>()
         initialHit?.let { hits.add(it) }
         var multiplier = selectedDartMultiplier
@@ -1374,7 +1378,7 @@ class MainActivity : ComponentActivity() {
                     gravity = Gravity.CENTER
                     setPadding(dp(7), dp(7), dp(7), dp(7))
                     background = rounded(if (activePlayer) 0xFF174E4B.toInt() else white,
-                        if (activePlayer) teal else 0xFFD7E2DE.toInt(), 9)
+                        if (activePlayer) teal else 0xFF3A4D59.toInt(), 9)
                     layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
                         setMargins(dp(3), 0, dp(3), 0)
                     }
@@ -1399,8 +1403,8 @@ class MainActivity : ComponentActivity() {
             })
         }
         val submit = Button(this).apply {
-            text = "Submit"; isAllCaps = false; textSize = 13f; setTextColor(ink)
-            background = rounded(0xFF28C980.toInt(), 0xFF28C980.toInt(), 28)
+            text = "SAISIR"; isAllCaps = false; textSize = 13f; setTextColor(0xFF062A27.toInt())
+            background = rounded(teal, teal, 28)
             stateListAnimator = null; minHeight = dp(48)
             layoutParams = LinearLayout.LayoutParams(dp(94), dp(48)).apply { setMargins(dp(3), 0, 0, 0) }
         }
@@ -1433,7 +1437,7 @@ class MainActivity : ComponentActivity() {
                 val n = r * 5 + c + 1
                 val cell = text(n.toString(), 25f, ink, true).apply {
                     layoutParams = LinearLayout.LayoutParams(0, dp(66), 1f)
-                    background = rounded(pale, 0xFFD1DEDA.toInt(), 0)
+                    background = rounded(0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 9)
                     setOnClickListener { if (selectedTab < 3) addHit(DartHit(n, multiplier)) }
                 }
                 cells.add(cell); row.addView(cell)
@@ -1452,12 +1456,13 @@ class MainActivity : ComponentActivity() {
         bottom.addView(bottomButton("↶") { if (hits.isNotEmpty()) { hits.removeAt(hits.lastIndex); render() } })
         bottom.addView(bottomButton("MANQUÉ") { addHit(DartHit.MISS) })
         bottom.addView(Button(this).apply {
-            text = "▣"; isAllCaps = false; textSize = 21f; setTextColor(white)
-            background = rounded(0xFFFF9826.toInt(), 0xFFFF9826.toInt(), 12)
+            text = "▣"; isAllCaps = false; textSize = 21f; setTextColor(0xFF062A27.toInt())
+            background = rounded(teal, teal, 12)
             layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
             setOnClickListener {
                 (content.parent as? android.view.ViewGroup)?.removeView(content)
                 manualEntryView = null
+                showManualEntryPrompt()
                 navigateToMorePage?.invoke()
                 setCameraMode(true)
             }
@@ -1474,13 +1479,13 @@ class MainActivity : ComponentActivity() {
                         else -> (when (it.multiplier) { 2 -> "D"; 3 -> "T"; else -> "S" }) + it.number
                     }
                 } ?: "—"
-                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFFDDF8F2.toInt() else 0xFFF5F8F7.toInt(), 0xFFDCE6E2.toInt(), 2)
+                slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFF174E4B.toInt() else 0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
             visitTotal.text = "TOTAL DE LA VOLÉE : ${hits.sumOf { it.points }}"
             tabs.forEachIndexed { i, tab ->
                 tab.setTextColor(if (i == selectedTab) white else ink)
-                tab.background = rounded(if (i == selectedTab) coral else pale, if (i == selectedTab) coral else 0xFFD1DEDA.toInt(), 3)
+                tab.background = rounded(if (i == selectedTab) coral else 0xFF1C2A35.toInt(), if (i == selectedTab) coral else 0xFF3A4D59.toInt(), 3)
             }
             cells.forEach { it.alpha = if (hits.size == 3 || selectedTab >= 3) .35f else 1f }
             submit.isEnabled = hits.size == 3
@@ -1506,11 +1511,13 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                 (content.parent as? android.view.ViewGroup)?.removeView(content)
                 manualEntryView = null
+                showManualEntryPrompt()
             } catch (e: Exception) {
                 Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
             }
         }
-        val page = gamePageView ?: return
+        val page = manualEntryHost ?: return
+        page.removeAllViews()
         manualEntryView?.let { (it.parent as? android.view.ViewGroup)?.removeView(it) }
         manualEntryView = content
         page.addView(content)
