@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Logo DART VISION"
         }
         root.addView(logoView)
-        status = label("DART VISION 0.6.1 PREMIUM • démarrage…", 18f)
+        status = label("DART VISION 0.7.0 PREMIUM • démarrage…", 18f)
         root.addView(status)
         preview = PreviewView(this).apply {
             scaleType = PreviewView.ScaleType.FIT_CENTER
@@ -862,7 +862,7 @@ private class GameServer(
                 action(name, params)
                 newFixedLengthResponse(Response.Status.OK, "application/json", state.get().toString())
             }
-            "/" -> newFixedLengthResponse(Response.Status.OK, "text/plain", "DART VISION 0.6.1 • API locale active")
+            "/" -> newFixedLengthResponse(Response.Status.OK, "text/plain", "DART VISION 0.7.0 • API locale active")
             else -> newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Not found")
         }
     }
