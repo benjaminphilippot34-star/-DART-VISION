@@ -73,7 +73,9 @@ jobs:
       - name: Verify release APK signature
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          apksigner verify --verbose android/app/build/outputs/apk/release/app-release.apk
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose android/app/build/outputs/apk/release/app-release.apk
           sha256sum android/app/build/outputs/apk/release/app-release.apk | tee android/app/build/outputs/apk/release/SHA256SUMS.txt
 
       - name: Publish signed release artifact
