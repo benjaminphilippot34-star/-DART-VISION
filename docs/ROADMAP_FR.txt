@@ -5,7 +5,7 @@ ROADMAP DART VISION
 0.7 — Suivi des fléchettes présentes, détection des nouvelles fléchettes et retraits
 0.8 — Localisation de la pointe, calcul de zone et validation manuelle
 0.9 — Corpus de tests réels, mesure de précision et gestion des cas ambigus
-1.0 — Moteur de jeu complet, appairage QR sécurisé et synchronisation multi-téléphones
+0.95 — Catalogue DartCounter local, modèles de réglages X01/121/Shanghai et tests unitaires (socle ajouté ; moteurs de règles à développer)\n1.0 — Moteurs de jeu complets, interfaces de modes, appairage QR sécurisé et synchronisation multi-téléphones
 1.1 — Seconde caméra facultative et fusion des deux vues
 1.2 — Commandes vocales, annonces, profils et statistiques
 Après Android : portage iOS et synchronisation cloud facultative.
