@@ -128,6 +128,21 @@ class MainActivity : ComponentActivity() {
         header.addView(brand)
         root.addView(header)
 
+        // Accueil : accès immédiat aux parties et aux modes de jeu.
+        val startPanel = panel()
+        startPanel.addView(text("PRÊT À JOUER ?", 12f, accent, true))
+        startPanel.addView(text("Choisis un mode ou lance une nouvelle partie.", 14f, white))
+        val startActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        button(startActions, "NOUVELLE PARTIE", true) { showGameModes() }
+        button(startActions, "JOUEURS") { managePlayers() }
+        startPanel.addView(startActions)
+        val quickModes = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        button(quickModes, "X01") { selectedMode = DartGameMode.X01; configureX01() }
+        button(quickModes, "CRICKET") { selectedMode = DartGameMode.CRICKET; configureTrainingMode() }
+        button(quickModes, "ENTRAÎNEMENT") { showTrainingModes() }
+        startPanel.addView(quickModes)
+        root.addView(startPanel)
+
         val navigation = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -468,6 +483,20 @@ class MainActivity : ComponentActivity() {
         status.text = "Calibration effacée."
     }
 
+    private fun showTrainingModes() {
+        val modes = DartCounterModeCatalog.default.modes.filter { it.category != GameModeCategory.CLASSIC || it == DartGameMode.X01 }
+            .filter { it != DartGameMode.X01 }
+        val labels = modes.map { "${it.title} — ${it.description}" }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Entraînement et jeux")
+            .setItems(labels) { _, which ->
+                selectedMode = modes[which]
+                configureTrainingMode()
+            }
+            .setNegativeButton("Retour", null)
+            .show()
+    }
+
     private fun showGameModes() {
         val modes = DartCounterModeCatalog.default.modes
         val labels = modes.map { "${it.title} — ${it.description}" }.toTypedArray()
@@ -567,11 +596,21 @@ class MainActivity : ComponentActivity() {
         val outRules = listOf("Sortie libre", "Sortie double", "Sortie master")
         val legs = listOf("1", "2", "3", "4", "5")
         val sets = listOf("1", "2", "3", "4", "5")
+        val playerCounts = (1..4).map { it.toString() }
         val scoreSpinner = spinner(scores)
         val inSpinner = spinner(inRules)
         val outSpinner = spinner(outRules).apply { setSelection(1) }
         val legsSpinner = spinner(legs)
         val setsSpinner = spinner(sets)
+        val playerSpinner = spinner(playerCounts).apply {
+            setSelection(((state.get().optJSONArray("players")?.length() ?: 1) - 1).coerceIn(0, 3))
+        }
+        val namesInput = EditText(this).apply {
+            hint = "Joueur 1, Joueur 2, ..."
+            setSingleLine(true)
+            val existing = state.get().optJSONArray("players") ?: JSONArray()
+            setText((0 until existing.length()).mapNotNull { existing.optJSONObject(it)?.optString("name") }.joinToString(", "))
+        }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 8, 32, 8)
@@ -585,6 +624,14 @@ class MainActivity : ComponentActivity() {
             })
             content.addView(control)
         }
+        addChoice("Nombre de joueurs", playerSpinner)
+        content.addView(TextView(this).apply {
+            text = "Noms des joueurs (séparés par des virgules)"
+            textSize = 14f
+            setTextColor(0xFF202020.toInt())
+            setPadding(0, 10, 0, 0)
+        })
+        content.addView(namesInput)
         addChoice("Score de départ", scoreSpinner)
         addChoice("Règle d'entrée", inSpinner)
         addChoice("Règle de sortie", outSpinner)
@@ -595,12 +642,15 @@ class MainActivity : ComponentActivity() {
             .setView(content)
             .setNegativeButton("Annuler", null)
             .setPositiveButton("Démarrer") { _, _ ->
-                val names = mutableListOf<String>()
-                val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
-                for (i in 0 until currentPlayers.length()) {
-                    names.add(currentPlayers.getJSONObject(i).optString("name", "Joueur ${i + 1}"))
-                }
-                if (names.isEmpty()) names.add("Joueur 1")
+                val count = playerSpinner.selectedItemPosition + 1
+                val enteredNames = namesInput.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
+                val names = (0 until count).map { i -> enteredNames.getOrNull(i) ?: "Joueur ${i + 1}" }
+                val playersJson = JSONArray()
+                names.forEach { playersJson.put(JSONObject().put("name", it).put("score", scores[scoreSpinner.selectedItemPosition].toInt())) }
+                val localState = state.get()
+                localState.put("players", playersJson).put("active", 0).put("turn", 1).put("mode", "x01")
+                state.set(localState)
+                saveLocalState(localState)
                 val settings = X01Settings(
                     startingScore = scores[scoreSpinner.selectedItemPosition].toInt(),
                     inRule = X01InRule.entries[inSpinner.selectedItemPosition],
