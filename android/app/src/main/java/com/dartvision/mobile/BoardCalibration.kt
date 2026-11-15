@@ -20,6 +20,12 @@ class BoardCalibration private constructor(private val h: DoubleArray) {
         return BoardPoint(x, y)
     }
 
+    /** Converts a previously localized image impact into a board score. */
+    fun scoreImagePoint(imagePoint: ImagePoint, wireToleranceMm: Double = 1.5): DartScore? {
+        val point = toBoard(imagePoint) ?: return null
+        return DartboardScoring.score(point.xMm, point.yMm, wireToleranceMm)
+    }
+
     companion object {
         fun fromFourCorners(corners: List<ImagePoint>, halfSizeMm: Double = DartboardScoring.OUTER_RADIUS_MM): BoardCalibration {
             require(corners.size == 4)
