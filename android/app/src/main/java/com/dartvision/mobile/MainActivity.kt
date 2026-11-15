@@ -1409,6 +1409,17 @@ class MainActivity : ComponentActivity() {
             setPadding(0, 10, 0, 3)
         })
         playerSection.addView(namesInput)
+        val includeAccountPlayer = CheckBox(this).apply {
+            text = "Ajouter automatiquement mon profil à cette partie"
+            textSize = 13f
+            setTextColor(0xFF263D39.toInt())
+            isChecked = accountId() != null
+            isEnabled = accountId() != null
+        }
+        if (accountId() == null) {
+            includeAccountPlayer.text = "Connecte-toi pour ajouter automatiquement ton profil"
+        }
+        playerSection.addView(includeAccountPlayer)
         val rulesSection = section("PARAMÈTRES DE JEU", "Définis le score de départ et les règles de la partie.")
         addChoice(rulesSection, "Score de départ", scoreSpinner)
         addChoice(rulesSection, "Entrée dans la partie", inSpinner)
@@ -1426,7 +1437,10 @@ class MainActivity : ComponentActivity() {
             .setPositiveButton("COMMENCER LE JEU") { _, _ ->
                 val count = playerSpinner.selectedItemPosition + 1
                 val enteredNames = namesInput.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
-                val names = (0 until count).map { i -> enteredNames.getOrNull(i) ?: "Joueur ${i + 1}" }
+                val names = (0 until count).map { i ->
+                    if (i == 0 && includeAccountPlayer.isChecked) accountDisplayName()
+                    else enteredNames.getOrNull(i) ?: "Joueur ${i + 1}"
+                }
                 val playersJson = JSONArray()
                 names.forEach { playersJson.put(JSONObject().put("name", it).put("score", scores[scoreSpinner.selectedItemPosition].toInt())) }
                 val localState = state.get()
@@ -1441,6 +1455,9 @@ class MainActivity : ComponentActivity() {
                     setsToWin = sets[setsSpinner.selectedItemPosition].toInt()
                 )
                 x01Engine = X01GameEngine(settings, names)
+                x01AccountParticipant = includeAccountPlayer.isChecked
+                x01HistorySaved = false
+                x01StartedAt = java.time.Instant.now().toString()
                 trainingTurnHandler = null
                 selectedMode = DartGameMode.X01
                 saveX01Game()
@@ -1672,7 +1689,7 @@ class MainActivity : ComponentActivity() {
                 val live = if (engine != null) engine.previewTurn(hits.toList()) else null
                 if (live != null && (live.bust || live.legWon)) {
                     val result = engine!!.throwTurn(hits.toList())
-                    refreshX01(); saveX01Game()
+                    refreshX01(); saveX01Game(); saveFinishedAccountMatch()
                     val message = if (result.bust) "Bust : score restauré à ${result.scoreBefore}. Tour terminé." else "Leg gagné !"
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     (content.parent as? android.view.ViewGroup)?.removeView(content)
