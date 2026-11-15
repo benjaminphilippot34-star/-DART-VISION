@@ -127,7 +127,7 @@ class MainActivity : ComponentActivity() {
         }
         root.addView(updateButton)
         val row1 = LinearLayout(this)
-        addButton(row1, "Nouvelle 301") { action("new_game") }
+        addButton(row1, "Nouvelle 301") { if (x01Engine != null) configureX01() else action("new_game") }
         addButton(row1, "+ Joueur") { action("add_player") }
         addButton(row1, "Tour suivant") { action("next_turn") }
         root.addView(row1)
@@ -144,6 +144,10 @@ class MainActivity : ComponentActivity() {
         val row4 = LinearLayout(this)
         addButton(row4, "Modes DartCounter") { showGameModes() }
         addButton(row4, "Saisir un tour") { enterManualTurn() }
+        addButton(row4, "Nouvelle manche") {
+            try { x01Engine?.newLeg(); refreshX01() }
+            catch (_: Exception) { Toast.makeText(this, "Termine d'abord la manche en cours.", Toast.LENGTH_SHORT).show() }
+        }
         root.addView(row4)
         setContentView(root)
     }
