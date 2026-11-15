@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+val releaseStoreFile = System.getenv("DARTVISION_KEYSTORE_PATH")
+
 android {
     namespace = "com.dartvision.mobile"
     compileSdk = 35
@@ -9,8 +12,23 @@ android {
         applicationId = "com.dartvision.mobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "0.7.0"
+        versionCode = 9
+        versionName = "0.8.0"
+    }
+    signingConfigs {
+        create("release") {
+            if (!releaseStoreFile.isNullOrBlank()) {
+                storeFile = file(releaseStoreFile)
+                storePassword = System.getenv("DARTVISION_STORE_PASSWORD")
+                keyAlias = System.getenv("DARTVISION_KEY_ALIAS")
+                keyPassword = System.getenv("DARTVISION_KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
 }
 kotlin {
