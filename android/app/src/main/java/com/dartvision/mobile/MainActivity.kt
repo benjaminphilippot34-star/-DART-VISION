@@ -440,23 +440,76 @@ class MainActivity : ComponentActivity() {
         val engine = x01Engine
         if (engine == null && trainingTurnHandler == null) {
             AlertDialog.Builder(this).setTitle("Aucun mode sélectionné")
-                .setMessage("Choisis un mode dans « Modes DartCounter ».")
+                .setMessage("Choisis un mode dans « Modes de jeu ».")
                 .setPositiveButton("OK", null).show()
             return
         }
-        val input = EditText(this).apply {
-            hint = "Ex. T20, S20, D16"
-            setSingleLine(true)
+        val density = resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+            setBackgroundColor(0xFF151D25.toInt())
         }
-        AlertDialog.Builder(this)
-            .setTitle("Saisir les fléchettes du tour")
-            .setMessage("Formats : S20, D20, T20, S25 (25), D25 (50), MISS. Sépare les impacts par des virgules.")
-            .setView(input)
-            .setNegativeButton("Annuler", null)
-            .setPositiveButton("Valider") { _, _ ->
+        val display = TextView(this).apply {
+            text = "0"; textSize = 38f; gravity = Gravity.CENTER
+            setTextColor(0xFFF5F7FA.toInt()); setPadding(0, dp(12), 0, dp(12))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF263440.toInt()); cornerRadius = dp(12).toFloat()
+            }
+        }
+        content.addView(display, LinearLayout.LayoutParams(-1, dp(76)).apply { bottomMargin = dp(10) })
+        var entered = ""
+        fun refresh() { display.text = if (entered.isEmpty()) "0" else entered }
+        fun keyRow(labels: List<String>, onKey: (String) -> Unit) {
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            labels.forEach { label ->
+                row.addView(Button(this).apply {
+                    text = label; isAllCaps = false; textSize = 16f
+                    setTextColor(0xFFF5F7FA.toInt())
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        setColor(if (label in listOf("180", "140", "100", "60", "0", "MISS", "⌫", "EFFACER")) 0xFFE34B55.toInt() else 0xFF344451.toInt())
+                        cornerRadius = dp(9).toFloat()
+                    }
+                    layoutParams = LinearLayout.LayoutParams(0, dp(50), 1f).apply {
+                        setMargins(dp(3), dp(3), dp(3), dp(3))
+                    }
+                    setOnClickListener { onKey(label) }
+                })
+            }
+            content.addView(row)
+        }
+        for (digits in listOf(listOf("1","2","3"), listOf("4","5","6"), listOf("7","8","9"))) {
+            keyRow(digits) { if (entered.length < 3) entered += it; refresh() }
+        }
+        keyRow(listOf("⌫", "0", "EFFACER")) {
+            when (it) {
+                "⌫" -> if (entered.isNotEmpty()) entered = entered.dropLast(1)
+                "EFFACER" -> entered = ""
+                else -> if (entered.length < 3) entered += it
+            }
+            refresh()
+        }
+        content.addView(TextView(this).apply {
+            text = "SCORES RAPIDES"; textSize = 11f; setTextColor(0xFFB5C0C9.toInt())
+            setPadding(dp(4), dp(8), 0, 0)
+        })
+        keyRow(listOf("26", "41", "45", "60")) { entered = it; refresh() }
+        keyRow(listOf("81", "85", "100", "140")) { entered = it; refresh() }
+        keyRow(listOf("180", "MISS")) { entered = if (it == "MISS") "0" else it; refresh() }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("SAISIE MANUELLE DU SCORE")
+            .setView(content)
+            .setNegativeButton("ANNULER", null)
+            .setPositiveButton("VALIDER", null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 try {
-                    val hits = input.text.toString().split(",").map { parseDartHit(it.trim()) }
-                    require(hits.size in 1..3)
+                    val total = entered.toIntOrNull() ?: 0
+                    require(total in 0..180)
+                    val hits = scoreToDarts(total)
                     val message = if (engine != null) {
                         val result = engine.throwTurn(hits)
                         refreshX01()
@@ -468,10 +521,36 @@ class MainActivity : ComponentActivity() {
                         }
                     } else trainingTurnHandler!!.invoke(hits)
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Saisie invalide. Exemple : T20, S20, D16", Toast.LENGTH_LONG).show()
+                    dialog.dismiss()
+                } catch (_: Exception) {
+                    Toast.makeText(this, "Score invalide : saisis un total entre 0 et 180.", Toast.LENGTH_LONG).show()
                 }
-            }.show()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun scoreToDarts(total: Int): List<DartHit> {
+        require(total in 0..180)
+        if (total == 0) return List(3) { DartHit(null, 1) }
+        val values = (1..20).flatMap { n -> listOf(n to 1, n * 2 to 2, n * 3 to 3) } +
+            listOf(25 to 1, 50 to 2)
+        fun find(remaining: Int, dartsLeft: Int): List<DartHit>? {
+            if (remaining == 0) return emptyList()
+            if (dartsLeft == 0) return null
+            for ((points, multiplier) in values.asReversed()) {
+                if (points <= remaining) {
+                    val tail = find(remaining - points, dartsLeft - 1)
+                    if (tail != null) {
+                        val number = if (points == 25 || points == 50) 25 else points / multiplier
+                        return listOf(DartHit(number, multiplier)) + tail
+                    }
+                }
+            }
+            return null
+        }
+        val hits = find(total, 3) ?: throw IllegalArgumentException("Score non représentable")
+        return hits + List(3 - hits.size) { DartHit(null, 1) }
     }
 
     private fun parseDartHit(raw: String): DartHit = DartHitParser.parse(raw)
