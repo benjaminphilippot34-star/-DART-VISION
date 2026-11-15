@@ -43,6 +43,8 @@ data class Player(var name: String, var score: Int)
 class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
+    private lateinit var scoreContextView: TextView
+    private lateinit var scoreTurnView: TextView
     private lateinit var preview: PreviewView
     private lateinit var calibrationOverlay: CalibrationOverlay
     private val calibrationPoints = mutableListOf<ImagePoint>()
@@ -272,12 +274,17 @@ class MainActivity : ComponentActivity() {
                 setColor(0xFF121D27.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
             }
         }
-        scoreCard.addView(txt(selectedMode.title.uppercase(), 10f, teal, true))
-        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 501)?.toString() ?: "501", 58f, white, true)
-            .apply { gravity = Gravity.CENTER; setPadding(0, dp(2), 0, 0) }
+        scoreCard.addView(txt("MODE " + selectedMode.title.uppercase(), 10f, teal, true))
+        scoreCard.addView(txt("SCORE RESTANT", 10f, muted, true).apply { setPadding(0, dp(8), 0, 0) })
+        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 501)?.toString() ?: "501", 50f, white, true)
+            .apply { gravity = Gravity.CENTER; setPadding(0, 0, 0, 0) }
         scoreCard.addView(scoreView)
-        scoreCard.addView(txt("SCORE RESTANT", 9f, muted, true))
-        scoreCard.addView(txt("TOUR " + state.get().optInt("turn", 1) + "  •  3 FLÉCHETTES", 10f, teal, true).apply { setPadding(0, dp(7), 0, 0) })
+        scoreContextView = txt("JOUEUR : " + (currentPlayers.optJSONObject(active)?.optString("name", "Joueur 1") ?: "Joueur 1"), 15f, white, true)
+            .apply { gravity = Gravity.CENTER; setPadding(0, dp(3), 0, 0) }
+        scoreCard.addView(scoreContextView)
+        scoreTurnView = txt("TOUR " + state.get().optInt("turn", 1) + "   •   3 FLÉCHETTES", 10f, teal, true)
+            .apply { gravity = Gravity.CENTER; setPadding(0, dp(7), 0, 0) }
+        scoreCard.addView(scoreTurnView)
         gamePage.addView(scoreCard)
 
         val entryTitle = txt("SAISIE DE LA VOLÉE", 11f, muted, true).apply { setPadding(dp(3), dp(5), 0, dp(3)) }
@@ -1687,13 +1694,11 @@ class MainActivity : ComponentActivity() {
     private fun refreshScore() {
         val s = state.get()
         val players = s.optJSONArray("players") ?: JSONArray()
-        val lines = StringBuilder("301 • Tour ${s.optInt("turn", 1)}\n")
-        for (i in 0 until players.length()) {
-            val p = players.optJSONObject(i) ?: continue
-            lines.append(if (i == s.optInt("active")) "▶ " else "   ")
-                .append(p.optString("name")).append(" : ").append(p.optInt("score")).append("\n")
-        }
-        scoreView.text = lines.toString()
+        val active = s.optInt("active", 0).coerceIn(0, (players.length() - 1).coerceAtLeast(0))
+        val player = players.optJSONObject(active)
+        scoreView.text = player?.optInt("score", 301)?.toString() ?: "301"
+        scoreContextView.text = "JOUEUR : " + (player?.optString("name", "Joueur " + (active + 1)) ?: "Joueur " + (active + 1))
+        scoreTurnView.text = "TOUR " + s.optInt("turn", 1) + "   •   3 FLÉCHETTES"
     }
 
     private fun httpGet(url: String): String {
