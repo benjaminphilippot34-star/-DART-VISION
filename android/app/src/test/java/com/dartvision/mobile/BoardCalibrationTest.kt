@@ -48,4 +48,28 @@ class BoardCalibrationTest {
             // Expected.
         }
     }
+    @Test fun rejectsCrossedCornerOrder() {
+        try {
+            BoardCalibration.fromFourCorners(
+                listOf(ImagePoint(0.0, 0.0), ImagePoint(100.0, 100.0),
+                    ImagePoint(100.0, 0.0), ImagePoint(0.0, 100.0))
+            )
+            throw AssertionError("Expected crossed corner order to be rejected")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
+        }
+    }
+
+    @Test fun rejectsRepeatedCorner() {
+        try {
+            BoardCalibration.fromFourCorners(
+                listOf(ImagePoint(0.0, 0.0), ImagePoint(100.0, 0.0),
+                    ImagePoint(100.0, 100.0), ImagePoint(100.0, 0.0))
+            )
+            throw AssertionError("Expected repeated corner to be rejected")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
+        }
+    }
+
 }
