@@ -316,6 +316,7 @@ class MainActivity : ComponentActivity() {
         gameHeading.addView(headingText)
         btn(gameHeading, "SORTIES", false) { showCheckoutSuggestions() }
         btn(gameHeading, "MODES", false) { showGameModes() }
+        gameHeading.visibility = View.GONE
         gamePage.addView(gameHeading)
 
         val scoreCard = LinearLayout(this).apply {
@@ -362,6 +363,7 @@ class MainActivity : ComponentActivity() {
         }
         scoreCard.addView(opponentScroll)
         refreshOpponentScores(currentPlayers, active, muted, white, teal)
+        scoreCard.visibility = View.GONE
         gamePage.addView(scoreCard)
 
         manualEntryHost = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
