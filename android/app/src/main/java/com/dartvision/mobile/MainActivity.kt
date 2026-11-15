@@ -83,7 +83,8 @@ class MainActivity : ComponentActivity() {
             TextView(this).apply {
                 text = value; textSize = size; setTextColor(color)
                 if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setPadding(dp(2), dp(3), dp(2), dp(3))\n                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
+                setPadding(dp(2), dp(3), dp(2), dp(3))
+                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
             }
         fun card(): LinearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
