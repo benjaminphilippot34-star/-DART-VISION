@@ -14,7 +14,12 @@ class SupabaseAuthClient(
     fun signUp(email: String, password: String): AuthResult {
         require(email.contains("@")) { "Adresse e-mail invalide." }
         require(password.length >= 8) { "Le mot de passe doit contenir au moins 8 caractères." }
-        return request("/auth/v1/signup", JSONObject().put("email", email).put("password", password))
+        return request("/auth/v1/signup?redirect_to=" + java.net.URLEncoder.encode("dartvision://auth-callback", "UTF-8"), JSONObject().put("email", email).put("password", password))
+    }
+
+    fun getUser(accessToken: String): AuthResult {
+        val json = requestRawGet("/auth/v1/user", accessToken)
+        return AuthResult(accessToken, null, json.optString("id").ifBlank { null }, json.optString("email").ifBlank { null })
     }
 
     fun signIn(email: String, password: String): AuthResult =
@@ -35,6 +40,22 @@ class SupabaseAuthClient(
             json.optString("refresh_token").ifBlank { null },
             user.optString("id").ifBlank { null },
             user.optString("email").ifBlank { null })
+    }
+
+    private fun requestRawGet(path: String, accessToken: String): JSONObject {
+        val connection = (URL(projectUrl.trimEnd('/') + path).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"; connectTimeout = 15000; readTimeout = 20000
+            setRequestProperty("apikey", publishableKey)
+            setRequestProperty("Authorization", "Bearer $accessToken")
+            setRequestProperty("Accept", "application/json")
+        }
+        try {
+            val status = connection.responseCode
+            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
+            val response = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (status !in 200..299) throw IllegalStateException("Impossible de valider le compte (HTTP $status).")
+            return JSONObject(response)
+        } finally { connection.disconnect() }
     }
 
     private fun requestRaw(path: String, body: JSONObject): JSONObject {
