@@ -349,22 +349,61 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun configureX01() {
-        val choices = arrayOf("301", "501", "701")
+        fun spinner(values: List<String>): Spinner = Spinner(this).apply {
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, values)
+        }
+        val scores = listOf("301", "501", "701")
+        val inRules = listOf("Entrée libre", "Entrée double", "Entrée master")
+        val outRules = listOf("Sortie libre", "Sortie double", "Sortie master")
+        val legs = listOf("1", "2", "3", "4", "5")
+        val sets = listOf("1", "2", "3", "4", "5")
+        val scoreSpinner = spinner(scores)
+        val inSpinner = spinner(inRules)
+        val outSpinner = spinner(outRules).apply { setSelection(1) }
+        val legsSpinner = spinner(legs)
+        val setsSpinner = spinner(sets)
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 8, 32, 8)
+        }
+        fun addChoice(label: String, control: Spinner) {
+            content.addView(TextView(this).apply {
+                text = label
+                textSize = 14f
+                setTextColor(0xFF202020.toInt())
+                setPadding(0, 10, 0, 0)
+            })
+            content.addView(control)
+        }
+        addChoice("Score de départ", scoreSpinner)
+        addChoice("Règle d'entrée", inSpinner)
+        addChoice("Règle de sortie", outSpinner)
+        addChoice("Manches à gagner par set", legsSpinner)
+        addChoice("Sets à gagner", setsSpinner)
         AlertDialog.Builder(this)
-            .setTitle("Score de départ X01")
-            .setSingleChoiceItems(choices, 0) { dialog, which ->
-                val score = choices[which].toInt()
+            .setTitle("Configuration X01")
+            .setView(content)
+            .setNegativeButton("Annuler", null)
+            .setPositiveButton("Démarrer") { _, _ ->
                 val names = mutableListOf<String>()
-                val players = state.get().optJSONArray("players") ?: JSONArray()
-                for (i in 0 until players.length()) names.add(players.getJSONObject(i).optString("name", "Joueur ${i + 1}"))
+                val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
+                for (i in 0 until currentPlayers.length()) {
+                    names.add(currentPlayers.getJSONObject(i).optString("name", "Joueur ${i + 1}"))
+                }
                 if (names.isEmpty()) names.add("Joueur 1")
-                x01Engine = X01GameEngine(X01Settings(startingScore = score), names)
+                val settings = X01Settings(
+                    startingScore = scores[scoreSpinner.selectedItemPosition].toInt(),
+                    inRule = X01InRule.entries[inSpinner.selectedItemPosition],
+                    outRule = X01OutRule.entries[outSpinner.selectedItemPosition],
+                    legsToWin = legs[legsSpinner.selectedItemPosition].toInt(),
+                    setsToWin = sets[setsSpinner.selectedItemPosition].toInt()
+                )
+                x01Engine = X01GameEngine(settings, names)
+                trainingTurnHandler = null
                 selectedMode = DartGameMode.X01
                 saveX01Game()
                 refreshX01()
-                dialog.dismiss()
             }
-            .setNegativeButton("Annuler", null)
             .show()
     }
 
