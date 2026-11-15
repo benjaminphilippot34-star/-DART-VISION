@@ -178,52 +178,64 @@ class MainActivity : ComponentActivity() {
         trainingTurnHandler = when (selectedMode) {
             DartGameMode.CRICKET -> {
                 val game = CricketGameEngine(if (names.size >= 2) names else names + "Joueur 2")
-                { hits -> game.playTurn(hits); game.state.players.forEach { summary.append("\\n${it.name} : ${it.points} pts • ${it.marks.values.sum()} marques") }; "Cricket : tour enregistré." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\n${game.state.players.joinToString { "${it.name} : ${it.points} pts" }}"); scoreView.text = "${selectedMode.title}\\nMode local hors ligne$summary"; "Cricket : tour enregistré." }
+                handler
             }
             DartGameMode.TACTICS -> {
                 val game = TacticsGameEngine(if (names.size >= 2) names else names + "Joueur 2")
-                { hits -> game.playTurn(hits); game.state.players.forEach { summary.append("\\n${it.name} : ${it.points} pts") }; "Tactics : tour enregistré." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\n${game.state.players.joinToString { "${it.name} : ${it.points} pts" }}"); scoreView.text = "${selectedMode.title}\\nMode local hors ligne$summary"; "Tactics : tour enregistré." }
+                handler
             }
             DartGameMode.SHANGHAI -> {
                 val game = ShanghaiGameEngine(if (names.size >= 2) names else names + "Joueur 2")
-                { hits -> val player = game.state.activePlayer; game.playTurn(player, hits); game.state.players.forEach { summary.append("\\n${it.name} : ${it.score} pts") }; "Shanghai : numéro ${game.state.round}, joueur suivant ${game.state.activePlayer + 1}." }
+                val handler: (List<DartHit>) -> String = { hits -> val player = game.state.activePlayer; game.playTurn(player, hits); summary.append("\\n${game.state.players.joinToString { "${it.name} : ${it.score} pts" }}"); scoreView.text = "${selectedMode.title}\\nManche ${game.state.round}$summary"; "Shanghai : tour enregistré." }
+                handler
             }
             DartGameMode.AROUND_THE_CLOCK -> {
                 val game = AroundClockEngine(names.first())
-                { hits -> game.playTurn(hits); summary.append("\\nCible : ${game.state.target}"); if (game.state.complete) "Bravo, parcours terminé !" else "Cible suivante : ${game.state.target}" }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nCible : ${game.state.target}"); scoreView.text = "${selectedMode.title}$summary"; if (game.state.complete) "Bravo, parcours terminé !" else "Cible suivante : ${game.state.target}" }
+                handler
             }
             DartGameMode.BOBS_27 -> {
                 val game = Bobs27Engine()
-                { hits -> game.playTurn(hits); summary.append("\\nScore : ${game.state.score} • Double : ${game.state.doubleNumber}"); "Bob's 27 : score ${game.state.score}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nScore : ${game.state.score} • Double : ${game.state.doubleNumber}"); scoreView.text = "${selectedMode.title}$summary"; "Bob's 27 : score ${game.state.score}." }
+                handler
             }
             DartGameMode.HALVE_IT -> {
                 val game = HalveItEngine()
-                { hits -> game.playTurn(hits); summary.append("\\nScore : ${game.state.score} • Manche : ${game.state.roundIndex}"); "Halve-It : score ${game.state.score}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nScore : ${game.state.score} • Manche : ${game.state.roundIndex}"); scoreView.text = "${selectedMode.title}$summary"; "Halve-It : score ${game.state.score}." }
+                handler
             }
             DartGameMode.CHECKOUT_121 -> {
                 val game = Checkout121Engine()
-                { hits -> val success = game.attempt(hits); summary.append("\\nNiveau : ${game.state.level} • cible : ${game.state.targetScore} • réussites : ${game.state.completedAttempts}"); if (success) "Checkout réussi !" else "Échec : retour au Safehouse ${game.state.safehouseScore}." }
+                val handler: (List<DartHit>) -> String = { hits -> val success = game.attempt(hits); summary.append("\\nNiveau : ${game.state.level} • cible : ${game.state.targetScore} • réussites : ${game.state.completedAttempts}"); scoreView.text = "${selectedMode.title}$summary"; if (success) "Checkout réussi !" else "Échec : retour au Safehouse ${game.state.safehouseScore}." }
+                handler
             }
             DartGameMode.RANDOM_CHECKOUT -> {
                 val game = RandomCheckoutEngine()
-                { hits -> val target = game.state.target; game.attempt(hits); summary.append("\\nCible précédente : $target • réussites : ${game.state.completed}"); if (game.state.completed > 0) "Checkout validé !" else "Cible : $target • tentative enregistrée." }
+                val handler: (List<DartHit>) -> String = { hits -> val target = game.state.target; game.attempt(hits); summary.append("\\nCible : ${game.state.target} • réussites : ${game.state.completed}"); scoreView.text = "${selectedMode.title}$summary"; if (game.state.completed > 0) "Checkout validé !" else "Cible : $target • tentative enregistrée." }
+                handler
             }
             DartGameMode.DOUBLES_TRAINING -> {
                 val game = DoublesTrainingEngine()
-                { hits -> game.playTurn(hits); summary.append("\\nDouble visé : ${game.state.target} • réussites : ${game.state.hits}/${game.state.attempts}"); "Doubles : cible ${game.state.target}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nDouble visé : ${game.state.target} • réussites : ${game.state.hits}/${game.state.attempts}"); scoreView.text = "${selectedMode.title}$summary"; "Doubles : cible ${game.state.target}." }
+                handler
             }
             DartGameMode.SINGLES_TRAINING -> {
                 val game = SinglesTrainingEngine()
-                { hits -> game.playTurn(hits); summary.append("\\nSimple visé : ${game.state.target} • réussites : ${game.state.hits}/${game.state.attempts}"); "Simples : cible ${game.state.target}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nSimple visé : ${game.state.target} • réussites : ${game.state.hits}/${game.state.attempts}"); scoreView.text = "${selectedMode.title}$summary"; "Simples : cible ${game.state.target}." }
+                handler
             }
             DartGameMode.SCORE_TRAINING -> {
                 val game = ScoreTrainingEngine()
-                { hits -> game.playTurn(hits); summary.append("\\nTotal : ${game.state.totalPoints} pts • fléchettes : ${game.state.darts}"); "Score enregistré : +${hits.sumOf { it.points }}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\nTotal : ${game.state.totalPoints} pts • fléchettes : ${game.state.darts}"); scoreView.text = "${selectedMode.title}$summary"; "Score enregistré : +${hits.sumOf { it.points }}." }
+                handler
             }
             DartGameMode.KILLER -> {
                 val assigned = (1..20).shuffled().take(names.size.coerceAtLeast(2))
                 val game = KillerGameEngine(if (names.size >= 2) names else names + "Joueur 2", assigned)
-                { hits -> val player = game.state.activePlayer; game.playTurn(hits); summary.append("\\n${game.state.players.joinToString { "${it.name} : ${it.number} / vies ${it.lives} / killer ${it.isKiller}" }}"); if (game.state.winner != null) "Gagnant : ${game.state.players[game.state.winner!!].name}" else "Killer : tour de ${game.state.players[game.state.activePlayer].name}." }
+                val handler: (List<DartHit>) -> String = { hits -> game.playTurn(hits); summary.append("\\n${game.state.players.joinToString { "${it.name} : ${it.number} / vies ${it.lives} / killer ${it.isKiller}" }}"); scoreView.text = "${selectedMode.title}$summary"; if (game.state.winner != null) "Gagnant : ${game.state.players[game.state.winner!!].name}" else "Killer : tour de ${game.state.players[game.state.activePlayer].name}." }
+                handler
             }
             DartGameMode.X01 -> null
         }
@@ -253,9 +265,9 @@ class MainActivity : ComponentActivity() {
 
     private fun enterManualTurn() {
         val engine = x01Engine
-        if (engine == null) {
-            AlertDialog.Builder(this).setTitle("Mode X01 non configuré")
-                .setMessage("Choisis d'abord le mode X01 dans « Modes DartCounter ». La saisie manuelle sert de secours en attendant la détection automatique fiable par caméra.")
+        if (engine == null && trainingTurnHandler == null) {
+            AlertDialog.Builder(this).setTitle("Aucun mode sélectionné")
+                .setMessage("Choisis un mode dans « Modes DartCounter ».")
                 .setPositiveButton("OK", null).show()
             return
         }
