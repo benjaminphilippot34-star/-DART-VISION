@@ -851,9 +851,8 @@ class MainActivity : ComponentActivity() {
         return c.inputStream.bufferedReader().use { it.readText() }.also { c.disconnect() }
     }
 
-    // URL à remplacer lors de la publication du dépôt. Le fichier JSON doit contenir
-    // versionCode, versionName, apkUrl et sha256.
-    private val updateManifestUrl = "https://raw.githubusercontent.com/OWNER/REPO/main/latest.json"
+    // Manifeste public du canal bêta ; le workflow de publication le met à jour.
+    private val updateManifestUrl = "https://raw.githubusercontent.com/benjaminphilippot34-star/-DART-VISION/main/latest.json"
     private var downloadedUpdate: File? = null
 
     private fun checkForUpdates(silent: Boolean) {
