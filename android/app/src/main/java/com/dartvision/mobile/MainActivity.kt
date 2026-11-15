@@ -21,6 +21,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import fi.iki.elonen.NanoHTTPD
 import org.json.JSONArray
 import org.json.JSONObject
@@ -369,6 +371,14 @@ class MainActivity : ComponentActivity() {
         showPage(if (hasAccountAtStart) "home" else "account")
         shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
+        // Android 15+ dessine l'application derrière la barre système :
+        // réserver sa hauteur sous la navigation pour garder les onglets entièrement visibles.
+        ViewCompat.setOnApplyWindowInsetsListener(shell) { view, insets ->
+            val navigationInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.setPadding(0, 0, 0, navigationInset)
+            insets
+        }
+        ViewCompat.requestApplyInsets(shell)
     }
 
     private fun buildAccountPanel(): LinearLayout {
