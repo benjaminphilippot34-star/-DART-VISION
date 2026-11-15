@@ -11,12 +11,14 @@ CONTENU
 - Contrôle OTA préparé : vérification de version, téléchargement APK, contrôle SHA-256 et ouverture de l'installateur Android.
 - Icônes et identité visuelle DART VISION (les images lourdes sont conservées dans l'archive source d'origine, non copiées individuellement dans ce dépôt).
 
-LIMITES À CONNAÎTRE
-- Le moteur de jeu reste un prototype : règles complètes 501/301, double-out, bust, historique/annulation réelle et modes Cricket/Around the Clock/Shanghai/Killer restent à développer.
-- La détection automatique des fléchettes et le calcul fiable des impacts ne sont pas intégrés.
-- Le mode multi-téléphones nécessite actuellement un réseau local commun ; la création automatique d'un réseau/hotspot par le téléphone maître et l'appairage QR restent à développer.
-- Le projet n'a pas été compilé ni testé sur un Xiaomi dans cet environnement. Aucun APK prêt à installer n'est fourni.
-- Le serveur est destiné à un réseau local de confiance ; ne pas l'exposer à Internet.
+ÉTAT RÉEL ET LIMITES
+- Le mode X01 dispose d'un moteur local avec double-out, bust, manches, sets et alternance du joueur qui commence. Les règles avancées doivent encore être validées en situation réelle.
+- Plusieurs moteurs d'entraînement et de jeu (Cricket, Tactics, Shanghai, Bob's 27, Halve-It, etc.) sont présents et reliés à une saisie manuelle. Ils ne remplacent pas encore des écrans dédiés complets ; leurs règles doivent être testées.
+- La géométrie de la cible et la transformation perspective sont codées et testées sur des coordonnées synthétiques. La calibration n'est pas encore pilotée depuis l'écran caméra.
+- La caméra fournit un aperçu et une analyse des changements de luminance. Cela ne détecte pas encore la pointe d'une fléchette et ne calcule pas automatiquement un score fiable.
+- Le solo manuel fonctionne sans Internet. Le partage actuel utilise un serveur HTTP local sur le port 8765 et nécessite un réseau local commun ; l'appairage QR, l'authentification et la création automatique d'un hotspot ne sont pas intégrés.
+- Aucune validation sur cible physique ni sur Xiaomi 14T n'a encore été effectuée. La version debug produite par GitHub Actions est destinée aux essais, pas à une diffusion publique.
+- Le serveur local n'est pas sécurisé pour une exposition à Internet.
 
 MISES À JOUR OTA
 Le mécanisme est préparé, mais il ne fonctionnera qu'après configuration de latest.json, publication d'un APK signé et remplacement de OWNER/REPO dans MainActivity.kt.
