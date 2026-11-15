@@ -170,7 +170,7 @@ class CricketGameEngine(playerNames: List<String>, private val includeBull: Bool
 }
 
 data class ShanghaiPlayerState(val name: String, val score: Int = 0)
-data class ShanghaiGameState(val players: List<ShanghaiPlayerState>, val round: Int, val winner: Int? = null)
+data class ShanghaiGameState(val players: List<ShanghaiPlayerState>, val round: Int, val winner: Int? = null, val activePlayer: Int = 0)
 
 class ShanghaiGameEngine(
     playerNames: List<String>,
@@ -182,6 +182,7 @@ class ShanghaiGameEngine(
 
     fun playTurn(playerIndex: Int, hits: List<DartHit>) {
         require(playerIndex in state.players.indices)
+        require(playerIndex == state.activePlayer) { "Ce n'est pas le tour de ce joueur." }
         require(hits.size in 1..3)
         check(state.winner == null)
         val target = state.round
@@ -199,10 +200,12 @@ class ShanghaiGameEngine(
             else relevant.sumOf { it.points }
         val ps = state.players.toMutableList()
         ps[playerIndex] = ps[playerIndex].copy(score = ps[playerIndex].score + points)
-        val nextRound = state.round + 1
-        state = ShanghaiGameState(ps, nextRound, if (nextRound > settings.lastNumber) {
-            ps.indices.maxByOrNull { ps[it].score }
-        } else null)
+        val nextPlayer = (playerIndex + 1) % ps.size
+        val roundComplete = nextPlayer == 0
+        val nextRound = state.round + if (roundComplete) 1 else 0
+        val finished = roundComplete && nextRound > settings.lastNumber
+        state = ShanghaiGameState(ps, if (finished) settings.lastNumber else nextRound,
+            if (finished) ps.indices.maxByOrNull { ps[it].score } else null, nextPlayer)
     }
 }
 
