@@ -240,7 +240,6 @@ class MainActivity : ComponentActivity() {
         gameHeading.addView(headingText)
         btn(gameHeading, "CHECKOUT", false) { showCheckoutSuggestions() }
         btn(gameHeading, "MODES", false) { showGameModes() }
-        btn(gameHeading, "CAMÉRA", false) { showPage("more"); setCameraMode(true) }
         gamePage.addView(gameHeading)
         val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
         val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
