@@ -1369,6 +1369,7 @@ class MainActivity : ComponentActivity() {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(3), 0, dp(8))
         }
+        val playerScoreViews = mutableListOf<TextView>()
         val gamePlayers = engine?.state?.players
         if (gamePlayers != null) {
             gamePlayers.forEachIndexed { index, player ->
@@ -1384,7 +1385,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 playerCard.addView(text(player.name, 12f, if (activePlayer) white else ink, true))
-                playerCard.addView(text(player.score.toString(), 19f, if (activePlayer) white else ink, true))
+                val playerScore = text(player.score.toString(), 19f, if (activePlayer) white else ink, true)
+                playerScoreViews.add(playerScore)
+                playerCard.addView(playerScore)
                 playersBand.addView(playerCard)
             }
         }
@@ -1490,12 +1493,34 @@ class MainActivity : ComponentActivity() {
             cells.forEach { it.alpha = if (hits.size == 3 || selectedTab >= 3) .35f else 1f }
             submit.isEnabled = hits.size == 3
             submit.alpha = if (submit.isEnabled) 1f else .45f
+            if (engine != null && hits.isNotEmpty()) {
+                val live = engine.previewTurn(hits.toList())
+                playerScoreViews.getOrNull(live.playerIndex)?.text = live.scoreAfter.toString()
+                if (live.playerIndex == engine.state.activePlayer) {
+                    scoreView.text = live.scoreAfter.toString()
+                    scoreTurnView.text = if (live.bust) "BUST • SCORE RESTAURÉ" else "TOUR ${engine.state.turnNumber} • ${hits.size}/3 FLÉCHETTES"
+                }
+            }
         }
         // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
         tabs[3].setOnClickListener { selectedTab = 3; addHit(DartHit(25, 2)); render() }
         tabs[4].setOnClickListener { selectedTab = 4; addHit(DartHit(25, 1)); render() }
         // Le mode de saisie est une vraie saisie fléchette par fléchette, pas une estimation du total.
-        addHit = { hit -> if (hits.size < 3) { hits.add(hit); render() } }
+        addHit = { hit ->
+            if (hits.size < 3) {
+                hits.add(hit)
+                val live = if (engine != null) engine.previewTurn(hits.toList()) else null
+                if (live != null && (live.bust || live.legWon)) {
+                    val result = engine.throwTurn(hits.toList())
+                    refreshX01(); saveX01Game()
+                    val message = if (result.bust) "Bust : score restauré à ${result.scoreBefore}. Tour terminé." else "Leg gagné !"
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    (content.parent as? android.view.ViewGroup)?.removeView(content)
+                    manualEntryView = null
+                    showManualEntryPrompt()
+                } else render()
+            }
+        }
         submit.setOnClickListener {
             if (hits.size != 3) return@setOnClickListener
             try {
@@ -1631,14 +1656,13 @@ class MainActivity : ComponentActivity() {
     private fun refreshX01() {
         val engine = x01Engine ?: return
         val s = engine.state
-        val lines = StringBuilder("X01 ${s.settings.startingScore} • Tour ${s.turnNumber}\n")
-        s.players.forEachIndexed { i, p ->
-            lines.append(if (i == s.activePlayer) "▶ " else "   ")
-                .append(p.name).append(" : ").append(p.score).append("  • Legs ").append(p.legsWon).append(" • Sets ").append(p.setsWon).append("\n")
-        }
-        if (s.legFinished && !s.finished) lines.append("\nManche terminée — appuie sur Nouvelle manche.")
-        if (s.finished) lines.append("\nMatch terminé !")
-        scoreView.text = lines.toString()
+        val active = s.players[s.activePlayer]
+        scoreContextView.text = active.name
+        scoreView.text = active.score.toString()
+        scoreTurnView.text = if (s.finished) "MATCH TERMINÉ" else if (s.legFinished) "MANCHE TERMINÉE" else "TOUR ${s.turnNumber} • 3 FLÉCHETTES"
+        val opponentJson = JSONArray()
+        s.players.forEach { p -> opponentJson.put(JSONObject().put("name", p.name).put("score", p.score)) }
+        refreshOpponentScores(opponentJson, s.activePlayer, 0xFF9AADB8.toInt(), 0xFFF2F6F8.toInt(), 0xFF28CDBA.toInt())
         status.text = "MODE X01 • ${s.settings.startingScore} • hors ligne"
     }
 
