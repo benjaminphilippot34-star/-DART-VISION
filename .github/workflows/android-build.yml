@@ -103,6 +103,9 @@ jobs:
       - name: Update in-app update manifest
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/github-script@v7
+        env:
+          VERSION_CODE: "13"
+          VERSION_NAME: "0.9.3"
         with:
           script: |
             const fs = require('fs');
@@ -129,7 +132,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               path,
-              message: "Publish DART VISION 0.9.1 update manifest",
+              message: "Publish DART VISION 0.9.3 update manifest",
               content: Buffer.from(content).toString('base64'),
               ...(sha ? { sha } : {})
             });
