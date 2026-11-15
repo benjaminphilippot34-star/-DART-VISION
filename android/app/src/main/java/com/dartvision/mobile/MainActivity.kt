@@ -73,9 +73,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF101820.toInt()
-        val panel = 0xFF1B2732.toInt()
-        val accent = 0xFFE34B55.toInt()
+        val bg = 0xFF09090B.toInt()
+        val panel = 0xFF171719.toInt()
+        val accent = 0xFFE32636.toInt()
         val white = 0xFFF5F7FA.toInt()
         val muted = 0xFF9EABB7.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
             row.addView(Button(this).apply {
                 text = title; isAllCaps = false; textSize = 13f; setTextColor(white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) accent else 0xFF344451.toInt())
+                    setColor(if (primary) accent else 0xFF292326.toInt())
                     cornerRadius = dp(10).toFloat()
                 }
                 minHeight = dp(48)
@@ -130,8 +130,8 @@ class MainActivity : ComponentActivity() {
 
         // Accueil : accès immédiat aux parties et aux modes de jeu.
         val startPanel = panel()
-        startPanel.addView(text("PRÊT À JOUER ?", 12f, accent, true))
-        startPanel.addView(text("Choisis un mode ou lance une nouvelle partie.", 14f, white))
+        startPanel.addView(text("DART VISION  •  PRÊT À JOUER", 12f, accent, true))
+        startPanel.addView(text("LE JEU COMMENCE ICI", 13f, muted, true))
         val startActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         button(startActions, "NOUVELLE PARTIE", true) { showGameModes() }
         button(startActions, "JOUEURS") { managePlayers() }
@@ -305,8 +305,8 @@ class MainActivity : ComponentActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             })
         }
-        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient(this@MainActivity).signUp(email.text.toString().trim(), password.text.toString()) } }
-        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient(this@MainActivity).signIn(email.text.toString().trim(), password.text.toString()) } }
+        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient().signUp(email.text.toString().trim(), password.text.toString()) } }
+        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient().signIn(email.text.toString().trim(), password.text.toString()) } }
         panel.addView(row)
         val phoneRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         phoneRow.addView(Button(this).apply {
@@ -317,7 +317,7 @@ class MainActivity : ComponentActivity() {
                 val number = phone.text.toString().trim()
                 if (!number.startsWith("+") || number.length < 8) {
                     Toast.makeText(this@MainActivity, "Saisis le numéro au format international (+33...).", Toast.LENGTH_LONG).show()
-                } else runAccountRequest { SupabaseAuthClient(this@MainActivity).requestPhoneOtp(number) }
+                } else runAccountRequest { SupabaseAuthClient().requestPhoneOtp(number) }
             }
         })
         phoneRow.addView(Button(this).apply {
@@ -329,7 +329,7 @@ class MainActivity : ComponentActivity() {
                 val code = EditText(this@MainActivity).apply { hint = "Code reçu par SMS"; inputType = android.text.InputType.TYPE_CLASS_NUMBER }
                 AlertDialog.Builder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
                     .setPositiveButton("Valider") { _, _ ->
-                        runAccountRequest { SupabaseAuthClient(this@MainActivity).verifyPhoneOtp(number, code.text.toString().trim()) }
+                        runAccountRequest { SupabaseAuthClient().verifyPhoneOtp(number, code.text.toString().trim()) }
                     }.setNegativeButton("Annuler", null).show()
             }
         })
