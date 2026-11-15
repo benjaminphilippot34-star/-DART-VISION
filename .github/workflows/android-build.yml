@@ -108,8 +108,8 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/github-script@v7
         env:
-          VERSION_CODE: "14"
-          VERSION_NAME: "0.9.4"
+          VERSION_CODE: "17"
+          VERSION_NAME: "0.9.7"
         with:
           script: |
             const fs = require('fs');
@@ -136,7 +136,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               path,
-              message: "Publish DART VISION 0.9.4 update manifest",
+              message: "Publish DART VISION 0.9.7 update manifest",
               content: Buffer.from(content).toString('base64'),
               ...(sha ? { sha } : {})
             });

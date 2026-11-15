@@ -8,12 +8,15 @@ val releaseStoreFile = System.getenv("DARTVISION_KEYSTORE_PATH")
 android {
     namespace = "com.dartvision.mobile"
     compileSdk = 35
+    buildFeatures { buildConfig = true }
     defaultConfig {
         applicationId = "com.dartvision.mobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.9.6"
+        versionCode = 17
+        versionName = "0.9.7"
+        buildConfigField("String", "SUPABASE_URL", "\"https://evfvekajquaxrvyozpua.supabase.co\"")
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_xFBcy-XA9F8RVjzzRb2xkg_rHxjKFLL\"")
     }
     signingConfigs {
         create("release") {
@@ -26,14 +29,10 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-        }
+        getByName("release") { signingConfig = signingConfigs.getByName("release") }
     }
 }
-kotlin {
-    jvmToolchain(17)
-}
+kotlin { jvmToolchain(17) }
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")

@@ -2,6 +2,13 @@
 
 Application Android de comptage et d'entraînement aux fléchettes, conçue pour fonctionner en partie locale sans connexion Internet.
 
+## Connexion Supabase (préparation 0.9.7)
+
+- URL du projet et clé publishable configurées dans `BuildConfig`.
+- Adaptateur Kotlin d'inscription/connexion Supabase ajouté (`SupabaseAuthClient`). Les appels doivent être exécutés sur un thread de fond.
+- Schéma SQL initial avec profils, amitiés, parties, participants et tours disponible dans `supabase/migrations/0001_initial_schema.sql`.
+- **La connexion n'est pas encore intégrée à l'interface et la synchronisation/multijoueur ne sont pas encore actifs.** Il faut exécuter la migration dans Supabase, puis intégrer l'écran de compte et les dépôts de données avant d'activer ces fonctions.
+
 ## État du projet
 
 Version Android déclarée : **0.8.0** (versionCode 9). Le projet est en développement actif.
