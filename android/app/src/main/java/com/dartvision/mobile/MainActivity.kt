@@ -65,6 +65,8 @@ class MainActivity : ComponentActivity() {
     private var cameraModeEnabled = false
     private var cameraPanelView: LinearLayout? = null
     private var navigateToMorePage: (() -> Unit)? = null
+    private var gamePageView: LinearLayout? = null
+    private var manualEntryView: LinearLayout? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
     private var x01Engine: X01GameEngine? = null
     private var trainingTurnHandler: ((List<DartHit>) -> String)? = null
@@ -171,6 +173,7 @@ class MainActivity : ComponentActivity() {
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val gamePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        gamePageView = gamePage
         val playersPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val morePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val accountPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -1211,7 +1214,6 @@ class MainActivity : ComponentActivity() {
         var selectedTab = 0
         lateinit var render: () -> Unit
         lateinit var addHit: (DartHit) -> Unit
-        lateinit var dialog: AlertDialog
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), dp(8), dp(14), dp(10))
@@ -1330,7 +1332,8 @@ class MainActivity : ComponentActivity() {
             background = rounded(0xFFFF9826.toInt(), 0xFFFF9826.toInt(), 12)
             layoutParams = LinearLayout.LayoutParams(dp(58), dp(52))
             setOnClickListener {
-                dialog.dismiss()
+                (content.parent as? android.view.ViewGroup)?.removeView(content)
+                manualEntryView = null
                 navigateToMorePage?.invoke()
                 setCameraMode(true)
             }
@@ -1364,8 +1367,6 @@ class MainActivity : ComponentActivity() {
         tabs[4].setOnClickListener { selectedTab = 4; addHit(DartHit(25, 1)); render() }
         // Le mode de saisie est une vraie saisie fléchette par fléchette, pas une estimation du total.
         addHit = { hit -> if (hits.size < 3) { hits.add(hit); render() } }
-        dialog = AlertDialog.Builder(this).setView(content).create()
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         submit.setOnClickListener {
             if (hits.size != 3) return@setOnClickListener
             try {
@@ -1379,14 +1380,16 @@ class MainActivity : ComponentActivity() {
                     }
                 } else trainingTurnHandler!!.invoke(hits.toList())
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                dialog.dismiss()
+                (content.parent as? android.view.ViewGroup)?.removeView(content)
+                manualEntryView = null
             } catch (e: Exception) {
                 Toast.makeText(this, e.message ?: "Score impossible à enregistrer.", Toast.LENGTH_LONG).show()
             }
         }
-        dialog.setOnShowListener { dialog.window?.setLayout(-1, -1); render() }
-        dialog.show()
-        dialog.window?.setLayout(-1, -1)
+        val page = gamePageView ?: return
+        manualEntryView?.let { (it.parent as? android.view.ViewGroup)?.removeView(it) }
+        manualEntryView = content
+        page.addView(content)
         render()
     }
 
