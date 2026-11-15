@@ -1,7 +1,5 @@
 package com.dartvision.mobile
 
-import kotlin.math.max
-
 /** Impact reconnu ou saisi manuellement. multiplier: 0 miss, 1 simple, 2 double, 3 triple. */
 data class DartHit(val number: Int?, val multiplier: Int) {
     init {
@@ -158,7 +156,7 @@ class CricketGameEngine(playerNames: List<String>, private val includeBull: Bool
             val overflow = (total - 3).coerceAtLeast(0)
             marks[n] = closedMarks
             val opponentsClosed = ps.indices.filter { it != i }.all { (ps[it].marks[n] ?: 0) >= 3 }
-            val points = if (old >= 3 || overflow == 0 || opponentsClosed) 0 else {
+            val points = if (overflow == 0 || opponentsClosed) 0 else {
                 val value = if (n == 25) 25 else n
                 value * overflow
             }
@@ -219,7 +217,7 @@ class AroundClockEngine(playerName: String, private val requireDoubles: Boolean 
         for (hit in hits) {
             val valid = hit.number == target && (!requireDoubles || hit.isDouble)
             if (valid) target++
-            if (target > 20 && includeBull && hit.number == 25) target = 21
+            if (includeBull && target == 21 && hit.number == 25) target = 22
         }
         state = state.copy(target = target.coerceAtMost(if (includeBull) 22 else 21),
             complete = target > if (includeBull) 21 else 20)
