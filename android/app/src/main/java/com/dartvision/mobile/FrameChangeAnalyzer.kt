@@ -150,15 +150,25 @@ class FrameChangeAnalyzer(
         ): ByteArray {
             require(reference.size == current.size && current.size == persistence.size)
             require(threshold in 1..255 && requiredFrames in 1..255)
+
+            // Compense les variations globales d'exposition/luminosité avant
+            // de rechercher les changements locaux (ex. une nouvelle fléchette).
+            val offsets = IntArray(reference.size) { i ->
+                (current[i].toInt() and 255) - (reference[i].toInt() and 255)
+            }
+            val globalOffset = if (offsets.isEmpty()) 0 else {
+                offsets.sort()
+                offsets[offsets.size / 2]
+            }
+
             val mask = ByteArray(reference.size)
             for (i in reference.indices) {
-                val difference = abs(
-                    (reference[i].toInt() and 255) -
-                        (current[i].toInt() and 255)
-                )
+                val rawDifference =
+                    (current[i].toInt() and 255) - (reference[i].toInt() and 255)
+                val difference = abs(rawDifference - globalOffset)
                 persistence[i] = if (difference >= threshold) {
-                    (persistence[i].toInt() and 255)
-                        .plus(1).coerceAtMost(requiredFrames).toByte()
+                    ((persistence[i].toInt() and 255) + 1)
+                        .coerceAtMost(requiredFrames).toByte()
                 } else {
                     0
                 }
