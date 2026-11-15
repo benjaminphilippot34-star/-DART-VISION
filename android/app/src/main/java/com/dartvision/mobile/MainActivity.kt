@@ -75,7 +75,8 @@ class MainActivity : ComponentActivity() {
     private var updateNavButton: Button? = null
     private var updateVersionLabel: TextView? = null
     private var updatePageView: LinearLayout? = null
-    @Volatile private var updateCheckRunning = false
+    private var homeUpdateBanner: LinearLayout? = null
+    private var updateCheckRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -236,6 +237,34 @@ class MainActivity : ComponentActivity() {
         val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, 0) }
         btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
         hero.addView(play)
+        homeUpdateBanner = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(15), dp(13), dp(12), dp(13))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFFE5C36B.toInt(), 0xFFAA812F.toInt())
+            ).apply { cornerRadius = dp(18).toFloat(); setStroke(dp(1), 0xFFFFE5A1.toInt()) }
+            visibility = View.GONE
+        }
+        val updateBannerTop = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val updateBannerText = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
+        updateBannerText.addView(txt("↻  NOUVELLE VERSION DISPONIBLE", 14f, 0xFF30230D.toInt(), true))
+        updateBannerText.addView(txt("Une mise à jour de DART VISION est prête à installer.", 10f, 0xFF493715.toInt()))
+        updateBannerTop.addView(updateBannerText)
+        val closeUpdateBanner = TextView(this).apply {
+            text = "×"; textSize = 25f; setTextColor(0xFF30230D.toInt()); gravity = Gravity.CENTER
+            setPadding(dp(10), 0, dp(4), 0); contentDescription = "Masquer l'annonce de mise à jour"
+            setOnClickListener { homeUpdateBanner?.visibility = View.GONE }
+        }
+        updateBannerTop.addView(closeUpdateBanner)
+        homeUpdateBanner?.addView(updateBannerTop)
+        val updateBannerAction = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END; setPadding(0, dp(8), 0, 0) }
+        btn(updateBannerAction, "METTRE À JOUR", true) {
+            val info = availableUpdate
+            if (info != null) downloadAndInstallUpdate(info.optString("apkUrl"), info.optString("sha256", ""))
+        }
+        homeUpdateBanner?.addView(updateBannerAction)
+        home.addView(homeUpdateBanner)
         home.addView(hero)
         home.addView(txt("MENU PRINCIPAL", 11f, muted, true).apply { setPadding(dp(3), dp(4), 0, dp(7)) })
         fun tile(title: String, sub: String, glyph: String, click: () -> Unit) {
@@ -1913,6 +1942,7 @@ class MainActivity : ComponentActivity() {
                     runOnUiThread {
                         availableUpdate = null
                         updateNavButton?.visibility = View.GONE
+                        homeUpdateBanner?.visibility = View.GONE
                         updateVersionLabel?.text = "Aucune mise à jour disponible. DART VISION est à jour."
                         if (!silent) AlertDialog.Builder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show()
                     }
@@ -1926,6 +1956,7 @@ class MainActivity : ComponentActivity() {
                     availableUpdate = manifest
                     updateVersionLabel?.text = "DART VISION $versionName est disponible. Appuie ci-dessous pour télécharger la version officielle signée."
                     updateNavButton?.visibility = View.VISIBLE
+                    homeUpdateBanner?.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
                 if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("Vérification impossible").setMessage("Impossible de joindre le serveur de mises à jour (${e.message ?: "erreur réseau"}). Vérifie ta connexion puis réessaie depuis PLUS > MISES À JOUR.").setPositiveButton("OK", null).show() }
