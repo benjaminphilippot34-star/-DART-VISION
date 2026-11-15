@@ -105,4 +105,15 @@ class OfflineGameEnginesTest {
         assertEquals(3, game.state.darts)
     }
 
+
+    @Test fun shanghaiGivesEveryPlayerTheSameRoundBeforeAdvancing() {
+        val game = ShanghaiGameEngine(listOf("A", "B"), ShanghaiSettings(1, 2))
+        game.playTurn(0, listOf(DartHit(1, 1)))
+        assertEquals(1, game.state.round)
+        assertEquals(1, game.state.activePlayer)
+        game.playTurn(1, listOf(DartHit(1, 2)))
+        assertEquals(2, game.state.round)
+        assertEquals(0, game.state.activePlayer)
+    }
+
 }
