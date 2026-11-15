@@ -70,4 +70,39 @@ class OfflineGameEnginesTest {
         assertEquals(10, game.state.score)
         assertTrue(game.state.complete)
     }
+
+    @Test fun cricketScoresAfterTheOpponentMissesAClosedNumber() {
+        val game = CricketGameEngine(listOf("A", "B"), includeBull = false)
+        game.playTurn(listOf(DartHit(20, 3)))
+        game.playTurn(listOf(DartHit.MISS))
+        game.playTurn(listOf(DartHit(20, 3)))
+        assertEquals(60, game.state.players[0].points)
+    }
+
+    @Test fun checkout121AdvancesAfterAValidDoubleFinish() {
+        val game = Checkout121Engine(Checkout121Settings(startingScore = 40, dartsPerAttempt = 3))
+        assertTrue(game.attempt(listOf(DartHit(20, 2))))
+        assertEquals(122, game.state.targetScore)
+        assertEquals(2, game.state.level)
+    }
+
+    @Test fun killerNeedsThreeMarksToBecomeKiller() {
+        val game = KillerGameEngine(listOf("A", "B"), listOf(20, 19))
+        game.playTurn(listOf(DartHit(20, 3)))
+        assertTrue(game.state.players[0].isKiller)
+    }
+
+    @Test fun doublesTrainingMovesToTheNextTargetOnHit() {
+        val game = DoublesTrainingEngine(1, 2)
+        game.playTurn(listOf(DartHit(1, 2)))
+        assertEquals(2, game.state.target)
+    }
+
+    @Test fun scoreTrainingAddsEveryDart() {
+        val game = ScoreTrainingEngine()
+        game.playTurn(listOf(DartHit(20, 3), DartHit(20, 1), DartHit.MISS))
+        assertEquals(80, game.state.totalPoints)
+        assertEquals(3, game.state.darts)
+    }
+
 }
