@@ -1474,14 +1474,9 @@ class MainActivity : ComponentActivity() {
         render = {
             slots.forEachIndexed { i, slot ->
                 val hit = hits.getOrNull(i)
-                slot.text = hit?.let {
-                    when {
-                        it.number == null -> "MISS"
-                        it.number == 25 && it.multiplier == 2 -> "50"
-                        it.number == 25 -> "25"
-                        else -> (when (it.multiplier) { 2 -> "D"; 3 -> "T"; else -> "S" }) + it.number
-                    }
-                } ?: "—"
+                // Affiche la valeur réellement comptabilisée pour la fléchette :
+                // Simple 20 = 20, Double 20 = 40, Triple 20 = 60.
+                slot.text = hit?.let { if (it.number == null) "MISS" else it.points.toString() } ?: "—"
                 slot.background = rounded(if (i == hits.size && hits.size < 3) 0xFF174E4B.toInt() else 0xFF1C2A35.toInt(), 0xFF3A4D59.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
