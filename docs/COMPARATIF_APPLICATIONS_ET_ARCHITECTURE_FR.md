@@ -80,3 +80,37 @@ ORDRE DE DÉVELOPPEMENT RECOMMANDÉ
 
 ÉTAT HONNÊTE AU 15/11/2026
 Le dépôt contient une base Android CameraX, un analyseur simple de changements d'image et un calculateur géométrique de score avec tests unitaires. Cela ne constitue pas encore une IA qui reconnaît les pointes de fléchettes. Le pipeline décrit ici est le plan de travail, pas une fonctionnalité déjà opérationnelle.
+
+FONCTIONNEMENT HORS LIGNE — EXIGENCE OBLIGATOIRE
+------------------------------------------------
+DART VISION doit rester utilisable dans une salle sans box, sans Internet et sans réseau Wi-Fi préexistant.
+
+MODE 1 — UN SEUL TÉLÉPHONE
+- La caméra, la détection, la calibration, le moteur de jeu, les annonces vocales et l'historique local fonctionnent entièrement sur l'appareil.
+- Aucune connexion réseau ne doit être nécessaire pour démarrer ou terminer une partie.
+- Les données de partie sont conservées localement.
+
+MODE 2 — PLUSIEURS TÉLÉPHONES, SANS ROUTEUR
+- Le téléphone maître peut proposer de créer un point d'accès Wi-Fi local (hotspot) et héberger la partie.
+- Les téléphones joueurs rejoignent ce réseau local ; Internet n'est pas requis.
+- Prévoir un appairage simple par QR code ou code court, avec jeton temporaire et commandes authentifiées.
+- Vérifier les restrictions Android et les autorisations nécessaires à la création/gestion du point d'accès ; si le système ne permet pas l'activation automatique, guider l'utilisateur vers les réglages Android.
+- Étudier Wi-Fi Direct comme solution complémentaire si elle apporte une meilleure compatibilité. Ne pas en faire une dépendance avant validation sur plusieurs modèles.
+- Bluetooth peut servir à des commandes ou messages légers en secours, mais ne doit pas être utilisé pour transporter le flux vidéo de la caméra.
+
+MODE 3 — RÉSEAU LOCAL DÉJÀ DISPONIBLE
+- Les appareils peuvent rejoindre le même Wi-Fi existant.
+- Le fonctionnement doit rester local et ne pas dépendre d'un accès Internet.
+
+COMPORTEMENT EN CAS DE COUPURE
+- La partie continue sur le téléphone maître si un appareil secondaire se déconnecte.
+- Les commandes sont mises en attente ou refusées proprement ; ne jamais appliquer deux fois un lancer.
+- À la reconnexion, synchroniser l'état maître et signaler les conflits éventuels.
+- Aucun score ni historique ne doit être perdu en cas de perte du réseau secondaire.
+
+CRITÈRE DE VALIDATION
+Tester une partie complète :
+1. sur un seul téléphone en mode avion (en réactivant uniquement la caméra si nécessaire) ;
+2. avec plusieurs téléphones sur le hotspot du téléphone maître, sans Internet ;
+3. avec coupure puis rétablissement du réseau pendant une partie.
+Le mode hors ligne est une condition de sortie, pas une option future.
