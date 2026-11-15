@@ -137,6 +137,16 @@ class X01GameEngine(
         return true
     }
 
+    /** Restore a validated local snapshot, used for offline persistence. */
+    fun restore(snapshot: X01GameState) {
+        require(snapshot.settings == settings)
+        require(snapshot.players.size == state.players.size)
+        require(snapshot.players.map { it.name } == state.players.map { it.name })
+        require(snapshot.activePlayer in snapshot.players.indices)
+        require(snapshot.history.all { it.playerIndex in snapshot.players.indices && it.hits.size in 1..3 })
+        state = snapshot
+    }
+
     fun newLeg() {
         check(state.legFinished && !state.finished) { "Aucune nouvelle manche à démarrer." }
         val players = state.players.map { it.copy(score = settings.startingScore, hasEntered = false) }
