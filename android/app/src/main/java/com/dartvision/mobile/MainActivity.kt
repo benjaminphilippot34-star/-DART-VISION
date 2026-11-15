@@ -193,7 +193,7 @@ class MainActivity : ComponentActivity() {
             playersPanel.addView(row)
         }
         val playerActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        button(playerActions, "AJOUTER JOUEUR") { action("add_player") }
+        button(playerActions, "AJOUTER JOUEUR") { editPlayerName(null) }
         button(playerActions, "CONFIGURER X01") { configureX01() }
         playersPanel.addView(playerActions)
         root.addView(playersPanel)
@@ -426,12 +426,17 @@ class MainActivity : ComponentActivity() {
                                 val s = state.get()
                                 s.put("players", players)
                                 s.put("active", s.optInt("active", 0).coerceIn(0, players.length() - 1))
-                                state.set(s); saveLocalState(s); refreshScore()
+                                state.set(s); saveLocalState(s); refreshUiAfterPlayersChanged()
                                 Toast.makeText(this, "Joueur supprimé.", Toast.LENGTH_SHORT).show()
                             } else Toast.makeText(this, "Il faut conserver au moins un joueur.", Toast.LENGTH_LONG).show()
                         }.show()
                 }
             }.setNegativeButton("Fermer", null).show()
+    }
+
+    private fun refreshUiAfterPlayersChanged() {
+        buildUi()
+        if (x01Engine != null) refreshX01() else refreshScore()
     }
 
     private fun editPlayerName(index: Int?) {
@@ -459,9 +464,11 @@ class MainActivity : ComponentActivity() {
                 }
                 val s = state.get()
                 val ps = s.optJSONArray("players") ?: JSONArray()
-                if (index == null) ps.put(JSONObject().put("name", name).put("score", s.optInt("mode", "301".toIntOrNull() ?: 301)))
-                else ps.optJSONObject(index)?.put("name", name)
-                s.put("players", ps); state.set(s); saveLocalState(s); refreshScore()
+                if (index == null) {
+                    val startingScore = x01Engine?.state?.settings?.startingScore ?: 301
+                    ps.put(JSONObject().put("name", name).put("score", startingScore))
+                } else ps.optJSONObject(index)?.put("name", name)
+                s.put("players", ps); state.set(s); saveLocalState(s); refreshUiAfterPlayersChanged()
                 Toast.makeText(this, "Joueurs mis à jour.", Toast.LENGTH_SHORT).show()
             }.show()
     }
