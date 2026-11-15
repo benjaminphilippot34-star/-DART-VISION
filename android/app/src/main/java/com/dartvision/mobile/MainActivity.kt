@@ -130,10 +130,10 @@ class MainActivity : ComponentActivity() {
                                 val score = calibrated.scoreImagePoint(imagePoint)
                                 if (score == null) "Candidat ${index + 1} : non calculable"
                                 else "Candidat ${index + 1} : ${score.points} pts (${score.zone})${if (score.nearWire) " • près d'un fil" else ""}"
-                            }.joinToString("\\n")
+                            }.joinToString("\n")
                         "Différence : %.2f %% • %d zone(s) • principale : %d px, centre (%.1f ; %.1f)".format(percent, regions.size, largest.pixelCount, largest.centroidX, largest.centroidY) +
-                            if (calibrated == null) "\\nCalibre la cible pour afficher des scores candidats."
-                            else "\\nScores candidats non validés :\\n$candidates\\nVérification humaine obligatoire."
+                            if (calibrated == null) "\nCalibre la cible pour afficher des scores candidats."
+                            else "\nScores candidats non validés :\n$candidates\nVérification humaine obligatoire."
                     }
                 }
         }
