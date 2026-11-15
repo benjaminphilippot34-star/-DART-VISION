@@ -116,4 +116,11 @@ class OfflineGameEnginesTest {
         assertEquals(0, game.state.activePlayer)
     }
 
+
+    @Test fun tacticsUsesTenThroughTwentyAndBullTargets() {
+        val game = TacticsGameEngine(listOf("A", "B"))
+        game.playTurn(listOf(DartHit(10, 3)))
+        assertEquals(3, game.state.players[0].marks[10])
+    }
+
 }
