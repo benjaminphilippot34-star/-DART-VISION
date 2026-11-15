@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var scoreView: TextView
     private lateinit var scoreContextView: TextView
     private lateinit var scoreTurnView: TextView
+    private lateinit var opponentScoresContainer: LinearLayout
     private lateinit var preview: PreviewView
     private lateinit var calibrationOverlay: CalibrationOverlay
     private val calibrationPoints = mutableListOf<ImagePoint>()
@@ -250,41 +251,44 @@ class MainActivity : ComponentActivity() {
         btn(gameHeading, "MODES", false) { showGameModes() }
         gamePage.addView(gameHeading)
 
-        val playerStrip = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(9), 0, dp(5)) }
-        for (i in 0 until currentPlayers.length()) {
-            val p = currentPlayers.optJSONObject(i) ?: continue
-            val selected = i == active
-            val chip = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(7), dp(8), dp(7), dp(8))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) 0xFF123D3A.toInt() else panelColor); cornerRadius = dp(13).toFloat()
-                    setStroke(dp(1), if (selected) teal else 0xFF263744.toInt())
-                }
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), 0, dp(3), dp(7)) }
-            }
-            chip.addView(txt((if (selected) "▶ " else "") + p.optString("name", "Joueur " + (i + 1)), 10f, if (selected) teal else muted, true))
-            chip.addView(txt(p.optInt("score", 501).toString(), 19f, white, true))
-            playerStrip.addView(chip)
-        }
-        gamePage.addView(playerStrip)
-
-        val scoreCard = card().apply {
-            gravity = Gravity.CENTER_HORIZONTAL
+        val scoreCard = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF121D27.toInt()); cornerRadius = dp(22).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
+                setColor(0xFF121D27.toInt()); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
             }
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
-        scoreCard.addView(txt("MODE " + selectedMode.title.uppercase(), 10f, teal, true))
-        scoreCard.addView(txt("SCORE RESTANT", 10f, muted, true).apply { setPadding(0, dp(8), 0, 0) })
-        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 501)?.toString() ?: "501", 50f, white, true)
-            .apply { gravity = Gravity.CENTER; setPadding(0, 0, 0, 0) }
-        scoreCard.addView(scoreView)
-        scoreContextView = txt("JOUEUR : " + (currentPlayers.optJSONObject(active)?.optString("name", "Joueur 1") ?: "Joueur 1"), 15f, white, true)
-            .apply { gravity = Gravity.CENTER; setPadding(0, dp(3), 0, 0) }
-        scoreCard.addView(scoreContextView)
-        scoreTurnView = txt("TOUR " + state.get().optInt("turn", 1) + "   •   3 FLÉCHETTES", 10f, teal, true)
-            .apply { gravity = Gravity.CENTER; setPadding(0, dp(7), 0, 0) }
-        scoreCard.addView(scoreTurnView)
+        val activePlayerPanel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(5), dp(8), dp(8), dp(8))
+            layoutParams = LinearLayout.LayoutParams(0, -1, 1.15f)
+        }
+        activePlayerPanel.addView(txt("JOUEUR ACTIF", 9f, teal, true))
+        scoreContextView = txt(currentPlayers.optJSONObject(active)?.optString("name", "Joueur " + (active + 1)) ?: "Joueur 1", 15f, white, true)
+            .apply { setPadding(0, dp(5), 0, 0); maxLines = 1 }
+        activePlayerPanel.addView(scoreContextView)
+        activePlayerPanel.addView(txt("SCORE RESTANT", 9f, muted, true).apply { setPadding(0, dp(8), 0, 0) })
+        scoreView = txt(currentPlayers.optJSONObject(active)?.optInt("score", 501)?.toString() ?: "501", 46f, white, true)
+            .apply { setPadding(0, 0, 0, 0) }
+        activePlayerPanel.addView(scoreView)
+        scoreTurnView = txt("TOUR " + state.get().optInt("turn", 1) + " • 3 FLÉCHETTES", 9f, teal, true)
+            .apply { setPadding(0, dp(5), 0, 0) }
+        activePlayerPanel.addView(scoreTurnView)
+        scoreCard.addView(activePlayerPanel)
+
+        val divider = View(this).apply { setBackgroundColor(0xFF314653.toInt()); layoutParams = LinearLayout.LayoutParams(dp(1), -1) }
+        scoreCard.addView(divider)
+        opponentScoresContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(3), dp(3), dp(3))
+            layoutParams = LinearLayout.LayoutParams(0, -1, 1f)
+        }
+        scoreCard.addView(opponentScoresContainer)
+        refreshOpponentScores(currentPlayers, active, muted, white, teal)
         gamePage.addView(scoreCard)
 
         val entryTitle = txt("SAISIE DE LA VOLÉE", 11f, muted, true).apply { setPadding(dp(3), dp(5), 0, dp(3)) }
@@ -1697,11 +1701,51 @@ class MainActivity : ComponentActivity() {
         val active = s.optInt("active", 0).coerceIn(0, (players.length() - 1).coerceAtLeast(0))
         val player = players.optJSONObject(active)
         scoreView.text = player?.optInt("score", 301)?.toString() ?: "301"
-        scoreContextView.text = "JOUEUR : " + (player?.optString("name", "Joueur " + (active + 1)) ?: "Joueur " + (active + 1))
-        scoreTurnView.text = "TOUR " + s.optInt("turn", 1) + "   •   3 FLÉCHETTES"
+        scoreContextView.text = player?.optString("name", "Joueur " + (active + 1)) ?: "Joueur " + (active + 1)
+        scoreTurnView.text = "TOUR " + s.optInt("turn", 1) + " • 3 FLÉCHETTES"
+        refreshOpponentScores(players, active, 0xFF91A4B2.toInt(), 0xFFF4F8FA.toInt(), 0xFF28D7C2.toInt())
     }
 
-    private fun httpGet(url: String): String {
+    private fun refreshOpponentScores(players: JSONArray, active: Int, muted: Int, white: Int, teal: Int) {
+        if (!::opponentScoresContainer.isInitialized) return
+        opponentScoresContainer.removeAllViews()
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        var opponents = 0
+        for (i in 0 until players.length()) {
+            if (i == active) continue
+            val p = players.optJSONObject(i) ?: continue
+            opponents++
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(7), dp(7), dp(4), dp(7))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF1B2A35.toInt()); cornerRadius = dp(10).toFloat()
+                }
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(6) }
+            }
+            row.addView(TextView(this).apply {
+                text = p.optString("name", "Joueur " + (i + 1))
+                textSize = 11f; setTextColor(muted)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                maxLines = 1
+            })
+            row.addView(TextView(this).apply {
+                text = p.optInt("score", 301).toString()
+                textSize = 20f; setTextColor(white)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            })
+            opponentScoresContainer.addView(row)
+        }
+        if (opponents == 0) {
+            opponentScoresContainer.addView(TextView(this).apply {
+                text = "EN ATTENTE D’AUTRES JOUEURS"
+                textSize = 10f; setTextColor(muted); gravity = Gravity.CENTER
+            })
+        }
+    }
+
+    private fun httpGet(url: String): String
         val c = URL(url).openConnection() as HttpURLConnection
         c.connectTimeout = 2500; c.readTimeout = 2500; c.requestMethod = "GET"
         return c.inputStream.bufferedReader().use { it.readText() }.also { c.disconnect() }
