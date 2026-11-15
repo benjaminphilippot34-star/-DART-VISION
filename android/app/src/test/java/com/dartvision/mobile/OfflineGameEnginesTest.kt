@@ -123,4 +123,20 @@ class OfflineGameEnginesTest {
         assertEquals(3, game.state.players[0].marks[10])
     }
 
+
+    @Test fun x01SupportsMultipleLegsAndSets() {
+        val game = X01GameEngine(
+            X01Settings(40, outRule = X01OutRule.DOUBLE_OUT, legsToWin = 1, setsToWin = 2),
+            listOf("A", "B")
+        )
+        game.throwTurn(listOf(DartHit(20, 2)))
+        assertTrue(game.state.legFinished)
+        assertFalse(game.state.finished)
+        assertEquals(1, game.state.players[0].setsWon)
+        game.newLeg()
+        game.throwTurn(listOf(DartHit(20, 2)))
+        assertTrue(game.state.finished)
+        assertEquals(2, game.state.players[0].setsWon)
+    }
+
 }
