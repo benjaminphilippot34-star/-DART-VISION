@@ -305,8 +305,8 @@ class MainActivity : ComponentActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             })
         }
-        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient(this).signUp(email.text.toString().trim(), password.text.toString()) } }
-        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient(this).signIn(email.text.toString().trim(), password.text.toString()) } }
+        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient(this@MainActivity).signUp(email.text.toString().trim(), password.text.toString()) } }
+        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient(this@MainActivity).signIn(email.text.toString().trim(), password.text.toString()) } }
         panel.addView(row)
         val phoneRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         phoneRow.addView(Button(this).apply {

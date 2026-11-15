@@ -20,9 +20,8 @@ class SupabaseAuthClient(
     fun signIn(email: String, password: String): AuthResult =
         request("/auth/v1/token?grant_type=password", JSONObject().put("email", email).put("password", password))
 
-    fun requestPhoneOtp(phone: String) {
-        requestRaw("/auth/v1/otp", JSONObject().put("phone", phone).put("create_user", true))
-    }
+    fun requestPhoneOtp(phone: String): AuthResult =
+        request("/auth/v1/otp", JSONObject().put("phone", phone).put("create_user", true))
 
     fun verifyPhoneOtp(phone: String, token: String): AuthResult {
         require(token.length in 4..10) { "Code SMS invalide." }
