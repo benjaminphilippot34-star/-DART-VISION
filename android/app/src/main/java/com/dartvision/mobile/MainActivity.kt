@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
     private lateinit var preview: PreviewView
+    private lateinit var calibrationOverlay: CalibrationOverlay
+    private val calibrationPoints = mutableListOf<ImagePoint>()
+    private var boardCalibration: BoardCalibration? = null
     private lateinit var joinInput: EditText
     private lateinit var connectButton: Button
     private var camera: Camera? = null
@@ -61,6 +64,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buildUi()
+        loadBoardCalibration()
         startLocalGame()
         checkForUpdates(silent = true)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) startCamera()
@@ -89,9 +93,18 @@ class MainActivity : ComponentActivity() {
         root.addView(status)
         preview = PreviewView(this).apply {
             scaleType = PreviewView.ScaleType.FIT_CENTER
+            layoutParams = FrameLayout.LayoutParams(-1, -1)
+        }
+        val previewFrame = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
         }
-        root.addView(preview)
+        previewFrame.addView(preview)
+        calibrationOverlay = CalibrationOverlay(this).apply {
+            layoutParams = FrameLayout.LayoutParams(-1, -1)
+            onPoint = ::onCalibrationTap
+        }
+        previewFrame.addView(calibrationOverlay)
+        root.addView(previewFrame)
         val analysisRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         addButton(analysisRow, "Référence avant lancer") {
             val captured = frameAnalyzer.captureReference()
@@ -110,6 +123,10 @@ class MainActivity : ComponentActivity() {
                 }
         }
         root.addView(analysisRow)
+        val calibrationRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        addButton(calibrationRow, "Calibrer la cible") { beginBoardCalibration() }
+        addButton(calibrationRow, "Effacer calibration") { clearBoardCalibration() }
+        root.addView(calibrationRow)
         scoreView = label("301", 28f)
         scoreView.gravity = Gravity.CENTER
         root.addView(scoreView)
@@ -153,6 +170,74 @@ class MainActivity : ComponentActivity() {
         setContentView(root)
     }
 
+
+
+    private fun beginBoardCalibration() {
+        calibrationPoints.clear()
+        calibrationOverlay.resetPoints()
+        calibrationOverlay.active = true
+        status.text = "CALIBRATION : touche les 4 coins extérieurs dans l'ordre : haut gauche, haut droite, bas droite, bas gauche. Garde toute la cible visible."
+    }
+
+    private fun onCalibrationTap(viewX: Double, viewY: Double) {
+        if (!calibrationOverlay.active) return
+        val point = PreviewCoordinateMapper.viewToImage(
+            viewX, viewY, calibrationOverlay.width, calibrationOverlay.height,
+            frameAnalyzer.imageWidth, frameAnalyzer.imageHeight, frameAnalyzer.rotationDegrees
+        )
+        if (point == null) {
+            Toast.makeText(this, "Touche à l'intérieur de l'image caméra.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        calibrationPoints.add(point)
+        calibrationOverlay.addScreenPoint(viewX, viewY)
+        if (calibrationPoints.size < 4) {
+            status.text = "Calibration : point ${calibrationPoints.size}/4 enregistré. Vise le coin ${calibrationPoints.size + 1}."
+            return
+        }
+        try {
+            boardCalibration = BoardCalibration.fromFourCorners(calibrationPoints.toList())
+            val json = JSONArray().apply {
+                calibrationPoints.forEach { put(JSONObject().put("x", it.x).put("y", it.y)) }
+            }
+            getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit()
+                .putString("corners", json.toString()).apply()
+            calibrationOverlay.active = false
+            status.text = "Calibration enregistrée. La transformation perspective est prête ; la localisation automatique de la pointe reste à intégrer."
+            Toast.makeText(this, "Calibration de la cible enregistrée.", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            calibrationPoints.clear()
+            calibrationOverlay.resetPoints()
+            status.text = "Calibration invalide : ${e.message}. Recommence en visant les quatre coins."
+        }
+    }
+
+    private fun loadBoardCalibration() {
+        val raw = getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).getString("corners", null) ?: return
+        try {
+            val json = JSONArray(raw)
+            if (json.length() != 4) return
+            val points = (0 until 4).map { i ->
+                val p = json.getJSONObject(i)
+                ImagePoint(p.getDouble("x"), p.getDouble("y"))
+            }
+            boardCalibration = BoardCalibration.fromFourCorners(points)
+            calibrationPoints.clear()
+            calibrationPoints.addAll(points)
+            status.text = "Calibration de cible restaurée."
+        } catch (_: Exception) {
+            boardCalibration = null
+        }
+    }
+
+    private fun clearBoardCalibration() {
+        boardCalibration = null
+        calibrationPoints.clear()
+        calibrationOverlay.resetPoints()
+        calibrationOverlay.active = false
+        getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit().remove("corners").apply()
+        status.text = "Calibration effacée."
+    }
 
     private fun showGameModes() {
         val modes = DartCounterModeCatalog.default.modes
