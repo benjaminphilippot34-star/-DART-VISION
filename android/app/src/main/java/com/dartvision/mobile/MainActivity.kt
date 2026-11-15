@@ -176,6 +176,12 @@ class MainActivity : ComponentActivity() {
             val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
             row.addView(text((if (index == active) "▶  " else "") + player.optString("name", "Joueur ${index + 1}"), 16f, if (index == active) accent else white, index == active), LinearLayout.LayoutParams(0, -2, 1f))
             row.addView(text(player.optInt("score", 301).toString(), 20f, white, true))
+            row.addView(Button(this).apply {
+                text = "✎"
+                contentDescription = "Modifier le nom de ${player.optString("name", "Joueur ${index + 1}")}"
+                isAllCaps = false
+                setOnClickListener { editPlayerName(index) }
+            })
             playersPanel.addView(row)
         }
         val playerActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -298,15 +304,20 @@ class MainActivity : ComponentActivity() {
 
     private fun editPlayerName(index: Int?) {
         val input = EditText(this).apply {
-            hint = "Nom du joueur"
+            hint = "Écris le nom que tu veux"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or
+                android.text.InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
             setSingleLine(true)
+            isSelectAllOnFocus = true
             if (index != null) {
                 val ps = state.get().optJSONArray("players") ?: JSONArray()
                 setText(ps.optJSONObject(index)?.optString("name", ""))
+                setSelection(text.length)
             }
         }
         AlertDialog.Builder(this)
-            .setTitle(if (index == null) "Ajouter un joueur" else "Renommer le joueur")
+            .setTitle(if (index == null) "Ajouter un joueur" else "Modifier le nom du joueur")
             .setView(input)
             .setNegativeButton("Annuler", null)
             .setPositiveButton("Valider") { _, _ ->
