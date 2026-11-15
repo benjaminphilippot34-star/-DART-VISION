@@ -134,9 +134,10 @@ class OfflineGameEnginesTest {
         assertFalse(game.state.finished)
         assertEquals(1, game.state.players[0].setsWon)
         game.newLeg()
+        assertEquals(1, game.state.activePlayer)
         game.throwTurn(listOf(DartHit(20, 2)))
         assertTrue(game.state.finished)
-        assertEquals(2, game.state.players[0].setsWon)
+        assertEquals(2, game.state.players[1].setsWon)
     }
 
 }
