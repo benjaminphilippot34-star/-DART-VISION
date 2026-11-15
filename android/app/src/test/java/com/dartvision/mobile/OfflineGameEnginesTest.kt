@@ -145,4 +145,16 @@ class OfflineGameEnginesTest {
         assertEquals(2, game.state.players[0].setsWon)
     }
 
+    @Test fun x01RestoresFullMatchSnapshot() {
+        val original = X01GameEngine(X01Settings(301), listOf("A", "B"))
+        original.throwTurn(listOf(DartHit(20, 3), DartHit(20, 3), DartHit(20, 3)))
+        val restored = X01GameEngine(X01Settings(301), listOf("A", "B"))
+        restored.restore(original.state)
+        assertEquals(121, restored.state.players[0].score)
+        assertEquals(1, restored.state.activePlayer)
+        assertEquals(1, restored.state.history.size)
+        assertTrue(restored.undo())
+        assertEquals(301, restored.state.players[0].score)
+    }
+
 }
