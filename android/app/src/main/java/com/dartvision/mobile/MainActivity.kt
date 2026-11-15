@@ -151,17 +151,34 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startLocalGame() {
-        val players = JSONArray().put(JSONObject().put("name", "Joueur 1").put("score", 501))
-        state.set(JSONObject().put("mode", "501").put("players", players).put("active", 0).put("turn", 1).put("lastAction", "Partie créée"))
+        val saved = getSharedPreferences("dart_vision_local", MODE_PRIVATE).getString("game_state", null)
+        val restored = try { saved?.let { JSONObject(it) } } catch (_: Exception) { null }
+        if (restored != null && restored.optJSONArray("players") != null) {
+            state.set(restored)
+        } else {
+            val players = JSONArray().put(JSONObject().put("name", "Joueur 1").put("score", 501))
+            state.set(JSONObject().put("mode", "501").put("players", players).put("active", 0).put("turn", 1).put("lastAction", "Partie créée"))
+            saveLocalState(state.get())
+        }
         isHost = true
         hostUrl = null
         try {
             server = GameServer(8765, state, ::handleHostAction).also { it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false) }
-            status.text = "DART VISION 0.6.1 • HÔTE\nConnexion : ${localIp()}:8765\nMême Wi-Fi • saisissez cette IP sur les autres téléphones"
-        } catch (e: Exception) {
-            status.text = "Serveur local non démarré : ${e.message}"
+            val ip = localIp()
+            status.text = if (ip == "IP inconnue") {
+                "DART VISION • MODE SOLO HORS LIGNE\nAucun Wi-Fi nécessaire pour jouer. Partie enregistrée sur ce téléphone."
+            } else {
+                "DART VISION • PARTIE LOCALE\nSolo sans Internet possible. Pour connecter d'autres téléphones : $ip:8765 (réseau local requis)."
+            }
+        } catch (_: Exception) {
+            status.text = "DART VISION • MODE SOLO HORS LIGNE\nServeur multi-téléphones indisponible, mais la partie locale reste utilisable."
         }
         refreshScore()
+    }
+
+    private fun saveLocalState(value: JSONObject) {
+        getSharedPreferences("dart_vision_local", MODE_PRIVATE)
+            .edit().putString("game_state", value.toString()).apply()
     }
 
     private fun startCamera() {
@@ -271,6 +288,7 @@ class MainActivity : ComponentActivity() {
             }
             s.put("lastAction", name)
             state.set(s)
+            saveLocalState(s)
         }
     }
 
@@ -393,6 +411,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        saveLocalState(state.get())
         server?.stop(); worker.shutdown(); poller.shutdownNow(); analysisExecutor.shutdown()
         super.onDestroy()
     }
