@@ -186,7 +186,7 @@ class MainActivity : ComponentActivity() {
         val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(12), dp(16), dp(18)); setBackgroundColor(bg)
+            setPadding(dp(16), dp(8), dp(16), dp(12)); setBackgroundColor(bg)
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -227,7 +227,7 @@ class MainActivity : ComponentActivity() {
         navigateToMorePage = { showPage("more") }
         val header = LinearLayout(this).apply {
             gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 0, 0, dp(13))
+            setPadding(0, 0, 0, dp(8))
         }
         header.addView(ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
@@ -250,7 +250,7 @@ class MainActivity : ComponentActivity() {
 
         // Accueil DART VISION : composition inspirée de la maquette, sans bouton JOUER en doublon.
         val homeStage = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(-1, dp(340))
+            layoutParams = LinearLayout.LayoutParams(-1, dp(275))
             setBackgroundColor(0xFF08090D.toInt())
         }
         val artwork = object : View(this) {
@@ -317,7 +317,7 @@ class MainActivity : ComponentActivity() {
         val welcome = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), 0, dp(8), 0)
-            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(112) }
+            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(88) }
         }
         welcome.addView(txt("BIENVENUE !", 14f, 0xFFFF3045.toInt(), true))
         welcome.addView(txt("Prêt à jouer ?", 30f, white, true).apply { setPadding(0, dp(5), 0, dp(1)) })
