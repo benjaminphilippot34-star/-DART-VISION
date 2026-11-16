@@ -689,104 +689,195 @@ class MainActivity : ComponentActivity() {
     private fun buildAccountPanel(): LinearLayout {
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(18, 14, 18, 14)
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF202630.toInt())
-                cornerRadius = 18f
-                setStroke(1, 0xFF343D49.toInt())
+            setPadding(dp(14), dp(14), dp(14), dp(16))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF17212B.toInt(), 0xFF0A1018.toInt())
+            ).apply {
+                cornerRadius = dp(20).toFloat()
+                setStroke(dp(1), 0xFFB72A3D.toInt())
+            }
+            elevation = dp(4).toFloat()
+        }
+        fun sectionTitle(value: String) {
+            panel.addView(TextView(this).apply {
+                text = value
+                textSize = 11f
+                letterSpacing = .12f
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
+                setTextColor(0xFFFF4055.toInt())
+                setPadding(0, dp(13), 0, dp(7))
+            })
+        }
+        fun field(hintText: String, inputTypeValue: Int, secret: Boolean = false): EditText {
+            return EditText(this).apply {
+                hint = hintText
+                inputType = inputTypeValue
+                setSingleLine(true)
+                textSize = 14f
+                setTextColor(android.graphics.Color.WHITE)
+                setHintTextColor(0xFF8997A5.toInt())
+                if (secret) transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                setPadding(dp(13), dp(11), dp(13), dp(11))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF0D151E.toInt())
+                    cornerRadius = dp(12).toFloat()
+                    setStroke(dp(1), 0xFF485767.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(-1, dp(49)).apply {
+                    bottomMargin = dp(9)
+                }
             }
         }
+        fun actionButton(label: String, primary: Boolean = false, action: () -> Unit): Button {
+            return Button(this).apply {
+                text = label
+                isAllCaps = false
+                textSize = 13f
+                setTextColor(android.graphics.Color.WHITE)
+                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(if (primary) 0xFFE52C43.toInt() else 0xFF111C27.toInt())
+                    cornerRadius = dp(13).toFloat()
+                    setStroke(dp(1), if (primary) 0xFFFF6575.toInt() else 0xFF586878.toInt())
+                }
+                stateListAnimator = null
+                minHeight = dp(48)
+                setPadding(dp(10), dp(7), dp(10), dp(7))
+                setOnClickListener { action() }
+            }
+        }
+
         panel.addView(TextView(this).apply {
-            text = "COMPTE DART VISION"
+            text = "MON COMPTE"
+            textSize = 23f
+            gravity = Gravity.CENTER
+            letterSpacing = .04f
+            setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
+            setTextColor(android.graphics.Color.WHITE)
+            setPadding(0, dp(2), 0, dp(3))
+        })
+        panel.addView(TextView(this).apply {
+            text = "—  TON ESPACE JOUEUR  —"
+            textSize = 10f
+            gravity = Gravity.CENTER
+            letterSpacing = .15f
+            setTextColor(0xFFFF4055.toInt())
+            setPadding(0, 0, 0, dp(13))
+        })
+
+        val avatarCard = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF202B37.toInt(), 0xFF101821.toInt())
+            ).apply {
+                cornerRadius = dp(16).toFloat()
+                setStroke(dp(1), 0xFFB72A3D.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
+        }
+        profileAvatarPreview = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(68), dp(68))
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            contentDescription = "Photo de profil ou avatar"
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(0xFF35131B.toInt())
+                setStroke(dp(2), 0xFFFF4055.toInt())
+            }
+            clipToOutline = true
+        }
+        avatarCard.addView(profileAvatarPreview)
+        val avatarInfo = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(12), 0, 0, 0)
+        }
+        avatarInfo.addView(TextView(this).apply {
+            text = "PROFIL JOUEUR"
             textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(0xFFFF563D.toInt())
+            setTypeface(android.graphics.Typeface.DEFAULT_BOLD)
+            setTextColor(android.graphics.Color.WHITE)
         })
-        panel.addView(TextView(this).apply {
-            text = "Ton compte personnel, ton pseudo et tes performances DART VISION."
+        avatarInfo.addView(TextView(this).apply {
+            text = "Personnalise ton identité sur DART VISION"
             textSize = 11f
-            setTextColor(0xFFB4BDC8.toInt())
+            setTextColor(0xFFAFBBC7.toInt())
+            setPadding(0, dp(4), 0, dp(7))
         })
-        val avatarRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        profileAvatarPreview = ImageView(this).apply { layoutParams = LinearLayout.LayoutParams(64, 64); scaleType = ImageView.ScaleType.CENTER_CROP; contentDescription = "Photo de profil ou avatar" }
-        avatarRow.addView(profileAvatarPreview)
-        val avatarButtons = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(10, 0, 0, 0) }
-        avatarButtons.addView(Button(this).apply { text = "Ajouter une photo"; isAllCaps = false; setOnClickListener { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply { type = "image/*"; addCategory(Intent.CATEGORY_OPENABLE); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) }, 741) } })
-        avatarButtons.addView(Button(this).apply { text = "Choisir un avatar"; isAllCaps = false; setOnClickListener { val opts = arrayOf("🎯","🙂","😎","🔥","⚡","🦊","🐺","👑"); AlertDialog.Builder(this@MainActivity).setTitle("Choisis ton avatar").setItems(opts) { _, i -> getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("avatar_emoji", opts[i]).remove("avatar_uri").apply(); refreshProfileAvatar() }.show() } })
-        avatarRow.addView(avatarButtons); panel.addView(avatarRow); refreshProfileAvatar()
-        val email = EditText(this).apply {
-            hint = "Adresse e-mail"
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-            setSingleLine(true)
-        }
-        val password = EditText(this).apply {
-            hint = "Mot de passe (8 caractères minimum)"
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            setSingleLine(true)
-        }
-        val phone = EditText(this).apply {
-            hint = "Téléphone au format +33612345678"
-            inputType = android.text.InputType.TYPE_CLASS_PHONE
-            setSingleLine(true)
-        }
+        val avatarActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        avatarActions.addView(actionButton("Photo", false) {
+            startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                type = "image/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            }, 741)
+        }, LinearLayout.LayoutParams(0, dp(39), 1f).apply { rightMargin = dp(5) })
+        avatarActions.addView(actionButton("Avatar", false) {
+            val opts = arrayOf("🎯","🙂","😎","🔥","⚡","🦊","🐺","👑")
+            AlertDialog.Builder(this@MainActivity).setTitle("Choisis ton avatar").setItems(opts) { _, i ->
+                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                    .putString("avatar_emoji", opts[i]).remove("avatar_uri").apply()
+                refreshProfileAvatar()
+            }.show()
+        }, LinearLayout.LayoutParams(0, dp(39), 1f))
+        avatarInfo.addView(avatarActions)
+        avatarCard.addView(avatarInfo, LinearLayout.LayoutParams(0, -2, 1f))
+        panel.addView(avatarCard)
+        refreshProfileAvatar()
+
+        sectionTitle("IDENTIFIANTS")
+        val email = field("Adresse e-mail", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+        val password = field("Mot de passe (8 caractères minimum)", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD, true)
+        val phone = field("Téléphone au format +33612345678", android.text.InputType.TYPE_CLASS_PHONE)
+        val profileNameInput = field("Pseudo utilisé pendant les parties", android.text.InputType.TYPE_CLASS_TEXT)
+        profileNameInput.setText(getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("display_name", ""))
         panel.addView(email)
         panel.addView(password)
         panel.addView(phone)
-        val profileNameInput = EditText(this).apply {
-            hint = "Pseudo utilisé pendant les parties"
-            setSingleLine(true)
-            textSize = 14f
-            setText(getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("display_name", ""))
-        }
         panel.addView(profileNameInput)
-        panel.addView(Button(this).apply {
-            text = "Enregistrer mon profil"
-            isAllCaps = false
-            setOnClickListener { saveAccountProfile(profileNameInput.text.toString()) }
-        })
-        panel.addView(Button(this).apply {
-            text = "Mes statistiques et mon historique"
-            isAllCaps = false
-            setOnClickListener { showAccountHistory() }
-        })
-        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        fun actionButton(label: String, action: () -> Unit) {
-            row.addView(Button(this).apply {
-                text = label
-                isAllCaps = false
-                setOnClickListener { action() }
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-            })
+
+        panel.addView(actionButton("ENREGISTRER MON PROFIL", true) {
+            saveAccountProfile(profileNameInput.text.toString())
+        }, LinearLayout.LayoutParams(-1, dp(50)).apply { topMargin = dp(2); bottomMargin = dp(9) })
+        panel.addView(actionButton("MES STATISTIQUES ET MON HISTORIQUE") {
+            showAccountHistory()
+        }, LinearLayout.LayoutParams(-1, dp(48)).apply { bottomMargin = dp(12) })
+
+        sectionTitle("ACCÈS AU COMPTE")
+        val accountActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        accountActions.addView(actionButton("CRÉER UN COMPTE") {
+            runAccountRequest { SupabaseAuthClient().signUp(email.text.toString().trim(), password.text.toString()) }
+        }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { rightMargin = dp(5) })
+        accountActions.addView(actionButton("CONNEXION") {
+            runAccountRequest { SupabaseAuthClient().signIn(email.text.toString().trim(), password.text.toString()) }
+        }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { leftMargin = dp(5) })
+        panel.addView(accountActions)
+
+        val phoneActions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(8), 0, 0)
         }
-        actionButton("Créer compte") { runAccountRequest { SupabaseAuthClient().signUp(email.text.toString().trim(), password.text.toString()) } }
-        actionButton("Connexion") { runAccountRequest { SupabaseAuthClient().signIn(email.text.toString().trim(), password.text.toString()) } }
-        panel.addView(row)
-        val phoneRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        phoneRow.addView(Button(this).apply {
-            text = "Code SMS"
-            isAllCaps = false
-            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-            setOnClickListener {
-                val number = phone.text.toString().trim()
-                if (!number.startsWith("+") || number.length < 8) {
-                    Toast.makeText(this@MainActivity, "Saisis le numéro au format international (+33...).", Toast.LENGTH_LONG).show()
-                } else runAccountRequest { SupabaseAuthClient().requestPhoneOtp(number) }
+        phoneActions.addView(actionButton("CODE SMS") {
+            val number = phone.text.toString().trim()
+            if (!number.startsWith("+") || number.length < 8) {
+                Toast.makeText(this@MainActivity, "Saisis le numéro au format international (+33...).", Toast.LENGTH_LONG).show()
+            } else runAccountRequest { SupabaseAuthClient().requestPhoneOtp(number) }
+        }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { rightMargin = dp(5) })
+        phoneActions.addView(actionButton("VALIDER SMS") {
+            val number = phone.text.toString().trim()
+            val code = EditText(this@MainActivity).apply {
+                hint = "Code reçu par SMS"
+                inputType = android.text.InputType.TYPE_CLASS_NUMBER
             }
-        })
-        phoneRow.addView(Button(this).apply {
-            text = "Valider SMS"
-            isAllCaps = false
-            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-            setOnClickListener {
-                val number = phone.text.toString().trim()
-                val code = EditText(this@MainActivity).apply { hint = "Code reçu par SMS"; inputType = android.text.InputType.TYPE_CLASS_NUMBER }
-                AlertDialog.Builder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
-                    .setPositiveButton("Valider") { _, _ ->
-                        runAccountRequest { SupabaseAuthClient().verifyPhoneOtp(number, code.text.toString().trim()) }
-                    }.setNegativeButton("Annuler", null).show()
-            }
-        })
-        panel.addView(phoneRow)
+            AlertDialog.Builder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
+                .setPositiveButton("Valider") { _, _ ->
+                    runAccountRequest { SupabaseAuthClient().verifyPhoneOtp(number, code.text.toString().trim()) }
+                }.setNegativeButton("Annuler", null).show()
+        }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { leftMargin = dp(5) })
+        panel.addView(phoneActions)
         return panel
     }
 
