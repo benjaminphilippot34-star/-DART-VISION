@@ -3,6 +3,7 @@ package com.dartvision.mobile
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -141,7 +142,7 @@ class MainActivity : ComponentActivity() {
             try {
                 val user = SupabaseAuthClient().getUser(accessToken)
                 runOnUiThread {
-                    getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                    accountPreferences().edit()
                         .putString("user_id", user.userId).putString("email", user.email)
                         .putString("access_token", accessToken).putString("refresh_token", values["refresh_token"]).apply()
                     Toast.makeText(this, "Adresse confirmée. Compte connecté.", Toast.LENGTH_LONG).show()
@@ -206,7 +207,7 @@ class MainActivity : ComponentActivity() {
         val discussionsPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val updatePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         updatePageView = updatePage
-        val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
+        val hasAccountAtStart = accountPreferences().getString("user_id", null) != null
         fun showPage(page: String) {
             currentPage = page
             home.visibility = if (page == "home") View.VISIBLE else View.GONE
@@ -818,7 +819,7 @@ class MainActivity : ComponentActivity() {
         avatarActions.addView(actionButton("Avatar", false) {
             val opts = arrayOf("🎯","🙂","😎","🔥","⚡","🦊","🐺","👑")
             AlertDialog.Builder(this@MainActivity).setTitle("Choisis ton avatar").setItems(opts) { _, i ->
-                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                accountPreferences().edit()
                     .putString("avatar_emoji", opts[i]).remove("avatar_uri").apply()
                 refreshProfileAvatar()
             }.show()
@@ -833,7 +834,7 @@ class MainActivity : ComponentActivity() {
         val password = field("Mot de passe (8 caractères minimum)", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD, true)
         val phone = field("Téléphone au format +33612345678", android.text.InputType.TYPE_CLASS_PHONE)
         val profileNameInput = field("Pseudo utilisé pendant les parties", android.text.InputType.TYPE_CLASS_TEXT)
-        profileNameInput.setText(getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("display_name", ""))
+        profileNameInput.setText(accountPreferences().getString("display_name", ""))
         panel.addView(email)
         panel.addView(password)
         panel.addView(phone)
@@ -882,7 +883,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun refreshProfileAvatar() {
-        val prefs = getSharedPreferences("dart_vision_account", MODE_PRIVATE)
+        val prefs = accountPreferences()
         val image = profileAvatarPreview ?: return
         val uri = prefs.getString("avatar_uri", null)
         if (!uri.isNullOrBlank()) runCatching { image.setImageURI(Uri.parse(uri)) }
@@ -904,17 +905,50 @@ class MainActivity : ComponentActivity() {
         if (requestCode == 741 && resultCode == RESULT_OK) {
             val uri = data?.data ?: return
             runCatching { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-            getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("avatar_uri", uri.toString()).apply()
+            accountPreferences().edit().putString("avatar_uri", uri.toString()).apply()
             refreshProfileAvatar()
             Toast.makeText(this, "Photo de profil enregistrée sur cet appareil.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun accountId(): String? = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null)
-    private fun accountToken(): String? = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("access_token", null)
-    private fun accountDisplayName(): String = getSharedPreferences("dart_vision_account", MODE_PRIVATE)
+    /**
+     * Store account credentials in Android Keystore-backed encrypted preferences.
+     * Migrate legacy preferences once, then remove the unencrypted copy.
+     */
+    private fun accountPreferences(): SharedPreferences {
+        val masterKey = androidx.security.crypto.MasterKey.Builder(this)
+            .setKeyScheme(androidx.security.crypto.MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        val secure = androidx.security.crypto.EncryptedSharedPreferences.create(
+            this,
+            "dart_vision_account_secure",
+            masterKey,
+            androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+        val legacy = getSharedPreferences("dart_vision_account", MODE_PRIVATE)
+        if (legacy.all.isNotEmpty()) {
+            val editor = secure.edit()
+            legacy.all.forEach { (key, value) ->
+                when (value) {
+                    is String -> if (!secure.contains(key)) editor.putString(key, value)
+                    is Boolean -> if (!secure.contains(key)) editor.putBoolean(key, value)
+                    is Int -> if (!secure.contains(key)) editor.putInt(key, value)
+                    is Long -> if (!secure.contains(key)) editor.putLong(key, value)
+                    is Float -> if (!secure.contains(key)) editor.putFloat(key, value)
+                }
+            }
+            editor.commit()
+            legacy.edit().clear().commit()
+        }
+        return secure
+    }
+
+    private fun accountId(): String? = accountPreferences().getString("user_id", null)
+    private fun accountToken(): String? = accountPreferences().getString("access_token", null)
+    private fun accountDisplayName(): String = accountPreferences()
         .getString("display_name", null)?.takeIf { it.isNotBlank() }
-        ?: getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("email", null)?.substringBefore("@")
+        ?: accountPreferences().getString("email", null)?.substringBefore("@")
             ?.takeIf { it.isNotBlank() } ?: "Mon profil"
 
     private fun syncAccountProfile() {
@@ -926,7 +960,7 @@ class MainActivity : ComponentActivity() {
                 val existing = client.loadProfile(token, id)
                 val name = existing?.optString("display_name")?.takeIf { it.isNotBlank() } ?: accountDisplayName()
                 if (existing == null) client.saveProfile(token, id, name)
-                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+                accountPreferences().edit().putString("display_name", name).apply()
             } catch (e: Exception) {
                 runOnUiThread { Toast.makeText(this, "Profil conservé localement : ${e.message}", Toast.LENGTH_LONG).show() }
             }
@@ -942,14 +976,14 @@ class MainActivity : ComponentActivity() {
         val id = accountId()
         val token = accountToken()
         if (id == null || token == null) {
-            getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+            accountPreferences().edit().putString("display_name", name).apply()
             Toast.makeText(this, "Nom enregistré sur cet appareil. Connecte-toi pour synchroniser ton profil.", Toast.LENGTH_LONG).show()
             return
         }
         worker.execute {
             try {
                 SupabaseAuthClient().saveProfile(token, id, name)
-                getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("display_name", name).apply()
+                accountPreferences().edit().putString("display_name", name).apply()
                 runOnUiThread { Toast.makeText(this, "Profil joueur synchronisé.", Toast.LENGTH_SHORT).show() }
             } catch (e: Exception) {
                 runOnUiThread { Toast.makeText(this, e.message ?: "Enregistrement du profil impossible.", Toast.LENGTH_LONG).show() }
@@ -1069,7 +1103,7 @@ class MainActivity : ComponentActivity() {
                 val result = request()
                 runOnUiThread {
                     val message = if (result.accessToken != null) {
-                        getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit()
+                        accountPreferences().edit()
                             .putString("user_id", result.userId).putString("email", result.email)
                             .putString("access_token", result.accessToken)
                             .putString("refresh_token", result.refreshToken).apply()
