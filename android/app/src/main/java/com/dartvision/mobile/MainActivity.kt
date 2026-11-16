@@ -226,11 +226,13 @@ class MainActivity : ComponentActivity() {
             enteringPage.animate().alpha(1.0f).translationY(0f).setDuration(220L).start()
             navButtons.forEach { (key, view) ->
                 val selected = key == page
-                view.alpha = if (selected) 1f else 0.58f
+                view.animate().cancel()
+                view.animate().alpha(if (selected) 1f else 0.68f).scaleX(if (selected) 1f else 0.94f)
+                    .scaleY(if (selected) 1f else 0.94f).setDuration(180L).start()
                 view.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) 0xFF50151D.toInt() else 0xFF121D27.toInt())
-                    cornerRadius = dp(13).toFloat()
-                    if (selected) setStroke(dp(1), teal)
+                    setColor(if (selected) 0xFF3A0D15.toInt() else 0xFF10141B.toInt())
+                    cornerRadius = dp(18).toFloat()
+                    if (selected) setStroke(dp(1), 0xFFFF3045.toInt())
                 }
             }
         }
@@ -246,37 +248,122 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Logo DART VISION"
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        brand.addView(txt("DART VISION", 21f, white, true))
-        brand.addView(txt("SMART DARTS EXPERIENCE", 9f, teal, true))
+        val brandName = android.text.SpannableString("DART VISION")
+        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFFFF3045.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        brand.addView(TextView(this).apply { text = brandName; textSize = 21f; setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)); setTextColor(white) })
+        brand.addView(txt("SMART DARTS EXPERIENCE", 9f, 0xFFFF5263.toInt(), true))
         header.addView(brand)
         header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        header.addView(txt("● LOCAL", 9f, teal, true))
         root.addView(header)
 
-        // Accueil volontairement minimal : une action principale, sans carte d'accueil encombrante.
-        home.addView(txt("DART VISION", 25f, white, true).apply { setPadding(dp(2), dp(24), dp(2), dp(5)) })
-        home.addView(txt("Choisis un mode et lance ta partie.", 13f, muted).apply { setPadding(dp(2), 0, dp(2), dp(18)) })
-        val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
-        home.addView(play)
+        // Accueil premium DART VISION : cible en arrière-plan, accueil éditorial et action principale.
+        val homeStage = FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(485))
+            setBackgroundColor(0xFF08090D.toInt())
+        }
+        val artwork = object : View(this) {
+            val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+            override fun onDraw(canvas: android.graphics.Canvas) {
+                super.onDraw(canvas)
+                val w = width.toFloat(); val h = height.toFloat()
+                val cx = w * 0.79f; val cy = h * 0.57f
+                val radius = minOf(w * 0.53f, h * 0.49f)
+                p.style = android.graphics.Paint.Style.STROKE
+                p.strokeWidth = dp(2).toFloat()
+                p.color = 0x44FF1D32
+                p.setShadowLayer(dp(18).toFloat(), 0f, 0f, 0xAAFF1028.toInt())
+                canvas.drawCircle(cx, cy, radius * 1.08f, p)
+                p.clearShadowLayer()
+                p.color = 0xCCBFC4CC.toInt(); p.strokeWidth = dp(1).toFloat()
+                canvas.drawCircle(cx, cy, radius, p)
+                p.style = android.graphics.Paint.Style.FILL
+                p.color = 0xFF11141B.toInt(); canvas.drawCircle(cx, cy, radius * .96f, p)
+                for (i in 0 until 20) {
+                    val angle = Math.toRadians((i * 18.0) - 99.0)
+                    val x1 = cx + kotlin.math.cos(angle).toFloat() * radius * .13f
+                    val y1 = cy + kotlin.math.sin(angle).toFloat() * radius * .13f
+                    val x2 = cx + kotlin.math.cos(angle).toFloat() * radius * .91f
+                    val y2 = cy + kotlin.math.sin(angle).toFloat() * radius * .91f
+                    p.style = android.graphics.Paint.Style.STROKE
+                    p.strokeWidth = dp(1).toFloat()
+                    p.color = if (i % 2 == 0) 0xFF7D828B.toInt() else 0xFF272C35.toInt()
+                    canvas.drawLine(x1, y1, x2, y2, p)
+                }
+                p.style = android.graphics.Paint.Style.STROKE
+                p.strokeWidth = dp(7).toFloat(); p.color = 0xFFE32636.toInt()
+                p.setShadowLayer(dp(12).toFloat(), 0f, 0f, 0xFFFF1C32.toInt())
+                canvas.drawCircle(cx, cy, radius * .93f, p)
+                p.clearShadowLayer()
+                p.strokeWidth = dp(2).toFloat(); p.color = 0xFFD5D9E0.toInt()
+                canvas.drawCircle(cx, cy, radius * .69f, p)
+                canvas.drawCircle(cx, cy, radius * .43f, p)
+                p.style = android.graphics.Paint.Style.FILL
+                p.color = 0xFF171B23.toInt(); canvas.drawCircle(cx, cy, radius * .27f, p)
+                p.color = 0xFFE32636.toInt()
+                p.setShadowLayer(dp(16).toFloat(), 0f, 0f, 0xFFFF1D32.toInt())
+                canvas.drawCircle(cx, cy, radius * .13f, p)
+                p.clearShadowLayer()
+                p.color = 0xFFFF3045.toInt(); canvas.drawCircle(cx, cy, radius * .055f, p)
+                val sx = cx - radius * .78f; val sy = cy - radius * .64f
+                val ex = cx - radius * .08f; val ey = cy - radius * .07f
+                p.style = android.graphics.Paint.Style.STROKE; p.strokeWidth = dp(5).toFloat()
+                p.strokeCap = android.graphics.Paint.Cap.ROUND; p.color = 0xFFE8EBF0.toInt()
+                p.setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF3045.toInt())
+                canvas.drawLine(sx, sy, ex, ey, p); p.clearShadowLayer()
+                p.style = android.graphics.Paint.Style.FILL
+                val dart = android.graphics.Path().apply {
+                    moveTo(sx - dp(12), sy - dp(13)); lineTo(sx + dp(15), sy - dp(5))
+                    lineTo(sx + dp(5), sy + dp(16)); close()
+                }
+                p.color = 0xFFE32636.toInt(); canvas.drawPath(dart, p)
+                val shade = android.graphics.LinearGradient(0f, 0f, w * .7f, 0f,
+                    intArrayOf(0x0008090D, 0xCC08090D, 0x0008090D), null, android.graphics.Shader.TileMode.CLAMP)
+                p.shader = shade; canvas.drawRect(0f, 0f, w * .73f, h, p); p.shader = null
+            }
+        }
+        homeStage.addView(artwork, FrameLayout.LayoutParams(-1, -1))
+        val welcome = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), 0, dp(8), 0)
+            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(174) }
+        }
+        welcome.addView(txt("BIENVENUE !", 13f, 0xFFFF3045.toInt(), true))
+        welcome.addView(txt("Prêt à jouer ?", 31f, white, true).apply { setPadding(0, dp(5), 0, dp(1)) })
+        welcome.addView(txt("Entre dans la partie.", 19f, 0xFFB8BEC8.toInt()))
+        homeStage.addView(welcome)
+        val play = Button(this).apply {
+            text = "▶   JOUER"
+            isAllCaps = false; textSize = 20f
+            setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
+            setTextColor(white)
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(0xFFFF263B.toInt(), 0xFFB90820.toInt())
+            ).apply { cornerRadius = dp(42).toFloat(); setStroke(dp(1), 0xFFFF6976.toInt()) }
+            elevation = dp(12).toFloat()
+            stateListAnimator = null
+            setOnClickListener { showPage("game"); showGameModes() }
+        }
+        homeStage.addView(play, FrameLayout.LayoutParams(-1, dp(76), Gravity.BOTTOM).apply {
+            setMargins(dp(18), 0, dp(18), dp(18))
+        })
+        home.addView(homeStage)
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(15), dp(13), dp(12), dp(13))
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFFE5C36B.toInt(), 0xFFAA812F.toInt())
-            ).apply { cornerRadius = dp(18).toFloat(); setStroke(dp(1), 0xFFFFE5A1.toInt()) }
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF241116.toInt()); cornerRadius = dp(18).toFloat(); setStroke(dp(1), 0xFFE32636.toInt())
+            }
             visibility = View.GONE
         }
         val updateBannerTop = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val updateBannerText = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
-        updateBannerText.addView(txt("↻  NOUVELLE VERSION DISPONIBLE", 14f, 0xFF30230D.toInt(), true))
-        updateBannerText.addView(txt("Une mise à jour de DART VISION est prête à installer.", 10f, 0xFF493715.toInt()))
+        updateBannerText.addView(txt("MISE À JOUR DISPONIBLE", 13f, 0xFFFF5263.toInt(), true))
+        updateBannerText.addView(txt("Une nouvelle version de DART VISION est prête.", 10f, muted))
         updateBannerTop.addView(updateBannerText)
         val closeUpdateBanner = TextView(this).apply {
-            text = "×"; textSize = 25f; setTextColor(0xFF30230D.toInt()); gravity = Gravity.CENTER
-            setPadding(dp(10), 0, dp(4), 0); contentDescription = "Masquer l'annonce de mise à jour"
-            setOnClickListener { homeUpdateBanner?.visibility = View.GONE }
+            text = "×"; textSize = 25f; setTextColor(white); gravity = Gravity.CENTER
+            setPadding(dp(10), 0, dp(4), 0); setOnClickListener { homeUpdateBanner?.visibility = View.GONE }
         }
         updateBannerTop.addView(closeUpdateBanner)
         homeUpdateBanner?.addView(updateBannerTop)
@@ -486,9 +573,9 @@ class MainActivity : ComponentActivity() {
         bottomNavigationBar = bottom
         fun nav(key: String, title: String, symbol: String) {
             val button = Button(this).apply {
-                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title.length > 9) 7.5f else 9f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
-                minHeight = dp(54); stateListAnimator = null
-                layoutParams = LinearLayout.LayoutParams(0, dp(54), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
+                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title.length > 9) 7.2f else 9f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
+                minHeight = dp(60); stateListAnimator = null
+                layoutParams = LinearLayout.LayoutParams(0, dp(60), 1f).apply { setMargins(dp(2), 0, dp(2), 0) }
                 setOnClickListener { showPage(key) }
             }
             if (key == "update") { updateNavButton = button; button.visibility = View.GONE }
@@ -497,7 +584,7 @@ class MainActivity : ComponentActivity() {
         nav("home", "ACCUEIL", "⌂"); nav("game", "JEUX", "◎"); nav("account", "PROFIL", "♙"); nav("discussions", "DISCUSSIONS", "☏"); nav("more", "PARAMÈTRES", "⚙")
         nav("update", "MISE À JOUR", "⬇")
         showPage("home")
-        shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
+        shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(76)))
         setContentView(shell)
         // Android 15+ dessine l'application derrière la barre système :
         // réserver sa hauteur sous la navigation pour garder les onglets entièrement visibles.
