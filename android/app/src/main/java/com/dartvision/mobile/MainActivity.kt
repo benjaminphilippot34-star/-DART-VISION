@@ -753,10 +753,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(14), dp(14), dp(14), dp(16))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF17212B.toInt(), 0xFF0A1018.toInt())
+                intArrayOf(0xFF101C28.toInt(), 0xFF070B12.toInt(), 0xFF1C0A13.toInt())
             ).apply {
                 cornerRadius = dp(20).toFloat()
-                setStroke(dp(1), 0xFFB72A3D.toInt())
+                setStroke(dp(2), 0xFFFF3048.toInt())
             }
             elevation = dp(4).toFloat()
         }
@@ -783,7 +783,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF0D151E.toInt())
                     cornerRadius = dp(12).toFloat()
-                    setStroke(dp(1), 0xFF28616A.toInt())
+                    setStroke(dp(1), 0xFF19DCD5.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, dp(49)).apply {
                     bottomMargin = dp(9)
@@ -798,9 +798,9 @@ class MainActivity : ComponentActivity() {
                 setTextColor(android.graphics.Color.WHITE)
                 typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) 0xFFE52C43.toInt() else 0xFF111C27.toInt())
+                    setColor(if (primary) 0xFFEC102F.toInt() else 0xFF101B25.toInt())
                     cornerRadius = dp(13).toFloat()
-                    setStroke(dp(1), if (primary) 0xFFFF6575.toInt() else 0xFF28616A.toInt())
+                    setStroke(dp(2), if (primary) 0xFFFF6A7A.toInt() else 0xFF19DCD5.toInt())
                 }
                 stateListAnimator = null
                 minHeight = dp(48)
@@ -833,10 +833,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF202B37.toInt(), 0xFF101821.toInt())
+                intArrayOf(0xFF10232C.toInt(), 0xFF190D18.toInt())
             ).apply {
                 cornerRadius = dp(16).toFloat()
-                setStroke(dp(1), 0xFFB72A3D.toInt())
+                setStroke(dp(2), 0xFFFF3048.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
