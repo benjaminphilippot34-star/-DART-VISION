@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
     private var gameInProgress = false
     private var currentPage = "home"
     private var bottomNavigationBar: View? = null
+    private var profileAvatarPreview: ImageView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -526,10 +527,17 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFFFF563D.toInt())
         })
         panel.addView(TextView(this).apply {
-            text = "Ton profil, tes statistiques et ton historique de parties sont sauvegardés avec ton compte."
-            textSize = 13f
+            text = "Ton compte personnel, ton pseudo et tes performances DART VISION."
+            textSize = 11f
             setTextColor(0xFFB4BDC8.toInt())
         })
+        val avatarRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        profileAvatarPreview = ImageView(this).apply { layoutParams = LinearLayout.LayoutParams(64, 64); scaleType = ImageView.ScaleType.CENTER_CROP; contentDescription = "Photo de profil ou avatar" }
+        avatarRow.addView(profileAvatarPreview)
+        val avatarButtons = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(10, 0, 0, 0) }
+        avatarButtons.addView(Button(this).apply { text = "Ajouter une photo"; isAllCaps = false; setOnClickListener { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply { type = "image/*"; addCategory(Intent.CATEGORY_OPENABLE); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) }, 741) } })
+        avatarButtons.addView(Button(this).apply { text = "Choisir un avatar"; isAllCaps = false; setOnClickListener { val opts = arrayOf("🎯","🙂","😎","🔥","⚡","🦊","🐺","👑"); AlertDialog.Builder(this@MainActivity).setTitle("Choisis ton avatar").setItems(opts) { _, i -> getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("avatar_emoji", opts[i]).remove("avatar_uri").apply(); refreshProfileAvatar() }.show() } })
+        avatarRow.addView(avatarButtons); panel.addView(avatarRow); refreshProfileAvatar()
         val email = EditText(this).apply {
             hint = "Adresse e-mail"
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
@@ -549,8 +557,9 @@ class MainActivity : ComponentActivity() {
         panel.addView(password)
         panel.addView(phone)
         val profileNameInput = EditText(this).apply {
-            hint = "Nom de joueur du profil"
+            hint = "Pseudo utilisé pendant les parties"
             setSingleLine(true)
+            textSize = 14f
             setText(getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("display_name", ""))
         }
         panel.addView(profileNameInput)
@@ -603,6 +612,35 @@ class MainActivity : ComponentActivity() {
         })
         panel.addView(phoneRow)
         return panel
+    }
+
+    private fun refreshProfileAvatar() {
+        val prefs = getSharedPreferences("dart_vision_account", MODE_PRIVATE)
+        val image = profileAvatarPreview ?: return
+        val uri = prefs.getString("avatar_uri", null)
+        if (!uri.isNullOrBlank()) runCatching { image.setImageURI(Uri.parse(uri)) }
+        else {
+            val emoji = prefs.getString("avatar_emoji", "🎯") ?: "🎯"
+            val size = (64 * resources.displayMetrics.density).toInt()
+            val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bitmap)
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF174E4B.toInt() }
+            canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
+            paint.color = android.graphics.Color.WHITE; paint.textAlign = android.graphics.Paint.Align.CENTER; paint.textSize = size * .48f
+            canvas.drawText(emoji, size / 2f, size * .66f, paint); image.setImageBitmap(bitmap)
+        }
+    }
+
+    @Deprecated("Deprecated in Android")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 741 && resultCode == RESULT_OK) {
+            val uri = data?.data ?: return
+            runCatching { contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            getSharedPreferences("dart_vision_account", MODE_PRIVATE).edit().putString("avatar_uri", uri.toString()).apply()
+            refreshProfileAvatar()
+            Toast.makeText(this, "Photo de profil enregistrée sur cet appareil.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun accountId(): String? = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null)
@@ -1610,21 +1648,16 @@ class MainActivity : ComponentActivity() {
         val gamePlayers = engine?.state?.players
         val activeIndex = engine?.state?.activePlayer ?: 0
         val activeName = gamePlayers?.getOrNull(activeIndex)?.name ?: "Joueur"
-        val title = text("C’EST AU TOUR DE $activeName DE LANCER !", 18f, coral, true).apply { gravity = Gravity.CENTER_VERTICAL; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
+        val title = text("AU TOUR DE $activeName", 14f, coral, true).apply { gravity = Gravity.CENTER_VERTICAL; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; includeFontPadding = false }
         val playerScoreViews = mutableListOf<TextView>()
         val scoreboard = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; background = rounded(0xFF1C2A35.toInt(), teal, 18); setPadding(dp(10), dp(10), dp(10), dp(10)) }
         val activePanel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(8), dp(8), dp(8)); background = rounded(coral, coral, 14); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1.15f) }
-        activePanel.addView(text("JOUEUR ACTIF", 12f, white, true).apply { gravity = Gravity.START })
-        activePanel.addView(text(activeName, 17f, white, true).apply { gravity = Gravity.START; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END })
-        val activeScore = text(gamePlayers?.getOrNull(activeIndex)?.score?.toString() ?: "301", 42f, white, true).apply { gravity = Gravity.START }
+        activePanel.addView(text("JOUEUR ACTIF", 10f, white, true).apply { gravity = Gravity.START; includeFontPadding = false })
+        activePanel.addView(text(activeName, 13f, white, true).apply { gravity = Gravity.START; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; includeFontPadding = false })
+        val activeScore = text(gamePlayers?.getOrNull(activeIndex)?.score?.toString() ?: "301", 34f, white, true).apply { gravity = Gravity.START; includeFontPadding = false }
         activePanel.addView(activeScore)
-        activePanel.addView(text("TOUR " + (engine?.state?.turnNumber ?: 1) + " • 3 FLÉCHETTES", 11f, white, true).apply { gravity = Gravity.START })
-        val activeStats = text("", 10f, white, true).apply {
-            gravity = Gravity.START
-            setPadding(0, dp(7), 0, 0)
-            maxLines = 3
-            setLineSpacing(dp(1).toFloat(), 1f)
-        }
+        activePanel.addView(text("TOUR " + (engine?.state?.turnNumber ?: 1) + " • 3 FLÉCHETTES", 9f, white, true).apply { gravity = Gravity.START; includeFontPadding = false })
+        val activeStats = text("", 8f, white, true).apply { gravity = Gravity.START; setPadding(0, dp(4), 0, 0); maxLines = 3; includeFontPadding = false; setLineSpacing(0f, 1f) }
         activePanel.addView(activeStats)
         scoreboard.addView(activePanel)
         val opponents = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(dp(8), 0, 0, 0); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1f) }
@@ -1779,10 +1812,10 @@ class MainActivity : ComponentActivity() {
                 val average = if (dartsThrown == 0) 0.0 else pointsScored * 3.0 / dartsThrown
                 val previous = history.lastOrNull()?.scoreBefore?.toString() ?: engine.state.settings.startingScore.toString()
                 activeStats.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) +
-                    "\\nSCORE PRÉCÉDENT  " + previous +
-                    "\\nFLÉCHETTES JETÉES  " + dartsThrown
+                    "\nMANCHE PRÉCÉDENTE  " + previous +
+                    "\nFLÉCHETTES LANCÉES  " + dartsThrown
             } else {
-                activeStats.text = "MOYENNE  —\\nSCORE PRÉCÉDENT  —\\nFLÉCHETTES JETÉES  0"
+                activeStats.text = "MOYENNE  —\nMANCHE PRÉCÉDENTE  —\nFLÉCHETTES LANCÉES  0"
             }
         }
         // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
