@@ -245,8 +245,8 @@ class MainActivity : ComponentActivity() {
             ).apply { cornerRadius = dp(21).toFloat(); setStroke(dp(1), 0xFF26766F.toInt()) }
         }
         hero.addView(txt("BIENVENUE SUR", 10f, teal, true))
-        hero.addView(txt("La précision à\\nchaque fléchette.", 27f, white, true))
-        hero.addView(txt("Joue, progresse et analyse tes performances.", 11f, muted))
+        hero.addView(txt("Prêt à viser juste ?", 27f, white, true))
+        hero.addView(txt("Lance tes parties, suis tes scores et mesure tes progrès.", 11f, muted))
         val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, 0) }
         btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
         hero.addView(play)
@@ -486,7 +486,7 @@ class MainActivity : ComponentActivity() {
         bottomNavigationBar = bottom
         fun nav(key: String, title: String, symbol: String) {
             val button = Button(this).apply {
-                text = symbol + "\n" + title; isAllCaps = false; textSize = 10f; setTextColor(white)
+                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title == "JOUEURS") 8f else 10f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
                 minHeight = dp(54); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, dp(54), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
                 setOnClickListener { showPage(key) }
@@ -875,7 +875,7 @@ class MainActivity : ComponentActivity() {
                             val updated = field.text.toString().trim()
                             if (updated.isNotBlank() && names.indices.none { it != index && names[it].equals(updated, true) }) {
                                 names[index] = updated
-                                prefs.edit().putString("names", names.joinToString("\\n")).apply()
+                                prefs.edit().putString("names", names.joinToString("\n")).apply()
                                 render()
                             } else Toast.makeText(this@MainActivity, "Pseudo vide ou déjà utilisé.", Toast.LENGTH_SHORT).show()
                         }.show()
@@ -1434,7 +1434,7 @@ class MainActivity : ComponentActivity() {
         val playerSpinner = spinner(playerCounts).apply {
             setSelection(((state.get().optJSONArray("players")?.length() ?: 1) - 1).coerceIn(0, 3))
         }
-        val savedPlayerNames = getSharedPreferences("dart_vision_players", MODE_PRIVATE).getString("names", "").orEmpty().split("\\n").map { it.trim() }.filter { it.isNotBlank() }
+        val savedPlayerNames = getSharedPreferences("dart_vision_players", MODE_PRIVATE).getString("names", "").orEmpty().split("\n", "\\n").map { it.trim() }.filter { it.isNotBlank() }
         val existingPlayers = state.get().optJSONArray("players") ?: JSONArray()
         val playerNameInputs = (0 until 4).map { index ->
             EditText(this).apply {
@@ -1544,7 +1544,7 @@ class MainActivity : ComponentActivity() {
                 val enteredNames = playerNameInputs.take(count).mapIndexed { i, input -> input.text.toString().trim().ifBlank { "Joueur ${i + 1}" } }.toMutableList()
                 if (includeAccountPlayer.isChecked) enteredNames[0] = accountDisplayName()
                 val names = enteredNames.distinctBy { it.lowercase() }
-                getSharedPreferences("dart_vision_players", MODE_PRIVATE).edit().putString("names", names.joinToString("\\n")).apply()
+                getSharedPreferences("dart_vision_players", MODE_PRIVATE).edit().putString("names", names.joinToString("\n")).apply()
                 val playersJson = JSONArray()
                 names.forEach { playersJson.put(JSONObject().put("name", it).put("score", scores[scoreSpinner.selectedItemPosition].toInt())) }
                 val localState = state.get()
