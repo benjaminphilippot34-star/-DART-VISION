@@ -325,103 +325,155 @@ class MainActivity : ComponentActivity() {
         headerAction("⚙", "Paramètres") { showPage("more") }
         root.addView(header)
 
-        // Accueil refondu selon la maquette validée : accueil éditorial, bouton Jouer et quatre rubriques uniques.
-        val welcome = LinearLayout(this).apply {
+        // Accueil DART VISION : reproduction de la maquette officielle, sans bouton Jouer.
+        val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(dp(18), dp(18), dp(18), dp(18))
+            setPadding(dp(12), dp(15), dp(12), dp(15))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF111D2A.toInt(), 0xFF090F18.toInt())
+                intArrayOf(0xFF06141B.toInt(), 0xFF10121C.toInt(), 0xFF210D17.toInt())
             ).apply {
-                cornerRadius = dp(22).toFloat()
-                setStroke(dp(1), 0xFF354555.toInt())
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(2), 0xFF19D9D2.toInt())
             }
-            layoutParams = LinearLayout.LayoutParams(-1, dp(154)).apply {
-                setMargins(0, dp(8), 0, dp(14))
+            layoutParams = LinearLayout.LayoutParams(-1, dp(202)).apply {
+                setMargins(0, dp(7), 0, dp(12))
             }
-            elevation = dp(5).toFloat()
+            elevation = dp(7).toFloat()
         }
-        welcome.addView(txt("BIENVENUE !", 12f, 0xFF31DED5.toInt(), true).apply {
+        hero.addView(TextView(this).apply {
+            text = "D"
+            textSize = 58f
             gravity = Gravity.CENTER
-            letterSpacing = .18f
+            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.ITALIC)
+            setTextColor(0xFFFF3048.toInt())
+            setShadowLayer(dp(14).toFloat(), 0f, 0f, 0xFF00E9E1.toInt())
         })
-        welcome.addView(TextView(this).apply {
-            text = "Prêt à jouer ?"
-            textSize = 27f
+        hero.addView(TextView(this).apply {
+            text = android.text.SpannableString("DART VISION").apply {
+                setSpan(android.text.style.ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 5, 0)
+                setSpan(android.text.style.ForegroundColorSpan(0xFF18E6E0.toInt()), 5, length, 0)
+            }
+            textSize = 29f
             gravity = Gravity.CENTER
-            setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
-            setTextColor(white)
-            setPadding(0, dp(5), 0, dp(3))
+            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
+            setShadowLayer(dp(8).toFloat(), 0f, 0f, 0xFFFF263F.toInt())
         })
-        welcome.addView(txt("LA PRÉCISION. LE JEU. LA PERFORMANCE.", 9f, 0xFFB9C3CE.toInt()).apply {
+        hero.addView(TextView(this).apply {
+            text = "—  SMART DARTS EXPERIENCE  —"
+            textSize = 10f
             gravity = Gravity.CENTER
-            letterSpacing = .10f
+            letterSpacing = .08f
+            setTextColor(0xFF26E5E0.toInt())
+            setPadding(0, dp(3), 0, dp(8))
         })
-        home.addView(welcome)
-        val playRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
+        hero.addView(TextView(this).apply {
+            text = "LA PRÉCISION  •  LE JEU  •  LA PERFORMANCE"
+            textSize = 10f
             gravity = Gravity.CENTER
-            setPadding(0, 0, 0, dp(14))
-        }
-        btn(playRow, "▶  JOUER", true) {
-            showPage("game")
-            showGameModes()
-        }
-        home.addView(playRow)
+            letterSpacing = .04f
+            setTextColor(0xFFF2F5F8.toInt())
+        })
+        home.addView(hero)
+
         val categoryGrid = android.widget.GridLayout(this).apply {
             columnCount = 2
             useDefaultMargins = false
             setPadding(0, 0, 0, dp(5))
         }
-        fun addCategory(icon: String, title: String, subtitle: String, action: () -> Unit) {
+        fun addCategory(icon: String, title: String, subtitle: String, accent: Int, action: () -> Unit) {
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                setPadding(dp(12), dp(13), dp(12), dp(13))
+                setPadding(dp(8), dp(10), dp(8), dp(9))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(0xFF142131.toInt(), 0xFF0B121C.toInt())
+                    intArrayOf(0xFF111D28.toInt(), 0xFF080E16.toInt())
                 ).apply {
-                    cornerRadius = dp(18).toFloat()
-                    setStroke(dp(1), 0xFFB72A3D.toInt())
+                    cornerRadius = dp(17).toFloat()
+                    setStroke(dp(2), accent)
                 }
-                elevation = dp(4).toFloat()
+                elevation = dp(6).toFloat()
                 isClickable = true
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(112)
+                    height = dp(132)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(dp(4), dp(4), dp(4), dp(6))
+                    setMargins(dp(4), dp(4), dp(4), dp(5))
                 }
                 setOnClickListener { action() }
             }
             tile.addView(TextView(this).apply {
-                text = icon; textSize = 23f; gravity = Gravity.CENTER
-                setTextColor(0xFF31DED5.toInt())
-                setPadding(0, 0, 0, dp(4))
+                text = icon; textSize = 34f; gravity = Gravity.CENTER
+                setTextColor(accent)
+                setShadowLayer(dp(8).toFloat(), 0f, 0f, accent)
+                setPadding(0, 0, 0, dp(3))
             })
             tile.addView(TextView(this).apply {
-                text = title; textSize = 13f; gravity = Gravity.CENTER
+                text = title; textSize = 14f; gravity = Gravity.CENTER
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC))
                 setTextColor(white)
             })
             tile.addView(TextView(this).apply {
-                text = subtitle; textSize = 9f; gravity = Gravity.CENTER
-                setTextColor(0xFFB2BEC9.toInt())
-                setPadding(0, dp(3), 0, 0)
+                text = subtitle; textSize = 10f; gravity = Gravity.CENTER
+                setTextColor(0xFFD0D7DF.toInt())
+                setPadding(0, dp(4), 0, 0)
+            })
+            tile.addView(TextView(this).apply {
+                text = "›"; textSize = 25f; gravity = Gravity.CENTER
+                setTextColor(accent)
+                setShadowLayer(dp(7).toFloat(), 0f, 0f, accent)
             })
             categoryGrid.addView(tile)
         }
-        addCategory("🎯", "JEUX", "501 • Cricket • Shanghai") {
-            showPage("game")
-            showGameModes()
+        addCategory("🎮", "PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFF18E6E0.toInt()) {
+            showPage("game"); showGameModes()
         }
-        addCategory("♙", "PROFIL", "Compte et progression") { showPage("account") }
-        addCategory("✦", "DISCUSSIONS", "Retrouver tes amis") { showPage("discussions") }
-        addCategory("⚙", "PARAMÈTRES", "Personnaliser l'application") { showPage("more") }
+        addCategory("🌐", "PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFFFF3048.toInt()) {
+            showPage("players")
+        }
+        addCategory("🎯", "ENTRAÎNEMENT", "Travailler les simples,\ndoubles et finishes", 0xFF18E6E0.toInt()) {
+            showPage("game"); showTrainingModes()
+        }
+        addCategory("🏆", "MODE CLASSÉ", "Compétition, classement\net progression", 0xFFFF3048.toInt()) {
+            showPage("game"); showGameModes()
+        }
         home.addView(categoryGrid)
+
+        val quickLinks = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, dp(7), 0, dp(4))
+        }
+        fun quick(label: String, icon: String, action: () -> Unit) {
+            val b = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(dp(3), dp(8), dp(3), dp(8))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF101923.toInt())
+                    cornerRadius = dp(16).toFloat()
+                    setStroke(dp(1), 0xFF405461.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(0, dp(72), 1f).apply {
+                    setMargins(dp(3), 0, dp(3), 0)
+                }
+                isClickable = true
+                setOnClickListener { action() }
+            }
+            b.addView(TextView(this).apply { text = icon; textSize = 21f; gravity = Gravity.CENTER; setTextColor(white) })
+            b.addView(TextView(this).apply { text = label; textSize = 10f; gravity = Gravity.CENTER; setTextColor(white) })
+            quickLinks.addView(b)
+        }
+        quick("STATISTIQUES", "▥") { showAccountHistory() }
+        quick("AMIS", "♟") { showPage("discussions") }
+        quick("SUCCÈS", "★") {
+            showInsightScreen("SUCCÈS", "TES OBJECTIFS DART VISION", emptyList(),
+                listOf("Progression" to "Tes performances et tes réussites apparaîtront ici."))
+        }
+        home.addView(quickLinks)
 
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
