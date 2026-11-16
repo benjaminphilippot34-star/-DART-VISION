@@ -84,6 +84,40 @@ private class DartAvatarPortraitView(context: android.content.Context, private v
     }
 }
 
+
+/** Original neon dartboard artwork drawn natively for the DART VISION home screen. */
+private class DartNeonArtworkView(context: android.content.Context, private val kind: Int = 0) : View(context) {
+    private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        val s=minOf(width,height).toFloat(); val cx=width/2f; val cy=height/2f
+        p.style=android.graphics.Paint.Style.FILL; p.color=0xFF071018.toInt()
+        canvas.drawCircle(cx,cy,s*.48f,p)
+        p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.025f
+        p.color=0xFFFF3048.toInt(); p.setShadowLayer(s*.10f,0f,0f,0xFFFF203D.toInt())
+        canvas.drawCircle(cx,cy,s*.46f,p); p.clearShadowLayer()
+        if(kind==0 || kind==2) {
+            val rings=intArrayOf(0xFF18E6E0.toInt(),0xFFFF3048.toInt(),0xFFF3F5F7.toInt(),0xFF18E6E0.toInt(),0xFFFF3048.toInt())
+            rings.forEachIndexed { i,col -> p.color=col; p.strokeWidth=s*(if(i==0) .045f else .025f); canvas.drawCircle(cx,cy,s*(.37f-i*.067f),p) }
+            p.style=android.graphics.Paint.Style.FILL; p.color=0xFFFF3048.toInt(); canvas.drawCircle(cx,cy,s*.055f,p)
+            p.color=0xFF18E6E0.toInt(); canvas.drawCircle(cx,cy,s*.022f,p)
+            p.strokeWidth=s*.035f; p.strokeCap=android.graphics.Paint.Cap.ROUND; p.color=0xFFEAFBFF.toInt()
+            canvas.drawLine(cx+s*.02f,cy-s*.02f,cx+s*.32f,cy-s*.38f,p)
+            p.style=android.graphics.Paint.Style.FILL
+            val dart=android.graphics.Path().apply { moveTo(cx+s*.28f,cy-s*.42f); lineTo(cx+s*.47f,cy-s*.48f); lineTo(cx+s*.39f,cy-s*.30f); close() }
+            p.color=0xFF18E6E0.toInt(); canvas.drawPath(dart,p)
+            p.color=0xFFFF3048.toInt(); canvas.drawCircle(cx+s*.02f,cy-s*.02f,s*.04f,p)
+        } else {
+            p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.065f
+            p.color=if(kind==1) 0xFF18E6E0.toInt() else 0xFFFF3048.toInt()
+            val r=s*.25f; canvas.drawCircle(cx,cy,r,p); canvas.drawLine(cx-r*.9f,cy,cx+r*.9f,cy,p)
+            canvas.drawLine(cx,cy-r*.9f,cx,cy+r*.9f,p)
+            canvas.drawArc(cx-r*.7f,cy-r*.7f,cx+r*.7f,cy+r*.7f,210f,120f,false,p)
+        }
+        p.clearShadowLayer(); p.strokeCap=android.graphics.Paint.Cap.BUTT; p.style=android.graphics.Paint.Style.FILL
+    }
+}
+
 class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
@@ -342,13 +376,9 @@ class MainActivity : ComponentActivity() {
             }
             elevation = dp(7).toFloat()
         }
-        hero.addView(TextView(this).apply {
-            text = "D"
-            textSize = 58f
-            gravity = Gravity.CENTER
-            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.ITALIC)
-            setTextColor(0xFFFF3048.toInt())
-            setShadowLayer(dp(14).toFloat(), 0f, 0f, 0xFF00E9E1.toInt())
+        hero.addView(DartNeonArtworkView(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(112), dp(112))
+            contentDescription = "Cible de fléchettes DART VISION avec fléchette lumineuse"
         })
         hero.addView(TextView(this).apply {
             text = android.text.SpannableString("DART VISION").apply {
@@ -405,11 +435,13 @@ class MainActivity : ComponentActivity() {
                 }
                 setOnClickListener { action() }
             }
-            tile.addView(TextView(this).apply {
-                text = icon; textSize = 34f; gravity = Gravity.CENTER
-                setTextColor(accent)
-                setShadowLayer(dp(8).toFloat(), 0f, 0f, accent)
-                setPadding(0, 0, 0, dp(3))
+            tile.addView(DartNeonArtworkView(this, when (title) {
+                "PARTIE LOCALE" -> 1
+                "PARTIE EN LIGNE" -> 3
+                else -> 0
+            }).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(62), dp(62))
+                contentDescription = title
             })
             tile.addView(TextView(this).apply {
                 text = title; textSize = 14f; gravity = Gravity.CENTER
