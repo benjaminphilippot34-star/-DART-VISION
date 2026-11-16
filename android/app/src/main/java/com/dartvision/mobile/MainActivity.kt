@@ -376,9 +376,10 @@ class MainActivity : ComponentActivity() {
             }
             elevation = dp(7).toFloat()
         }
-        hero.addView(DartNeonArtworkView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(112), dp(112))
-            contentDescription = "Cible de fléchettes DART VISION avec fléchette lumineuse"
+        hero.addView(DartboardPreview(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(126), dp(126))
+            contentDescription = "Cible de fléchettes traditionnelle détaillée"
+            elevation = dp(9).toFloat()
         })
         hero.addView(TextView(this).apply {
             text = android.text.SpannableString("DART VISION").apply {
