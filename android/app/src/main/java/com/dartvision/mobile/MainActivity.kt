@@ -258,7 +258,7 @@ class MainActivity : ComponentActivity() {
                 val radius = minOf(w * 0.53f, h * 0.49f)
                 p.style = android.graphics.Paint.Style.STROKE
                 p.strokeWidth = dp(2).toFloat()
-                p.color = 0x44FF1D32
+                p.color = 0x44FF1D32.toInt()
                 p.setShadowLayer(dp(18).toFloat(), 0f, 0f, 0xAAFF1028.toInt())
                 canvas.drawCircle(cx, cy, radius * 1.08f, p)
                 p.clearShadowLayer()
