@@ -262,63 +262,163 @@ class MainActivity : ComponentActivity() {
             setBackgroundColor(0xFF08090D.toInt())
         }
         val artwork = object : View(this) {
-            val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+            private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
             override fun onDraw(canvas: android.graphics.Canvas) {
                 super.onDraw(canvas)
-                val w = width.toFloat(); val h = height.toFloat()
-                val cx = w * 0.79f; val cy = h * 0.57f
+                val w = width.toFloat()
+                val h = height.toFloat()
+                val cx = w * 0.79f
+                val cy = h * 0.57f
                 val radius = minOf(w * 0.53f, h * 0.49f)
-                p.style = android.graphics.Paint.Style.STROKE
-                p.strokeWidth = dp(2).toFloat()
-                p.color = 0x44FF1D32.toInt()
-                p.setShadowLayer(dp(18).toFloat(), 0f, 0f, 0xAAFF1028.toInt())
-                canvas.drawCircle(cx, cy, radius * 1.08f, p)
-                p.clearShadowLayer()
-                p.color = 0xCCBFC4CC.toInt(); p.strokeWidth = dp(1).toFloat()
-                canvas.drawCircle(cx, cy, radius, p)
-                p.style = android.graphics.Paint.Style.FILL
-                p.color = 0xFF11141B.toInt(); canvas.drawCircle(cx, cy, radius * .96f, p)
+                val board = android.graphics.RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+                val outer = 0xFF10151B.toInt()
+                val wire = 0xFFBFC5CC.toInt()
+                val red = 0xFFB91F32.toInt()
+                val green = 0xFF16845B.toInt()
+                val cream = 0xFFD8C6A5.toInt()
+                val black = 0xFF17191D.toInt()
+
+                // Socle et cerclage métallique de la cible.
+                paint.style = android.graphics.Paint.Style.FILL
+                paint.color = 0xFF070A0F.toInt()
+                paint.setShadowLayer(dp(18).toFloat(), 0f, dp(5).toFloat(), 0xCC000000.toInt())
+                canvas.drawCircle(cx, cy, radius * 1.055f, paint)
+                paint.clearShadowLayer()
+                paint.color = 0xFF7C858E.toInt()
+                canvas.drawCircle(cx, cy, radius * 1.025f, paint)
+                paint.color = outer
+                canvas.drawCircle(cx, cy, radius * 0.99f, paint)
+
+                // Vingt secteurs alternés, avec texture légère de sisal.
                 for (i in 0 until 20) {
-                    val angle = Math.toRadians((i * 18.0) - 99.0)
-                    val x1 = cx + kotlin.math.cos(angle).toFloat() * radius * .13f
-                    val y1 = cy + kotlin.math.sin(angle).toFloat() * radius * .13f
-                    val x2 = cx + kotlin.math.cos(angle).toFloat() * radius * .91f
-                    val y2 = cy + kotlin.math.sin(angle).toFloat() * radius * .91f
-                    p.style = android.graphics.Paint.Style.STROKE
-                    p.strokeWidth = dp(1).toFloat()
-                    p.color = if (i % 2 == 0) 0xFF7D828B.toInt() else 0xFF272C35.toInt()
-                    canvas.drawLine(x1, y1, x2, y2, p)
+                    val startAngle = -99f + i * 18f
+                    paint.style = android.graphics.Paint.Style.FILL
+                    paint.color = if (i % 2 == 0) cream else black
+                    canvas.drawArc(board, startAngle, 18f, true, paint)
                 }
-                p.style = android.graphics.Paint.Style.STROKE
-                p.strokeWidth = dp(7).toFloat(); p.color = 0xFFE32636.toInt()
-                p.setShadowLayer(dp(12).toFloat(), 0f, 0f, 0xFFFF1C32.toInt())
-                canvas.drawCircle(cx, cy, radius * .93f, p)
-                p.clearShadowLayer()
-                p.strokeWidth = dp(2).toFloat(); p.color = 0xFFD5D9E0.toInt()
-                canvas.drawCircle(cx, cy, radius * .69f, p)
-                canvas.drawCircle(cx, cy, radius * .43f, p)
-                p.style = android.graphics.Paint.Style.FILL
-                p.color = 0xFF171B23.toInt(); canvas.drawCircle(cx, cy, radius * .27f, p)
-                p.color = 0xFFE32636.toInt()
-                p.setShadowLayer(dp(16).toFloat(), 0f, 0f, 0xFFFF1D32.toInt())
-                canvas.drawCircle(cx, cy, radius * .13f, p)
-                p.clearShadowLayer()
-                p.color = 0xFFFF3045.toInt(); canvas.drawCircle(cx, cy, radius * .055f, p)
-                val sx = cx - radius * .78f; val sy = cy - radius * .64f
-                val ex = cx - radius * .08f; val ey = cy - radius * .07f
-                p.style = android.graphics.Paint.Style.STROKE; p.strokeWidth = dp(5).toFloat()
-                p.strokeCap = android.graphics.Paint.Cap.ROUND; p.color = 0xFFE8EBF0.toInt()
-                p.setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF3045.toInt())
-                canvas.drawLine(sx, sy, ex, ey, p); p.clearShadowLayer()
-                p.style = android.graphics.Paint.Style.FILL
-                val dart = android.graphics.Path().apply {
-                    moveTo(sx - dp(12), sy - dp(13)); lineTo(sx + dp(15), sy - dp(5))
-                    lineTo(sx + dp(5), sy + dp(16)); close()
+                val texture = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                    color = 0x247C7569
+                    strokeWidth = dp(0.7f).toFloat()
                 }
-                p.color = 0xFFE32636.toInt(); canvas.drawPath(dart, p)
-                val shade = android.graphics.LinearGradient(0f, 0f, w * .7f, 0f,
-                    intArrayOf(0x0008090D.toInt(), 0xCC08090D.toInt(), 0x0008090D.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
-                p.shader = shade; canvas.drawRect(0f, 0f, w * .73f, h, p); p.shader = null
+                for (i in 0 until 240) {
+                    val angle = i * 2.399963f
+                    val rr = radius * (0.53f + ((i * 37) % 41) / 100f)
+                    val x = cx + kotlin.math.cos(angle).toFloat() * rr
+                    val y = cy + kotlin.math.sin(angle).toFloat() * rr
+                    canvas.drawPoint(x, y, texture)
+                }
+
+                // Double et triple couronnes : segments rouges et verts séparés par les fils.
+                for (i in 0 until 20) {
+                    val startAngle = -99f + i * 18f
+                    val bandColor = if (i % 2 == 0) red else green
+                    paint.style = android.graphics.Paint.Style.FILL
+                    paint.color = bandColor
+                    canvas.drawArc(board, startAngle, 18f, true, paint)
+                }
+                // Les secteurs sont redessinés au-dessus des zones non scorantes des couronnes.
+                for (i in 0 until 20) {
+                    val startAngle = -99f + i * 18f
+                    paint.color = if (i % 2 == 0) cream else black
+                    canvas.drawArc(
+                        android.graphics.RectF(cx - radius * .86f, cy - radius * .86f, cx + radius * .86f, cy + radius * .86f),
+                        startAngle, 18f, true, paint
+                    )
+                }
+                for (i in 0 until 20) {
+                    val startAngle = -99f + i * 18f
+                    paint.color = if (i % 2 == 0) red else green
+                    canvas.drawArc(
+                        android.graphics.RectF(cx - radius * .49f, cy - radius * .49f, cx + radius * .49f, cy + radius * .49f),
+                        startAngle, 18f, true, paint
+                    )
+                    paint.color = if (i % 2 == 0) cream else black
+                    canvas.drawArc(
+                        android.graphics.RectF(cx - radius * .43f, cy - radius * .43f, cx + radius * .43f, cy + radius * .43f),
+                        startAngle, 18f, true, paint
+                    )
+                }
+
+                // Fils radiaux et couronnes métalliques.
+                paint.style = android.graphics.Paint.Style.STROKE
+                paint.strokeWidth = dp(1.2f).toFloat()
+                paint.color = wire
+                for (i in 0 until 20) {
+                    val angle = Math.toRadians(-99.0 + i * 18.0)
+                    val x1 = cx + kotlin.math.cos(angle).toFloat() * radius * .12f
+                    val y1 = cy + kotlin.math.sin(angle).toFloat() * radius * .12f
+                    val x2 = cx + kotlin.math.cos(angle).toFloat() * radius * .94f
+                    val y2 = cy + kotlin.math.sin(angle).toFloat() * radius * .94f
+                    canvas.drawLine(x1, y1, x2, y2, paint)
+                }
+                for (r in floatArrayOf(.12f, .43f, .49f, .86f, .94f, .985f)) {
+                    paint.strokeWidth = if (r == .49f || r == .86f) dp(2f).toFloat() else dp(1f).toFloat()
+                    canvas.drawCircle(cx, cy, radius * r, paint)
+                }
+
+                // Chiffres autour de la cible.
+                val numbers = intArrayOf(20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
+                paint.style = android.graphics.Paint.Style.FILL
+                paint.color = 0xFFE8E9E9.toInt()
+                paint.textSize = radius * .105f
+                paint.typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
+                paint.textAlign = android.graphics.Paint.Align.CENTER
+                for (i in numbers.indices) {
+                    val angle = Math.toRadians(-90.0 + i * 18.0)
+                    val x = cx + kotlin.math.cos(angle).toFloat() * radius * .91f
+                    val y = cy + kotlin.math.sin(angle).toFloat() * radius * .91f + paint.textSize * .34f
+                    canvas.drawText(numbers[i].toString(), x, y, paint)
+                }
+
+                // Bull extérieur vert et bull central rouge.
+                paint.style = android.graphics.Paint.Style.FILL
+                paint.color = green
+                canvas.drawCircle(cx, cy, radius * .12f, paint)
+                paint.color = red
+                canvas.drawCircle(cx, cy, radius * .055f, paint)
+                paint.style = android.graphics.Paint.Style.STROKE
+                paint.strokeWidth = dp(1.4f).toFloat()
+                paint.color = wire
+                canvas.drawCircle(cx, cy, radius * .12f, paint)
+                canvas.drawCircle(cx, cy, radius * .055f, paint)
+
+                // Fléchette métallique stylisée plantée dans le bull.
+                val sx = cx - radius * .78f
+                val sy = cy - radius * .64f
+                val ex = cx - radius * .075f
+                val ey = cy - radius * .07f
+                paint.style = android.graphics.Paint.Style.STROKE
+                paint.strokeWidth = dp(4f).toFloat()
+                paint.strokeCap = android.graphics.Paint.Cap.ROUND
+                paint.color = 0xFFCDD3D9.toInt()
+                paint.setShadowLayer(dp(5f).toFloat(), 0f, 0f, 0xAAFF3045.toInt())
+                canvas.drawLine(sx, sy, ex, ey, paint)
+                paint.clearShadowLayer()
+                paint.strokeWidth = dp(1f).toFloat()
+                paint.color = 0xFF6D747C.toInt()
+                for (i in 1..5) {
+                    val t = i / 6f
+                    canvas.drawLine(sx + (ex - sx) * t, sy + (ey - sy) * t - dp(2f), sx + (ex - sx) * t, sy + (ey - sy) * t + dp(2f), paint)
+                }
+                paint.style = android.graphics.Paint.Style.FILL
+                paint.color = red
+                val flight = android.graphics.Path().apply {
+                    moveTo(sx - dp(12f), sy - dp(12f))
+                    lineTo(sx + dp(13f), sy - dp(4f))
+                    lineTo(sx + dp(5f), sy + dp(15f))
+                    close()
+                }
+                canvas.drawPath(flight, paint)
+
+                // Fondu sombre à gauche pour garder le titre parfaitement lisible.
+                val shade = android.graphics.LinearGradient(
+                    0f, 0f, w * .73f, 0f,
+                    intArrayOf(0x0008090D, 0xCC08090D.toInt(), 0x0008090D),
+                    null, android.graphics.Shader.TileMode.CLAMP
+                )
+                paint.shader = shade
+                canvas.drawRect(0f, 0f, w * .73f, h, paint)
+                paint.shader = null
             }
         }
         homeStage.addView(artwork, FrameLayout.LayoutParams(-1, -1))
