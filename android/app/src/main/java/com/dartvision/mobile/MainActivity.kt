@@ -131,6 +131,8 @@ class MainActivity : ComponentActivity() {
     private var currentPage = "home"
     private var bottomNavigationBar: View? = null
     private var profileAvatarPreview: ImageView? = null
+    private var navigateHomeFromPage: (() -> Unit)? = null
+    private var gameExitPrompt: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -277,6 +279,7 @@ class MainActivity : ComponentActivity() {
             enteringPage.animate().alpha(1.0f).translationY(0f).setDuration(220L).start()
         }
         navigateToMorePage = { showPage("more") }
+        navigateHomeFromPage = { showPage("home") }
         val header = LinearLayout(this).apply {
             gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL
             setPadding(0, 0, 0, dp(8))
@@ -713,6 +716,45 @@ class MainActivity : ComponentActivity() {
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
 
+        gameExitPrompt = {
+            AlertDialog.Builder(this).setTitle("Quitter la partie ?")
+                .setMessage("Tu peux sauvegarder la partie pour la reprendre plus tard, l'abandonner sans sauvegarde ou continuer à jouer.")
+                .setPositiveButton("SAUVEGARDER ET QUITTER") { _, _ ->
+                    x01Engine?.let { saveX01Game() }
+                    saveLocalState(state.get())
+                    gameInProgress = false
+                    trainingTurnHandler = null
+                    bottomNavigationBar?.visibility = View.VISIBLE
+                    showPage("home")
+                    Toast.makeText(this, "Partie sauvegardée.", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("ABANDONNER") { _, _ ->
+                    getSharedPreferences("dart_vision_local", MODE_PRIVATE).edit()
+                        .remove("x01_state").remove("game_state").apply()
+                    gameInProgress = false
+                    x01Engine = null
+                    trainingTurnHandler = null
+                    bottomNavigationBar?.visibility = View.VISIBLE
+                    showPage("home")
+                    Toast.makeText(this, "Partie abandonnée sans sauvegarde.", Toast.LENGTH_SHORT).show()
+                }
+                .setNeutralButton("CONTINUER", null)
+                .show()
+        }
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (currentPage != "home") {
+                    if (currentPage == "game" && gameInProgress) gameExitPrompt?.invoke()
+                    else navigateHomeFromPage?.invoke()
+                } else if (gameInProgress) {
+                    gameExitPrompt?.invoke()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
         root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
         // Aucun menu inférieur : toute la navigation part de la page d'accueil, sous le bouton JOUER.
         bottomNavigationBar = null
@@ -871,6 +913,7 @@ class MainActivity : ComponentActivity() {
 
         sectionTitle("IDENTIFIANTS")
         val email = field("Adresse e-mail", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+        email.setText(accountPreferences().getString("email", "").orEmpty())
         val password = field("Mot de passe (8 caractères minimum)", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD, true)
         val phone = field("Téléphone au format +33612345678", android.text.InputType.TYPE_CLASS_PHONE)
         val profileNameInput = field("Pseudo utilisé pendant les parties", android.text.InputType.TYPE_CLASS_TEXT)
