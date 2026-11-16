@@ -418,90 +418,108 @@ class MainActivity : ComponentActivity() {
         }
         navigateToMorePage = { showPage("more") }
         navigateHomeFromPage = { showPage("home") }
-        val header = LinearLayout(this).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 0, 0, dp(9))
+        // En-tête DART VISION — logo d'origine conservé, composition calée sur la maquette.
+        val header = android.widget.FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(62)).apply {
+                bottomMargin = dp(5)
+            }
             clipChildren = false
             clipToPadding = false
         }
-        header.addView(ImageView(this).apply {
-            setImageResource(R.drawable.dart_vision_logo)
-            adjustViewBounds = true
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(52), dp(52))
-            contentDescription = "Logo DART VISION"
-            elevation = dp(5).toFloat()
+        val menuAction = android.widget.FrameLayout(this).apply {
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(42), dp(46), Gravity.CENTER_VERTICAL or Gravity.START)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Menu"
+            setOnClickListener { showPage("more") }
+        }
+        menuAction.addView(TextView(this).apply {
+            text = "☰"
+            textSize = 27f
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setTextColor(0xFF101820.toInt())
+            layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
+        menuAction.addView(View(this).apply {
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(0xFFFF9D16.toInt())
+            }
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(10), dp(10), Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(5)
+                rightMargin = dp(3)
+            }
+        })
+        header.addView(menuAction)
+
         val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = android.widget.FrameLayout.LayoutParams(-2, -1, Gravity.CENTER)
+            setPadding(dp(4), 0, dp(4), 0)
+        }
+        brand.addView(ImageView(this).apply {
+            setImageResource(R.drawable.dart_vision_logo)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            layoutParams = LinearLayout.LayoutParams(dp(45), dp(45)).apply {
+                rightMargin = dp(5)
+            }
+            contentDescription = "Logo original DART VISION"
+        })
+        val brandText = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(2), 0, dp(2), 0)
         }
-        val brandName = android.text.SpannableString("DART VISION")
-        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        brand.addView(TextView(this).apply {
-            text = brandName
-            textSize = 22f
+        brandText.addView(TextView(this).apply {
+            text = android.text.SpannableString("DART VISION").apply {
+                setSpan(android.text.style.ForegroundColorSpan(0xFF101820.toInt()), 0, 5, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(android.text.style.ForegroundColorSpan(0xFF00AFC0.toInt()), 5, length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            textSize = 21f
             maxLines = 1
             includeFontPadding = false
-            setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
-            setTextColor(white)
-            setShadowLayer(dp(5).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
+            setTextColor(0xFF101820.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
         })
-        brand.addView(TextView(this).apply {
-            text = "—  SMART DARTS EXPERIENCE  —"
+        brandText.addView(TextView(this).apply {
+            text = "SMART DARTS EXPERIENCE"
             textSize = 7.5f
             maxLines = 1
             includeFontPadding = false
-            letterSpacing = .04f
-            setTextColor(0xFF00F0FF.toInt())
+            letterSpacing = .025f
+            setTextColor(0xFF26383B.toInt())
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setPadding(0, dp(3), 0, 0)
         })
-        header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
-        fun headerAction(symbol: String, label: String, click: () -> Unit, notification: Boolean = false) {
-            val action = android.widget.FrameLayout(this).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(36), dp(36)).apply {
-                    setMargins(dp(2), 0, dp(2), 0)
-                }
-                isClickable = true
-                isFocusable = true
-                contentDescription = label
-                setOnClickListener { click() }
-            }
-            action.addView(TextView(this).apply {
-                text = symbol
-                textSize = if (symbol == "⚙") 19f else 18f
-                gravity = Gravity.CENTER
-                setTextColor(white)
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF080F17.toInt())
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setStroke(dp(1), 0xFF00F0FF.toInt())
-                }
-                setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFF00F0FF.toInt())
-                layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
-            })
-            if (notification) {
-                action.addView(View(this).apply {
-                    background = android.graphics.drawable.GradientDrawable().apply {
-                        setColor(0xFFFF1E1E.toInt())
-                        shape = android.graphics.drawable.GradientDrawable.OVAL
-                        setStroke(dp(1), 0xFFFFB0B8.toInt())
-                    }
-                    layoutParams = android.widget.FrameLayout.LayoutParams(dp(8), dp(8), Gravity.TOP or Gravity.END).apply {
-                        topMargin = dp(1)
-                        rightMargin = dp(1)
-                    }
-                    elevation = dp(3).toFloat()
-                })
-            }
-            header.addView(action)
+        brand.addView(brandText)
+        header.addView(brand)
+
+        val notificationAction = android.widget.FrameLayout(this).apply {
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(42), dp(46), Gravity.CENTER_VERTICAL or Gravity.END)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Notifications"
+            setOnClickListener { showPage("update") }
         }
-        headerAction("♙", "Mon profil", click = { showPage("account") })
-        headerAction("●", "Notifications", { showPage("update") }, notification = true)
-        headerAction("⚙", "Paramètres", click = { showPage("more") })
+        notificationAction.addView(TextView(this).apply {
+            text = "♟"
+            textSize = 23f
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            setTextColor(0xFF101820.toInt())
+            layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
+        })
+        notificationAction.addView(View(this).apply {
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(0xFFFF3045.toInt())
+            }
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(9), dp(9), Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(5)
+                rightMargin = dp(4)
+            }
+        })
+        header.addView(notificationAction)
         root.addView(header)
         root.addView(View(this).apply {
             background = android.graphics.drawable.GradientDrawable(
