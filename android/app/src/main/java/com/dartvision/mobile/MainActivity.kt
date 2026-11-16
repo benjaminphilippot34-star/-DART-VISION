@@ -490,7 +490,6 @@ class MainActivity : ComponentActivity() {
                 ).apply {
                     cornerRadius = dp(17).toFloat()
                     setStroke(dp(2), accent)
-                    setShadowLayer(dp(8).toFloat(), 0f, 0f, accent)
                 }
                 elevation = dp(6).toFloat()
                 isClickable = true
