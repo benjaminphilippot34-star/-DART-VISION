@@ -1324,9 +1324,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showModeCatalogue(trainingOnly: Boolean) {
-        val modes = DartCounterModeCatalog.default.modes.filter {
-            if (trainingOnly) it.category == GameModeCategory.TRAINING else true
+        if (trainingOnly) {
+            showModeFolder("ENTRAÎNEMENT", DartCounterModeCatalog.default.modes.filter {
+                it.category == GameModeCategory.TRAINING
+            })
+            return
         }
+
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
         val accent = 0xFFFF3045.toInt()
@@ -1334,48 +1338,147 @@ class MainActivity : ComponentActivity() {
         val muted = 0xFF91A4B2.toInt()
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
-            setPadding(dp(14), dp(8), dp(14), dp(8))
+            setPadding(dp(12), dp(8), dp(12), dp(8))
             useDefaultMargins = false
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle(if (trainingOnly) "ENTRAÎNEMENT" else "CHOISIR UN MODE")
+            .setTitle("CHOISIR UN UNIVERS")
+            .setMessage("Retrouve chaque type de partie dans son dossier.")
             .setView(ScrollView(this).apply { addView(grid) })
             .setNegativeButton("FERMER", null)
             .create()
+
+        fun addFolder(icon: String, title: String, subtitle: String, action: () -> Unit) {
+            val tile = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(16), dp(15), dp(14), dp(15))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF172630.toInt())
+                    cornerRadius = dp(20).toFloat()
+                    setStroke(dp(1), 0xFF344A58.toInt())
+                }
+                isClickable = true
+                isFocusable = true
+                elevation = dp(3).toFloat()
+                layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = dp(142)
+                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                    setMargins(dp(5), dp(5), dp(5), dp(5))
+                }
+            }
+            tile.addView(TextView(this).apply {
+                text = icon
+                textSize = 27f
+                setTextColor(accent)
+                gravity = Gravity.CENTER_VERTICAL
+            })
+            tile.addView(TextView(this).apply {
+                text = title
+                textSize = 15f
+                setTextColor(ink)
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
+                setPadding(0, dp(5), 0, dp(3))
+            })
+            tile.addView(TextView(this).apply {
+                text = subtitle
+                textSize = 10f
+                setTextColor(muted)
+                maxLines = 2
+            })
+            tile.setOnClickListener {
+                dialog.dismiss()
+                action()
+            }
+            grid.addView(tile)
+        }
+
+        val allModes = DartCounterModeCatalog.default.modes
+        addFolder("⌂", "PARTIE LOCALE", "Jouer sur cet appareil ou en réseau local") {
+            showModeFolder("PARTIE LOCALE", allModes.filter {
+                it.category == GameModeCategory.CLASSIC || it.category == GameModeCategory.PARTY
+            })
+        }
+        addFolder("◎", "PARTIE EN LIGNE", "Défier des joueurs à distance") {
+            showModeFolderUnavailable(
+                "PARTIE EN LIGNE",
+                "Le dossier est prêt. Les salons, invitations et matchs à distance seront activés lorsque le service multijoueur en ligne sera finalisé."
+            )
+        }
+        addFolder("🎯", "ENTRAÎNEMENT", "Travailler les simples, doubles et finishes") {
+            showModeFolder("ENTRAÎNEMENT", allModes.filter { it.category == GameModeCategory.TRAINING })
+        }
+        addFolder("🏆", "MODE CLASSÉ", "Jouer pour progresser dans le classement") {
+            showModeFolderUnavailable(
+                "MODE CLASSÉ",
+                "Le mode classé sera activé avec le système de classement et de validation des résultats. Aucun rang fictif ne sera affiché."
+            )
+        }
+        dialog.show()
+    }
+
+    private fun showModeFolderUnavailable(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("COMPRIS", null)
+            .show()
+    }
+
+    private fun showModeFolder(title: String, modes: List<DartGameMode>) {
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        val accent = 0xFFFF3045.toInt()
+        val ink = 0xFFF4F8FA.toInt()
+        val muted = 0xFF91A4B2.toInt()
+        val grid = android.widget.GridLayout(this).apply {
+            columnCount = 2
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+            useDefaultMargins = false
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(ScrollView(this).apply { addView(grid) })
+            .setNegativeButton("RETOUR", null)
+            .create()
+
         modes.forEach { mode ->
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(13), dp(14), dp(13), dp(14))
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF172630.toInt())
-                    cornerRadius = dp(16).toFloat()
-                    setStroke(dp(1), 0xFF314653.toInt())
+                    cornerRadius = dp(18).toFloat()
+                    setStroke(dp(1), 0xFF344A58.toInt())
                 }
                 isClickable = true
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(132)
+                    height = dp(124)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
                     setMargins(dp(5), dp(5), dp(5), dp(5))
                 }
             }
             tile.addView(TextView(this).apply {
-                text = when (mode.category) {
-                    GameModeCategory.CLASSIC -> "CLASSIQUE"
-                    GameModeCategory.TRAINING -> "ENTRAÎNEMENT"
-                    GameModeCategory.PARTY -> "MULTIJOUEUR"
-                }
-                textSize = 9f; setTextColor(accent)
+                text = if (mode.category == GameModeCategory.PARTY) "MULTIJOUEUR LOCAL"
+                    else if (mode.category == GameModeCategory.TRAINING) "ENTRAÎNEMENT" else "CLASSIQUE"
+                textSize = 9f
+                setTextColor(accent)
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
             })
             tile.addView(TextView(this).apply {
-                text = mode.title; textSize = 16f; setTextColor(ink)
+                text = mode.title
+                textSize = 16f
+                setTextColor(ink)
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
                 setPadding(0, dp(5), 0, dp(3))
             })
             tile.addView(TextView(this).apply {
-                text = mode.description; textSize = 10f; setTextColor(muted)
+                text = mode.description
+                textSize = 10f
+                setTextColor(muted)
                 maxLines = 3
                 setLineSpacing(dp(2).toFloat(), 1f)
             })
