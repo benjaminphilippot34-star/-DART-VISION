@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity() {
         val panelColor = 0xFF121D27.toInt()
         val teal = 0xFFFF3045.toInt()
         val white = 0xFFF4F8FA.toInt()
-        val muted = 0xFF91A4B2.toInt()
+        val muted = 0xFF91BFC2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -217,7 +217,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(panelColor); cornerRadius = dp(18).toFloat()
-                setStroke(dp(1), 0xFF263744.toInt())
+                setStroke(dp(1), 0xFF20414D.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -228,7 +228,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (primary) teal else 0xFF1B2A35.toInt())
                     cornerRadius = dp(13).toFloat()
-                    if (!primary) setStroke(dp(1), 0xFF314653.toInt())
+                    if (!primary) setStroke(dp(1), 0xFF24515A.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -766,7 +766,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF0D151E.toInt())
                     cornerRadius = dp(12).toFloat()
-                    setStroke(dp(1), 0xFF485767.toInt())
+                    setStroke(dp(1), 0xFF28616A.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, dp(49)).apply {
                     bottomMargin = dp(9)
@@ -783,7 +783,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (primary) 0xFFE52C43.toInt() else 0xFF111C27.toInt())
                     cornerRadius = dp(13).toFloat()
-                    setStroke(dp(1), if (primary) 0xFFFF6575.toInt() else 0xFF586878.toInt())
+                    setStroke(dp(1), if (primary) 0xFFFF6575.toInt() else 0xFF28616A.toInt())
                 }
                 stateListAnimator = null
                 minHeight = dp(48)
@@ -1028,14 +1028,17 @@ class MainActivity : ComponentActivity() {
         val uri = prefs.getString("avatar_uri", null)
         if (!uri.isNullOrBlank()) runCatching { image.setImageURI(Uri.parse(uri)) }
         else {
-            val emoji = prefs.getString("avatar_emoji", "🎯") ?: "🎯"
-            val size = (64 * resources.displayMetrics.density).toInt()
+            val key = prefs.getString("avatar_emoji", "ace") ?: "ace"
+            val keys = listOf("ace","shadow","viper","wolf","fox","royal","cyber","bull","phantom","storm","raven","blaze")
+            val style = keys.indexOf(key).let { if (it < 0) 0 else it }
+            val size = dp(68)
+            val portrait = DartAvatarPortraitView(this, style)
+            portrait.measure(View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY))
+            portrait.layout(0, 0, size, size)
             val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-            val canvas = android.graphics.Canvas(bitmap)
-            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF50151D.toInt() }
-            canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
-            paint.color = android.graphics.Color.WHITE; paint.textAlign = android.graphics.Paint.Align.CENTER; paint.textSize = size * .48f
-            canvas.drawText(emoji, size / 2f, size * .66f, paint); image.setImageBitmap(bitmap)
+            portrait.draw(android.graphics.Canvas(bitmap))
+            image.setImageBitmap(bitmap)
         }
     }
 
@@ -1695,7 +1698,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF172630.toInt())
                     cornerRadius = dp(20).toFloat()
-                    setStroke(dp(1), 0xFF344A58.toInt())
+                    setStroke(dp(1), 0xFF1D5960.toInt())
                 }
                 isClickable = true
                 isFocusable = true
