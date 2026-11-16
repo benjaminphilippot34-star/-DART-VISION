@@ -382,7 +382,7 @@ class MainActivity : ComponentActivity() {
         header.addView(ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(62), dp(58))
+            layoutParams = LinearLayout.LayoutParams(dp(50), dp(50))
             contentDescription = "Logo DART VISION"
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -452,21 +452,6 @@ class MainActivity : ComponentActivity() {
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
             setShadowLayer(dp(8).toFloat(), 0f, 0f, 0xFFFF263F.toInt())
         })
-        hero.addView(TextView(this).apply {
-            text = "—  SMART DARTS EXPERIENCE  —"
-            textSize = 10f
-            gravity = Gravity.CENTER
-            letterSpacing = .08f
-            setTextColor(0xFF26E5E0.toInt())
-            setPadding(0, dp(3), 0, dp(8))
-        })
-        hero.addView(TextView(this).apply {
-            text = "LA PRÉCISION  •  LE JEU  •  LA PERFORMANCE"
-            textSize = 10f
-            gravity = Gravity.CENTER
-            letterSpacing = .04f
-            setTextColor(0xFFF2F5F8.toInt())
-        })
         home.addView(hero)
 
         val categoryGrid = android.widget.GridLayout(this).apply {
@@ -491,7 +476,7 @@ class MainActivity : ComponentActivity() {
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(132)
+                    height = dp(138)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
                     setMargins(dp(4), dp(4), dp(4), dp(5))
                 }
@@ -511,14 +496,9 @@ class MainActivity : ComponentActivity() {
                 setTextColor(white)
             })
             tile.addView(TextView(this).apply {
-                text = subtitle; textSize = 10f; gravity = Gravity.CENTER
+                text = subtitle; textSize = 11f; gravity = Gravity.CENTER
                 setTextColor(0xFFD0D7DF.toInt())
                 setPadding(0, dp(4), 0, 0)
-            })
-            tile.addView(TextView(this).apply {
-                text = "›"; textSize = 25f; gravity = Gravity.CENTER
-                setTextColor(accent)
-                setShadowLayer(dp(7).toFloat(), 0f, 0f, accent)
             })
             categoryGrid.addView(tile)
         }
