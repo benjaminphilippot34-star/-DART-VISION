@@ -118,29 +118,55 @@ jobs:
             const apk = fs.readFileSync('android/app/build/outputs/apk/release/app-release.apk');
             const sha256 = crypto.createHash('sha256').update(apk).digest('hex');
             const path = 'latest.json';
-            let sha;
-            try {
-              const current = await github.rest.repos.getContent({
-                owner: context.repo.owner, repo: context.repo.repo, path
-              });
-              sha = current.data.sha;
-            } catch (error) {
-              if (error.status !== 404) throw error;
+            const apkUrl = 'https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v' + versionName + '/app-release.apk';
+            const content = JSON.stringify({ versionCode, versionName, apkUrl, sha256 }, null, 2) + "\n";
+            let published = false;
+            for (let attempt = 1; attempt <= 5; attempt++) {
+              let currentSha;
+              let currentManifest = null;
+              try {
+                const current = await github.rest.repos.getContent({
+                  owner: context.repo.owner, repo: context.repo.repo, path
+                });
+                currentSha = current.data.sha;
+                if (current.data.content) {
+                  currentManifest = JSON.parse(Buffer.from(current.data.content, 'base64').toString('utf8'));
+                }
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+              if (currentManifest && Number(currentManifest.versionCode) > versionCode) {
+                core.info('A newer APK is already published in latest.json; refusing to replace it with an older build.');
+                published = true;
+                break;
+              }
+              if (currentManifest &&
+                  Number(currentManifest.versionCode) === versionCode &&
+                  currentManifest.versionName === versionName &&
+                  currentManifest.apkUrl === apkUrl &&
+                  currentManifest.sha256 === sha256) {
+                core.info('latest.json already matches this signed APK; no update is needed.');
+                published = true;
+                break;
+              }
+              try {
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path,
+                  message: 'Publish DART VISION ' + versionName + ' update manifest',
+                  content: Buffer.from(content).toString('base64'),
+                  ...(currentSha ? { sha: currentSha } : {})
+                });
+                published = true;
+                break;
+              } catch (error) {
+                if (![409, 422].includes(error.status) || attempt === 5) throw error;
+                core.warning('latest.json changed during publication; retrying with its newest SHA (attempt ' + (attempt + 1) + ').');
+                await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+              }
             }
-            const content = JSON.stringify({
-              versionCode,
-              versionName,
-              apkUrl: `https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/v${versionName}/app-release.apk`,
-              sha256
-            }, null, 2) + "\n";
-            await github.rest.repos.createOrUpdateFileContents({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path,
-              message: `Publish DART VISION ${versionName} update manifest`,
-              content: Buffer.from(content).toString('base64'),
-              ...(sha ? { sha } : {})
-            });
+            if (!published) throw new Error('Unable to publish a coherent latest.json after retries.');
 
       - name: Remove temporary signing keystore
         if: ${{ always() }}
