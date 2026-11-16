@@ -298,7 +298,7 @@ class MainActivity : ComponentActivity() {
     private fun buildUi() {
         val bg = 0xFF080E15.toInt()
         val panelColor = 0xFF121D27.toInt()
-        val teal = 0xFFFF3045.toInt()
+        val teal = 0xFF18E6E0.toInt()
         val white = 0xFFF4F8FA.toInt()
         val muted = 0xFF91BFC2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
@@ -314,7 +314,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(panelColor); cornerRadius = dp(18).toFloat()
-                setStroke(dp(1), 0xFF20414D.toInt())
+                setStroke(dp(1), 0xFF18AEB5.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -323,9 +323,9 @@ class MainActivity : ComponentActivity() {
                 text = title; isAllCaps = false; textSize = 12f
                 setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) teal else 0xFF1B2A35.toInt())
-                    cornerRadius = dp(13).toFloat()
-                    if (!primary) setStroke(dp(1), 0xFF24515A.toInt())
+                    setColor(if (primary) 0xFFE91532.toInt() else 0xFF101923.toInt())
+                    cornerRadius = dp(15).toFloat()
+                    setStroke(dp(1), if (primary) 0xFFFF6475.toInt() else 0xFF18BFC1.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -387,13 +387,13 @@ class MainActivity : ComponentActivity() {
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val brandName = android.text.SpannableString("DART VISION")
-        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFFFF263B.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFF18E6E0.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         brand.addView(TextView(this).apply {
             text = brandName; textSize = 25f
             setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
             setTextColor(white)
         })
-        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFFFF5263.toInt(), true))
+        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFF18E6E0.toInt(), true))
         header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
         fun headerAction(symbol: String, label: String, click: () -> Unit) {
             header.addView(TextView(this).apply {
@@ -533,9 +533,9 @@ class MainActivity : ComponentActivity() {
                 gravity = Gravity.CENTER
                 setPadding(dp(3), dp(8), dp(3), dp(8))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF101923.toInt())
+                    setColor(0xFF0B151D.toInt())
                     cornerRadius = dp(16).toFloat()
-                    setStroke(dp(1), 0xFF405461.toInt())
+                    setStroke(dp(1), if (label == "AMIS") 0xFF18E6E0.toInt() else 0xFFFF4055.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(0, dp(72), 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
@@ -714,9 +714,27 @@ class MainActivity : ComponentActivity() {
         roster.addView(playerActions); playersPage.addView(roster)
 
         // Outils
-        morePage.addView(txt("PARAMÈTRES", 20f, white, true))
-        morePage.addView(txt("Configure ton installation DART VISION.", 11f, muted))
-        val cameraPanel = card()
+        morePage.addView(TextView(this).apply {
+            text = "PARAMÈTRES"
+            textSize = 24f
+            gravity = Gravity.CENTER
+            letterSpacing = .05f
+            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
+            setTextColor(white)
+            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF3048.toInt())
+            setPadding(0, dp(7), 0, dp(2))
+        })
+        morePage.addView(TextView(this).apply {
+            text = "—  PERSONNALISE TON EXPÉRIENCE  —"
+            textSize = 10f
+            gravity = Gravity.CENTER
+            letterSpacing = .12f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setTextColor(0xFF18E6E0.toInt())
+            setPadding(0, 0, 0, dp(14))
+        })
+        morePage.addView(txt("CAMÉRA & INSTALLATION", 11f, 0xFF18E6E0.toInt(), true))
+        val cameraPanel = card().apply { elevation = dp(5).toFloat() }
         cameraPanel.addView(txt("CAMÉRA & CALIBRAGE", 13f, teal, true))
         cameraPanel.addView(txt("Aide au cadrage et analyse des changements d’image. La reconnaissance automatique de la pointe et du score n’est pas encore disponible : vérifie chaque résultat manuellement.", 11f, muted))
         preview = PreviewView(this).apply { scaleType = PreviewView.ScaleType.FIT_CENTER; layoutParams = FrameLayout.LayoutParams(-1, -1) }
@@ -738,7 +756,8 @@ class MainActivity : ComponentActivity() {
         btn(analyze, "ANALYSER") { status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence." else "Analyse : " + "%.2f".format(frameAnalyzer.changedPercent ?: 0.0) + " % de différence. Vérifie le score proposé." }
         cameraPanel.addView(analyze); cameraPanelView = cameraPanel; cameraPanel.visibility = View.GONE
         morePage.addView(cameraPanel)
-        val settings = card()
+        val settings = card().apply { elevation = dp(5).toFloat() }
+        settings.addView(txt("GESTION DE LA PARTIE", 12f, 0xFFFF5263.toInt(), true))
         btn(settings, "■  ARRÊTER LA PARTIE", false) {
             if (!gameInProgress) {
                 AlertDialog.Builder(this).setTitle("Aucune partie en cours")
