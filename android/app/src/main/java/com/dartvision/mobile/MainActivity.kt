@@ -256,232 +256,182 @@ class MainActivity : ComponentActivity() {
         header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
         root.addView(header)
 
-        // Accueil DART VISION : composition inspirée de la maquette, sans bouton JOUER en doublon.
-        val homeStage = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(-1, dp(275))
-            setBackgroundColor(0xFF08090D.toInt())
-        }
-        val artwork = object : View(this) {
-            private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-            override fun onDraw(canvas: android.graphics.Canvas) {
-                super.onDraw(canvas)
-                val w = width.toFloat()
-                val h = height.toFloat()
-                val cx = w * 0.79f
-                val cy = h * 0.57f
-                val radius = minOf(w * 0.53f, h * 0.49f)
-                val board = android.graphics.RectF(cx - radius, cy - radius, cx + radius, cy + radius)
-                val outer = 0xFF10151B.toInt()
-                val wire = 0xFFBFC5CC.toInt()
-                val red = 0xFFB91F32.toInt()
-                val green = 0xFF16845B.toInt()
-                val cream = 0xFFD8C6A5.toInt()
-                val black = 0xFF17191D.toInt()
-
-                // Socle et cerclage métallique de la cible.
-                paint.style = android.graphics.Paint.Style.FILL
-                paint.color = 0xFF070A0F.toInt()
-                paint.setShadowLayer(dp(18).toFloat(), 0f, dp(5).toFloat(), 0xCC000000.toInt())
-                canvas.drawCircle(cx, cy, radius * 1.055f, paint)
-                paint.clearShadowLayer()
-                paint.color = 0xFF7C858E.toInt()
-                canvas.drawCircle(cx, cy, radius * 1.025f, paint)
-                paint.color = outer
-                canvas.drawCircle(cx, cy, radius * 0.99f, paint)
-
-                // Vingt secteurs alternés, avec texture légère de sisal.
-                for (i in 0 until 20) {
-                    val startAngle = -99f + i * 18f
-                    paint.style = android.graphics.Paint.Style.FILL
-                    paint.color = if (i % 2 == 0) cream else black
-                    canvas.drawArc(board, startAngle, 18f, true, paint)
-                }
-                val texture = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                    color = 0x247C7569
-                    strokeWidth = dp(1).toFloat()
-                }
-                for (i in 0 until 240) {
-                    val angle = i * 2.399963f
-                    val rr = radius * (0.53f + ((i * 37) % 41) / 100f)
-                    val x = cx + kotlin.math.cos(angle).toFloat() * rr
-                    val y = cy + kotlin.math.sin(angle).toFloat() * rr
-                    canvas.drawPoint(x, y, texture)
-                }
-
-                // Double et triple couronnes : segments rouges et verts séparés par les fils.
-                for (i in 0 until 20) {
-                    val startAngle = -99f + i * 18f
-                    val bandColor = if (i % 2 == 0) red else green
-                    paint.style = android.graphics.Paint.Style.FILL
-                    paint.color = bandColor
-                    canvas.drawArc(board, startAngle, 18f, true, paint)
-                }
-                // Les secteurs sont redessinés au-dessus des zones non scorantes des couronnes.
-                for (i in 0 until 20) {
-                    val startAngle = -99f + i * 18f
-                    paint.color = if (i % 2 == 0) cream else black
-                    canvas.drawArc(
-                        android.graphics.RectF(cx - radius * .86f, cy - radius * .86f, cx + radius * .86f, cy + radius * .86f),
-                        startAngle, 18f, true, paint
-                    )
-                }
-                for (i in 0 until 20) {
-                    val startAngle = -99f + i * 18f
-                    paint.color = if (i % 2 == 0) red else green
-                    canvas.drawArc(
-                        android.graphics.RectF(cx - radius * .49f, cy - radius * .49f, cx + radius * .49f, cy + radius * .49f),
-                        startAngle, 18f, true, paint
-                    )
-                    paint.color = if (i % 2 == 0) cream else black
-                    canvas.drawArc(
-                        android.graphics.RectF(cx - radius * .43f, cy - radius * .43f, cx + radius * .43f, cy + radius * .43f),
-                        startAngle, 18f, true, paint
-                    )
-                }
-
-                // Fils radiaux et couronnes métalliques.
-                paint.style = android.graphics.Paint.Style.STROKE
-                paint.strokeWidth = dp(1.2f).toFloat()
-                paint.color = wire
-                for (i in 0 until 20) {
-                    val angle = Math.toRadians(-99.0 + i * 18.0)
-                    val x1 = cx + kotlin.math.cos(angle).toFloat() * radius * .12f
-                    val y1 = cy + kotlin.math.sin(angle).toFloat() * radius * .12f
-                    val x2 = cx + kotlin.math.cos(angle).toFloat() * radius * .94f
-                    val y2 = cy + kotlin.math.sin(angle).toFloat() * radius * .94f
-                    canvas.drawLine(x1, y1, x2, y2, paint)
-                }
-                for (r in floatArrayOf(.12f, .43f, .49f, .86f, .94f, .985f)) {
-                    paint.strokeWidth = if (r == .49f || r == .86f) dp(2).toFloat() else dp(1).toFloat()
-                    canvas.drawCircle(cx, cy, radius * r, paint)
-                }
-
-                // Chiffres autour de la cible.
-                val numbers = intArrayOf(20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
-                paint.style = android.graphics.Paint.Style.FILL
-                paint.color = 0xFFE8E9E9.toInt()
-                paint.textSize = radius * .105f
-                paint.typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
-                paint.textAlign = android.graphics.Paint.Align.CENTER
-                for (i in numbers.indices) {
-                    val angle = Math.toRadians(-90.0 + i * 18.0)
-                    val x = cx + kotlin.math.cos(angle).toFloat() * radius * .91f
-                    val y = cy + kotlin.math.sin(angle).toFloat() * radius * .91f + paint.textSize * .34f
-                    canvas.drawText(numbers[i].toString(), x, y, paint)
-                }
-
-                // Bull extérieur vert et bull central rouge.
-                paint.style = android.graphics.Paint.Style.FILL
-                paint.color = green
-                canvas.drawCircle(cx, cy, radius * .12f, paint)
-                paint.color = red
-                canvas.drawCircle(cx, cy, radius * .055f, paint)
-                paint.style = android.graphics.Paint.Style.STROKE
-                paint.strokeWidth = dp(1.4f).toFloat()
-                paint.color = wire
-                canvas.drawCircle(cx, cy, radius * .12f, paint)
-                canvas.drawCircle(cx, cy, radius * .055f, paint)
-
-                // Fléchette métallique stylisée plantée dans le bull.
-                val sx = cx - radius * .78f
-                val sy = cy - radius * .64f
-                val ex = cx - radius * .075f
-                val ey = cy - radius * .07f
-                paint.style = android.graphics.Paint.Style.STROKE
-                paint.strokeWidth = dp(4).toFloat()
-                paint.strokeCap = android.graphics.Paint.Cap.ROUND
-                paint.color = 0xFFCDD3D9.toInt()
-                paint.setShadowLayer(dp(5).toFloat(), 0f, 0f, 0xAAFF3045.toInt())
-                canvas.drawLine(sx, sy, ex, ey, paint)
-                paint.clearShadowLayer()
-                paint.strokeWidth = dp(1).toFloat()
-                paint.color = 0xFF6D747C.toInt()
-                for (i in 1..5) {
-                    val t = i / 6f
-                    canvas.drawLine(sx + (ex - sx) * t, sy + (ey - sy) * t - dp(2), sx + (ex - sx) * t, sy + (ey - sy) * t + dp(2), paint)
-                }
-                paint.style = android.graphics.Paint.Style.FILL
-                paint.color = red
-                val flight = android.graphics.Path().apply {
-                    moveTo(sx - dp(12), sy - dp(12))
-                    lineTo(sx + dp(13), sy - dp(4))
-                    lineTo(sx + dp(5), sy + dp(15))
-                    close()
-                }
-                canvas.drawPath(flight, paint)
-
-                // Fondu sombre à gauche pour garder le titre parfaitement lisible.
-                val shade = android.graphics.LinearGradient(
-                    0f, 0f, w * .73f, 0f,
-                    intArrayOf(0x0008090D, 0xCC08090D.toInt(), 0x0008090D),
-                    null, android.graphics.Shader.TileMode.CLAMP
-                )
-                paint.shader = shade
-                canvas.drawRect(0f, 0f, w * .73f, h, paint)
-                paint.shader = null
-            }
-        }
-        homeStage.addView(artwork, FrameLayout.LayoutParams(-1, -1))
-        val welcome = LinearLayout(this).apply {
+        // Accueil DART VISION : nouvelle composition premium inspirée directement de la maquette.
+        val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), 0, dp(8), 0)
-            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(88) }
+            gravity = Gravity.CENTER
+            setPadding(dp(12), dp(15), dp(12), dp(15))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF151B23.toInt(), 0xFF080D14.toInt(), 0xFF171019.toInt())
+            ).apply {
+                cornerRadius = dp(22).toFloat()
+                setStroke(dp(1), 0xFF4B5968.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(-1, dp(142)).apply {
+                setMargins(0, dp(5), 0, dp(14))
+            }
+            elevation = dp(5).toFloat()
         }
-        welcome.addView(txt("BIENVENUE !", 14f, 0xFFFF3045.toInt(), true))
-        welcome.addView(txt("Prêt à jouer ?", 30f, white, true).apply { setPadding(0, dp(5), 0, dp(1)) })
-        homeStage.addView(welcome)
-        home.addView(homeStage)
+        hero.addView(TextView(this).apply {
+            text = "DART VISION"
+            textSize = 29f
+            letterSpacing = 0.04f
+            gravity = Gravity.CENTER
+            setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
+            setTextColor(white)
+        })
+        val heroTag = android.text.SpannableString("—  SMART DARTS EXPERIENCE  —")
+        heroTag.setSpan(android.text.style.ForegroundColorSpan(0xFFFF3045.toInt()), 0, heroTag.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        hero.addView(TextView(this).apply {
+            text = heroTag
+            textSize = 10f
+            letterSpacing = 0.18f
+            gravity = Gravity.CENTER
+            setPadding(0, dp(5), 0, dp(7))
+            setTextColor(white)
+        })
+        hero.addView(TextView(this).apply {
+            text = "LA PRÉCISION. LE JEU. LA PERFORMANCE."
+            textSize = 9f
+            letterSpacing = 0.12f
+            gravity = Gravity.CENTER
+            setTextColor(0xFFB9C3CE.toInt())
+        })
+        home.addView(hero)
 
-        // Les quatre rubriques principales sont accessibles directement, sans bouton JOUER en doublon.
-        fun homeMenuItem(icon: String, title: String, subtitle: String, destination: String, action: (() -> Unit)? = null) {
-            val item = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
+        // Quatre dossiers principaux, disposés en grille comme sur la maquette.
+        val homeGrid = android.widget.GridLayout(this).apply {
+            columnCount = 2
+            useDefaultMargins = false
+            setPadding(0, 0, 0, dp(4))
+        }
+        fun addHomeFolder(icon: String, title: String, description: String, click: () -> Unit) {
+            val tile = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(17), dp(13), dp(14), dp(13))
+                setPadding(dp(12), dp(12), dp(10), dp(11))
                 background = android.graphics.drawable.GradientDrawable(
-                    android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(0xFFFF263B.toInt(), 0xFFB90820.toInt(), 0xFF850817.toInt())
+                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                    intArrayOf(0xFF17212B.toInt(), 0xFF0B1119.toInt())
                 ).apply {
-                    cornerRadius = dp(25).toFloat()
-                    setStroke(dp(2), 0xFFFF5968.toInt())
+                    cornerRadius = dp(19).toFloat()
+                    setStroke(dp(1), 0xFFB72A3D.toInt())
                 }
-                elevation = dp(13).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(94)).apply { setMargins(dp(2), dp(8), dp(2), dp(8)) }
+                elevation = dp(5).toFloat()
                 isClickable = true
                 isFocusable = true
+                layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = dp(142)
+                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                    setMargins(dp(4), dp(4), dp(4), dp(7))
+                }
                 setOnClickListener {
-                    animate().scaleX(0.985f).scaleY(0.985f).setDuration(75L).withEndAction {
-                        animate().scaleX(1f).scaleY(1f).setDuration(100L).start()
-                        if (action != null) action() else showPage(destination)
+                    animate().scaleX(0.98f).scaleY(0.98f).setDuration(70L).withEndAction {
+                        animate().scaleX(1f).scaleY(1f).setDuration(90L).start()
+                        click()
                     }.start()
                 }
             }
-            item.addView(TextView(this).apply {
-                text = icon; textSize = 28f; gravity = Gravity.CENTER
+            tile.addView(TextView(this).apply {
+                text = icon
+                textSize = 27f
+                gravity = Gravity.CENTER
+                setTextColor(if (title == "MODE CLASSÉ") 0xFFFFC45B.toInt() else 0xFFFF4055.toInt())
+                setPadding(0, 0, 0, dp(5))
+            })
+            tile.addView(TextView(this).apply {
+                text = title
+                textSize = 13f
+                maxLines = 2
+                gravity = Gravity.CENTER
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC))
                 setTextColor(white)
-                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(dp(55), -1)
+                letterSpacing = 0.015f
             })
-            item.addView(View(this).apply {
-                setBackgroundColor(0xFFFFA0A8.toInt())
-                layoutParams = LinearLayout.LayoutParams(dp(1), dp(48)).apply { setMargins(dp(10), 0, dp(15), 0) }
+            tile.addView(TextView(this).apply {
+                text = description
+                textSize = 9f
+                maxLines = 2
+                gravity = Gravity.CENTER
+                setTextColor(0xFFB2BEC9.toInt())
+                setPadding(0, dp(4), 0, 0)
             })
-            val labels = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
-            labels.addView(txt(title, 17f, white, true))
-            labels.addView(txt(subtitle, 11f, 0xFFADB2BC.toInt()))
-            item.addView(labels)
-            item.addView(TextView(this).apply {
-                text = "›"; textSize = 32f; gravity = Gravity.CENTER
-                setTextColor(white); layoutParams = LinearLayout.LayoutParams(dp(22), -1)
+            tile.addView(TextView(this).apply {
+                text = "›"
+                textSize = 22f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFFF4055.toInt())
+                layoutParams = LinearLayout.LayoutParams(-1, dp(18))
             })
-            home.addView(item)
+            homeGrid.addView(tile)
         }
-        homeMenuItem("◎", "JEUX", "501, Cricket, Shanghai, entraînement", "game") {
-            showPage("game"); showGameModes()
+        addHomeFolder("🎮", "PARTIE LOCALE", "Jouer sur cet appareil ou en réseau local") {
+            showPage("game")
+            showGameModes()
         }
-        homeMenuItem("♙", "PROFIL", "Mon compte et mes statistiques", "account")
-        homeMenuItem("☏", "DISCUSSIONS", "Échanger avec la communauté", "discussions")
-        homeMenuItem("⚙", "PARAMÈTRES", "Application et préférences", "more")
+        addHomeFolder("🌐", "PARTIE EN LIGNE", "Défier des joueurs à distance") {
+            AlertDialog.Builder(this)
+                .setTitle("PARTIE EN LIGNE")
+                .setMessage("Le mode en ligne sera disponible lorsque les salons et le service multijoueur seront activés.")
+                .setPositiveButton("COMPRIS", null)
+                .show()
+        }
+        addHomeFolder("🎯", "ENTRAÎNEMENT", "Travailler les simples, doubles et finishes") {
+            showPage("game")
+            showModeCatalogue(true)
+        }
+        addHomeFolder("🏆", "MODE CLASSÉ", "Compétition, classement et progression") {
+            AlertDialog.Builder(this)
+                .setTitle("MODE CLASSÉ")
+                .setMessage("Le classement compétitif sera activé avec le système de rangs et la validation des résultats.")
+                .setPositiveButton("COMPRIS", null)
+                .show()
+        }
+        home.addView(homeGrid)
+
+        // Raccourcis inférieurs reprenant les trois capsules de la maquette.
+        val shortcuts = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(0, dp(7), 0, dp(8))
+        }
+        fun addShortcut(icon: String, label: String, click: () -> Unit) {
+            val chip = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(dp(4), dp(9), dp(4), dp(8))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF111923.toInt())
+                    cornerRadius = dp(22).toFloat()
+                    setStroke(dp(1), 0xFF526170.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
+                    setMargins(dp(3), 0, dp(3), 0)
+                }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { click() }
+            }
+            chip.addView(TextView(this).apply {
+                text = icon
+                textSize = 15f
+                gravity = Gravity.CENTER
+                setTextColor(white)
+            })
+            chip.addView(TextView(this).apply {
+                text = label
+                textSize = 9f
+                gravity = Gravity.CENTER
+                setTextColor(white)
+            })
+            shortcuts.addView(chip)
+        }
+        addShortcut("▥", "STATISTIQUES") { showGameStatistics() }
+        addShortcut("♟", "AMIS") { showPage("discussions") }
+        addShortcut("★", "SUCCÈS") { showGameStatistics() }
+        home.addView(shortcuts)
 
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
