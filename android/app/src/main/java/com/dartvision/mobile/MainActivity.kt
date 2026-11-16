@@ -202,6 +202,10 @@ class MainActivity : ComponentActivity() {
     private var cameraPanelView: LinearLayout? = null
     private var navigateToMorePage: (() -> Unit)? = null
     private var gamePageView: LinearLayout? = null
+    private var gameScoreCardView: View? = null
+    private var gameHeadingView: View? = null
+    private var gameCameraShortcutView: View? = null
+    private var gameNextActionsView: View? = null
     private var manualEntryHost: LinearLayout? = null
     private var manualEntryView: LinearLayout? = null
     private var selectedMode: DartGameMode = DartGameMode.X01
@@ -519,7 +523,13 @@ class MainActivity : ComponentActivity() {
             categoryGrid.addView(tile)
         }
         addCategory("🎮", "PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFF18E6E0.toInt()) {
-            showPage("game"); showGameModes()
+            if (restoreX01Game()) {
+                gameInProgress = true
+                showPage("game")
+                showRestoredGameScreen()
+            } else {
+                showPage("game"); showGameModes()
+            }
         }
         addCategory("🌐", "PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFFFF3048.toInt()) {
             showPage("players")
@@ -623,6 +633,7 @@ class MainActivity : ComponentActivity() {
         btn(gameHeading, "SORTIES", false) { showCheckoutSuggestions() }
         btn(gameHeading, "MODES", false) { showGameModes() }
         gameHeading.visibility = View.GONE
+        gameHeadingView = gameHeading
         gamePage.addView(gameHeading)
 
         val scoreCard = LinearLayout(this).apply {
@@ -676,6 +687,7 @@ class MainActivity : ComponentActivity() {
         scoreCard.addView(opponentScroll)
         refreshOpponentScores(currentPlayers, active, muted, white, teal)
         scoreCard.visibility = View.GONE
+        gameScoreCardView = scoreCard
         gamePage.addView(scoreCard)
 
         manualEntryHost = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -691,10 +703,12 @@ class MainActivity : ComponentActivity() {
             setCameraMode(true)
         }
         gamePage.addView(cameraShortcut)
+        gameCameraShortcutView = cameraShortcut
         val next = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(next, "TOUR SUIVANT", true) { action("next_turn") }
         btn(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else showGameModes() }
         gamePage.addView(next)
+        gameNextActionsView = next
 
         // Joueurs
         playersPage.addView(txt("JOUEURS & ÉQUIPES", 20f, white, true))
@@ -2259,6 +2273,19 @@ class MainActivity : ComponentActivity() {
                 enterManualTurn()
             }
             .show()
+    }
+
+    /**
+     * Rebuilds the live match screen after returning from the home page.
+     * A saved match must never land on the empty/manual-entry placeholder screen.
+     */
+    private fun showRestoredGameScreen() {
+        gameHeadingView?.visibility = View.VISIBLE
+        gameScoreCardView?.visibility = View.VISIBLE
+        gameCameraShortcutView?.visibility = View.GONE
+        gameNextActionsView?.visibility = View.GONE
+        refreshX01()
+        enterManualTurn()
     }
 
     private fun showManualEntryPrompt() {
