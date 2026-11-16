@@ -252,8 +252,30 @@ class MainActivity : ComponentActivity() {
             setTextColor(white)
         })
         brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFFFF5263.toInt(), true))
-        header.addView(brand)
-        header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+        header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
+        fun headerAction(symbol: String, label: String, click: () -> Unit) {
+            header.addView(TextView(this).apply {
+                text = symbol
+                textSize = 16f
+                gravity = Gravity.CENTER
+                setTextColor(white)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF111923.toInt())
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setStroke(dp(1), 0xFF536170.toInt())
+                }
+                contentDescription = label
+                layoutParams = LinearLayout.LayoutParams(dp(32), dp(32)).apply {
+                    setMargins(dp(2), 0, dp(2), 0)
+                }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { click() }
+            })
+        }
+        headerAction("♙", "Mon profil") { showPage("account") }
+        headerAction("●", "Notifications") { showPage("update") }
+        headerAction("⚙", "Paramètres") { showPage("more") }
         root.addView(header)
 
         // Accueil DART VISION : nouvelle composition premium inspirée directement de la maquette.
