@@ -419,49 +419,99 @@ class MainActivity : ComponentActivity() {
         navigateToMorePage = { showPage("more") }
         navigateHomeFromPage = { showPage("home") }
         val header = LinearLayout(this).apply {
-            gravity = Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 0, 0, dp(8))
+            gravity = Gravity.CENTER_VERTICAL
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 0, 0, dp(9))
+            clipChildren = false
+            clipToPadding = false
         }
         header.addView(ImageView(this).apply {
-            setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
+            setImageResource(R.drawable.dart_vision_logo)
+            adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(50), dp(50))
+            layoutParams = LinearLayout.LayoutParams(dp(52), dp(52))
             contentDescription = "Logo DART VISION"
+            elevation = dp(5).toFloat()
         })
-        val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(2), 0, dp(2), 0)
+        }
         val brandName = android.text.SpannableString("DART VISION")
         brandName.setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         brand.addView(TextView(this).apply {
-            text = brandName; textSize = 25f
+            text = brandName
+            textSize = 22f
+            maxLines = 1
+            includeFontPadding = false
             setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
             setTextColor(white)
+            setShadowLayer(dp(5).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
         })
-        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFF00F0FF.toInt(), true))
+        brand.addView(TextView(this).apply {
+            text = "—  SMART DARTS EXPERIENCE  —"
+            textSize = 7.5f
+            maxLines = 1
+            includeFontPadding = false
+            letterSpacing = .04f
+            setTextColor(0xFF00F0FF.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
+            setPadding(0, dp(3), 0, 0)
+        })
         header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
-        fun headerAction(symbol: String, label: String, click: () -> Unit) {
-            header.addView(TextView(this).apply {
-                text = symbol
-                textSize = 16f
-                gravity = Gravity.CENTER
-                setTextColor(white)
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF111923.toInt())
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setStroke(dp(1), 0xFF00F0FF.toInt())
-                }
-                contentDescription = label
-                layoutParams = LinearLayout.LayoutParams(dp(32), dp(32)).apply {
+        fun headerAction(symbol: String, label: String, click: () -> Unit, notification: Boolean = false) {
+            val action = android.widget.FrameLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(36), dp(36)).apply {
                     setMargins(dp(2), 0, dp(2), 0)
                 }
                 isClickable = true
                 isFocusable = true
+                contentDescription = label
                 setOnClickListener { click() }
+            }
+            action.addView(TextView(this).apply {
+                text = symbol
+                textSize = if (symbol == "⚙") 19f else 18f
+                gravity = Gravity.CENTER
+                setTextColor(white)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF080F17.toInt())
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setStroke(dp(1), 0xFF00F0FF.toInt())
+                }
+                setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFF00F0FF.toInt())
+                layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
             })
+            if (notification) {
+                action.addView(View(this).apply {
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        setColor(0xFFFF1E1E.toInt())
+                        shape = android.graphics.drawable.GradientDrawable.OVAL
+                        setStroke(dp(1), 0xFFFFB0B8.toInt())
+                    }
+                    layoutParams = android.widget.FrameLayout.LayoutParams(dp(8), dp(8), Gravity.TOP or Gravity.END).apply {
+                        topMargin = dp(1)
+                        rightMargin = dp(1)
+                    }
+                    elevation = dp(3).toFloat()
+                })
+            }
+            header.addView(action)
         }
         headerAction("♙", "Mon profil") { showPage("account") }
-        headerAction("●", "Notifications") { showPage("update") }
+        headerAction("●", "Notifications", { showPage("update") }, notification = true)
         headerAction("⚙", "Paramètres") { showPage("more") }
         root.addView(header)
+        root.addView(View(this).apply {
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0x00FF1E1E, 0xFFFF1E1E.toInt(), 0xFF00F0FF.toInt(), 0x0000F0FF)
+            )
+            layoutParams = LinearLayout.LayoutParams(-1, dp(1)).apply {
+                bottomMargin = dp(5)
+            }
+        })
 
         // ÉCRAN 1 — Accueil fidèle à la maquette officielle.
         val hero = android.widget.FrameLayout(this).apply {
