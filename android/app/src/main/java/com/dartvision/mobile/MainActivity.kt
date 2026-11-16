@@ -175,6 +175,46 @@ private class DartNeonArtworkView(context: android.content.Context, private val 
     }
 }
 
+/** Deep-black DART VISION background with soft diagonal red/cyan neon beams. */
+private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
+    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    override fun draw(canvas: android.graphics.Canvas) {
+        val b = bounds
+        canvas.drawColor(0xFF05080D.toInt())
+        val w = b.width().toFloat()
+        val h = b.height().toFloat()
+        val beams = listOf(
+            Triple(-.10f, .18f, 0xFFFF1E1E.toInt()),
+            Triple(.22f, -.08f, 0xFF00F0FF.toInt()),
+            Triple(.78f, -.06f, 0xFF00F0FF.toInt()),
+            Triple(1.08f, .20f, 0xFFFF1E1E.toInt()),
+            Triple(.06f, .94f, 0xFFFF1E1E.toInt()),
+            Triple(.88f, 1.02f, 0xFF00F0FF.toInt())
+        )
+        beams.forEachIndexed { index, beam ->
+            val x = w * beam.first
+            val y = h * beam.second
+            paint.style = android.graphics.Paint.Style.STROKE
+            paint.strokeCap = android.graphics.Paint.Cap.ROUND
+            paint.color = beam.third
+            paint.strokeWidth = if (index < 4) w * .012f else w * .009f
+            paint.alpha = 115
+            paint.setShadowLayer(w * .045f, 0f, 0f, beam.third)
+            canvas.drawLine(x, y, x + w * .20f, y - h * .12f, paint)
+            paint.clearShadowLayer()
+            paint.alpha = 210
+            paint.strokeWidth = maxOf(1f, w * .0025f)
+            canvas.drawLine(x, y, x + w * .20f, y - h * .12f, paint)
+        }
+        paint.alpha = 255
+        paint.style = android.graphics.Paint.Style.FILL
+    }
+    override fun setAlpha(alpha: Int) { paint.alpha = alpha; invalidateSelf() }
+    override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { paint.colorFilter = colorFilter; invalidateSelf() }
+    @Deprecated("Deprecated in Android")
+    override fun getOpacity(): Int = android.graphics.PixelFormat.OPAQUE
+}
+
 class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
@@ -338,7 +378,7 @@ class MainActivity : ComponentActivity() {
         val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(8), dp(16), dp(12)); setBackgroundColor(bg)
+            setPadding(dp(12), dp(8), dp(12), dp(12)); background = DartNeonBackgroundDrawable()
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -423,55 +463,69 @@ class MainActivity : ComponentActivity() {
         headerAction("⚙", "Paramètres") { showPage("more") }
         root.addView(header)
 
-        // Accueil DART VISION : reproduction de la maquette officielle, sans bouton Jouer.
-        val hero = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(dp(12), dp(15), dp(12), dp(15))
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF05080D.toInt(), 0xFF05080D.toInt(), 0xFF250A14.toInt())
-            ).apply {
-                cornerRadius = dp(18).toFloat()
-                setStroke(dp(2), 0xFFFF1E1E.toInt())
+        // ÉCRAN 1 — Accueil fidèle à la maquette officielle.
+        val hero = android.widget.FrameLayout(this).apply {
+            clipChildren = false
+            clipToPadding = false
+            layoutParams = LinearLayout.LayoutParams(-1, dp(216)).apply {
+                setMargins(0, dp(2), 0, dp(8))
             }
-            layoutParams = LinearLayout.LayoutParams(-1, dp(202)).apply {
-                setMargins(0, dp(7), 0, dp(12))
-            }
-            elevation = dp(7).toFloat()
         }
         hero.addView(DartboardPreview(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(126), dp(126))
-            contentDescription = "Cible de fléchettes traditionnelle détaillée"
-            elevation = dp(9).toFloat()
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(184), dp(184), Gravity.CENTER_VERTICAL or Gravity.START).apply {
+                leftMargin = dp(-24)
+            }
+            contentDescription = "Cible de fléchettes détaillée"
+            elevation = dp(10).toFloat()
         })
-        hero.addView(TextView(this).apply {
-            text = "—  SMART DARTS EXPERIENCE  —"
-            textSize = 10f
+        val heroBrand = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            letterSpacing = .14f
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
+            layoutParams = android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.CENTER_VERTICAL).apply {
+                leftMargin = dp(104)
+                rightMargin = dp(2)
+            }
+        }
+        heroBrand.addView(TextView(this).apply {
+            text = "D"
+            textSize = 76f
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
             setTextColor(0xFF00F0FF.toInt())
-            setPadding(0, dp(1), 0, dp(4))
+            setShadowLayer(dp(12).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
+            layoutParams = LinearLayout.LayoutParams(-1, dp(78))
         })
-        hero.addView(TextView(this).apply {
+        heroBrand.addView(TextView(this).apply {
             text = android.text.SpannableString("DART VISION").apply {
                 setSpan(android.text.style.ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 5, 0)
                 setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, length, 0)
             }
-            textSize = 29f
+            textSize = 25f
             gravity = Gravity.CENTER
+            maxLines = 1
+            setSingleLine(true)
+            setTextColor(white)
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
-            setShadowLayer(dp(8).toFloat(), 0f, 0f, 0xFFFF263F.toInt())
+            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
         })
-        hero.addView(TextView(this).apply {
-            text = "LA PRÉCISION  •  LE JEU  •  LA PERFORMANCE"
+        heroBrand.addView(TextView(this).apply {
+            text = "SMART DARTS EXPERIENCE"
+            textSize = 8.5f
+            gravity = Gravity.CENTER
+            letterSpacing = .08f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
+            setTextColor(0xFF00F0FF.toInt())
+            setPadding(0, dp(2), 0, dp(7))
+        })
+        heroBrand.addView(TextView(this).apply {
+            text = "LA PRÉCISION  •  LE JEU\nLA PERFORMANCE"
             textSize = 10f
             gravity = Gravity.CENTER
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFFEAF4F5.toInt())
-            setPadding(0, dp(3), 0, dp(2))
+            setTextColor(0xFFFFFFFF.toInt())
         })
+        hero.addView(heroBrand)
         home.addView(hero)
 
         val categoryGrid = android.widget.GridLayout(this).apply {
@@ -483,7 +537,7 @@ class MainActivity : ComponentActivity() {
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                setPadding(dp(8), dp(10), dp(8), dp(9))
+                setPadding(dp(8), dp(8), dp(8), dp(8))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     intArrayOf(0xFF111B25.toInt(), 0xFF080B12.toInt(), 0xFF1B0B13.toInt())
@@ -496,9 +550,9 @@ class MainActivity : ComponentActivity() {
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(138)
+                    height = dp(154)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(dp(4), dp(4), dp(4), dp(5))
+                    setMargins(dp(4), dp(3), dp(4), dp(4))
                 }
                 setOnClickListener { action() }
             }
@@ -507,7 +561,7 @@ class MainActivity : ComponentActivity() {
                 "PARTIE EN LIGNE" -> 3
                 else -> 0
             }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(62), dp(62))
+                layoutParams = LinearLayout.LayoutParams(dp(64), dp(64))
                 contentDescription = title
             })
             tile.addView(TextView(this).apply {
