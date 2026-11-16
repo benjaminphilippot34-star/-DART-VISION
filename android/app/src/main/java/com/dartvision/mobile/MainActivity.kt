@@ -151,22 +151,22 @@ private class DartNeonArtworkView(context: android.content.Context, private val 
         p.style=android.graphics.Paint.Style.FILL; p.color=0xFF071018.toInt()
         canvas.drawCircle(cx,cy,s*.48f,p)
         p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.025f
-        p.color=0xFFFF3048.toInt(); p.setShadowLayer(s*.10f,0f,0f,0xFFFF203D.toInt())
+        p.color=0xFFFF1E1E.toInt(); p.setShadowLayer(s*.10f,0f,0f,0xFFFF203D.toInt())
         canvas.drawCircle(cx,cy,s*.46f,p); p.clearShadowLayer()
         if(kind==0 || kind==2) {
-            val rings=intArrayOf(0xFF18E6E0.toInt(),0xFFFF3048.toInt(),0xFFF3F5F7.toInt(),0xFF18E6E0.toInt(),0xFFFF3048.toInt())
+            val rings=intArrayOf(0xFF00F0FF.toInt(),0xFFFF1E1E.toInt(),0xFFF3F5F7.toInt(),0xFF00F0FF.toInt(),0xFFFF1E1E.toInt())
             rings.forEachIndexed { i,col -> p.color=col; p.strokeWidth=s*(if(i==0) .045f else .025f); canvas.drawCircle(cx,cy,s*(.37f-i*.067f),p) }
-            p.style=android.graphics.Paint.Style.FILL; p.color=0xFFFF3048.toInt(); canvas.drawCircle(cx,cy,s*.055f,p)
-            p.color=0xFF18E6E0.toInt(); canvas.drawCircle(cx,cy,s*.022f,p)
+            p.style=android.graphics.Paint.Style.FILL; p.color=0xFFFF1E1E.toInt(); canvas.drawCircle(cx,cy,s*.055f,p)
+            p.color=0xFF00F0FF.toInt(); canvas.drawCircle(cx,cy,s*.022f,p)
             p.strokeWidth=s*.035f; p.strokeCap=android.graphics.Paint.Cap.ROUND; p.color=0xFFEAFBFF.toInt()
             canvas.drawLine(cx+s*.02f,cy-s*.02f,cx+s*.32f,cy-s*.38f,p)
             p.style=android.graphics.Paint.Style.FILL
             val dart=android.graphics.Path().apply { moveTo(cx+s*.28f,cy-s*.42f); lineTo(cx+s*.47f,cy-s*.48f); lineTo(cx+s*.39f,cy-s*.30f); close() }
-            p.color=0xFF18E6E0.toInt(); canvas.drawPath(dart,p)
-            p.color=0xFFFF3048.toInt(); canvas.drawCircle(cx+s*.02f,cy-s*.02f,s*.04f,p)
+            p.color=0xFF00F0FF.toInt(); canvas.drawPath(dart,p)
+            p.color=0xFFFF1E1E.toInt(); canvas.drawCircle(cx+s*.02f,cy-s*.02f,s*.04f,p)
         } else {
             p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.065f
-            p.color=if(kind==1) 0xFF18E6E0.toInt() else 0xFFFF3048.toInt()
+            p.color=if(kind==1) 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt()
             val r=s*.25f; canvas.drawCircle(cx,cy,r,p); canvas.drawLine(cx-r*.9f,cy,cx+r*.9f,cy,p)
             canvas.drawLine(cx,cy-r*.9f,cx,cy+r*.9f,p)
             canvas.drawArc(cx-r*.7f,cy-r*.7f,cx+r*.7f,cy+r*.7f,210f,120f,false,p)
@@ -296,9 +296,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF080E15.toInt()
-        val panelColor = 0xFF121D27.toInt()
-        val teal = 0xFF18E6E0.toInt()
+        val bg = 0xFF05080D.toInt()
+        val panelColor = 0xFF101720.toInt()
+        val teal = 0xFF00F0FF.toInt()
         val white = 0xFFF4F8FA.toInt()
         val muted = 0xFF91BFC2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
@@ -314,10 +314,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF14202B.toInt(), 0xFF090F17.toInt(), 0xFF1A0B13.toInt())
+                intArrayOf(0xFF14202B.toInt(), 0xFF05080D.toInt(), 0xFF1A0B13.toInt())
             ).apply {
                 cornerRadius = dp(18).toFloat()
-                setStroke(dp(2), 0xFF18DCD5.toInt())
+                setStroke(dp(2), 0xFF00F0FF.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -326,9 +326,9 @@ class MainActivity : ComponentActivity() {
                 text = title; isAllCaps = false; textSize = 12f
                 setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) 0xFFE91532.toInt() else 0xFF0B141D.toInt())
+                    setColor(if (primary) 0xFFFF1E1E.toInt() else 0xFF05080D.toInt())
                     cornerRadius = dp(15).toFloat()
-                    setStroke(dp(2), if (primary) 0xFFFF5267.toInt() else 0xFF18DCD5.toInt())
+                    setStroke(dp(2), if (primary) 0xFFFF1E1E.toInt() else 0xFF00F0FF.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -390,13 +390,13 @@ class MainActivity : ComponentActivity() {
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val brandName = android.text.SpannableString("DART VISION")
-        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFF18E6E0.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         brand.addView(TextView(this).apply {
             text = brandName; textSize = 25f
             setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
             setTextColor(white)
         })
-        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFF18E6E0.toInt(), true))
+        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFF00F0FF.toInt(), true))
         header.addView(brand, LinearLayout.LayoutParams(0, -2, 1f))
         fun headerAction(symbol: String, label: String, click: () -> Unit) {
             header.addView(TextView(this).apply {
@@ -407,7 +407,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF111923.toInt())
                     shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setStroke(dp(1), 0xFF18D9D4.toInt())
+                    setStroke(dp(1), 0xFF00F0FF.toInt())
                 }
                 contentDescription = label
                 layoutParams = LinearLayout.LayoutParams(dp(32), dp(32)).apply {
@@ -430,10 +430,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(12), dp(15), dp(12), dp(15))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF03090F.toInt(), 0xFF10131C.toInt(), 0xFF250A14.toInt())
+                intArrayOf(0xFF05080D.toInt(), 0xFF05080D.toInt(), 0xFF250A14.toInt())
             ).apply {
                 cornerRadius = dp(18).toFloat()
-                setStroke(dp(2), 0xFFFF3048.toInt())
+                setStroke(dp(2), 0xFFFF1E1E.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, dp(202)).apply {
                 setMargins(0, dp(7), 0, dp(12))
@@ -451,13 +451,13 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             letterSpacing = .14f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF18E6E0.toInt())
+            setTextColor(0xFF00F0FF.toInt())
             setPadding(0, dp(1), 0, dp(4))
         })
         hero.addView(TextView(this).apply {
             text = android.text.SpannableString("DART VISION").apply {
                 setSpan(android.text.style.ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 5, 0)
-                setSpan(android.text.style.ForegroundColorSpan(0xFF18E6E0.toInt()), 5, length, 0)
+                setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, length, 0)
             }
             textSize = 29f
             gravity = Gravity.CENTER
@@ -522,7 +522,7 @@ class MainActivity : ComponentActivity() {
             })
             categoryGrid.addView(tile)
         }
-        addCategory("🎮", "PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFF18E6E0.toInt()) {
+        addCategory("🎮", "PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFF00F0FF.toInt()) {
             if (restoreX01Game()) {
                 gameInProgress = true
                 showPage("game")
@@ -531,13 +531,13 @@ class MainActivity : ComponentActivity() {
                 showPage("game"); showGameModes()
             }
         }
-        addCategory("🌐", "PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFFFF3048.toInt()) {
+        addCategory("🌐", "PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFFFF1E1E.toInt()) {
             showPage("players")
         }
-        addCategory("🎯", "ENTRAÎNEMENT", "Travailler les simples,\ndoubles et finishes", 0xFF18E6E0.toInt()) {
+        addCategory("🎯", "ENTRAÎNEMENT", "Travailler les simples,\ndoubles et finishes", 0xFF00F0FF.toInt()) {
             showPage("game"); showTrainingModes()
         }
-        addCategory("🏆", "MODE CLASSÉ", "Compétition, classement\net progression", 0xFFFF3048.toInt()) {
+        addCategory("🏆", "MODE CLASSÉ", "Compétition, classement\net progression", 0xFFFF1E1E.toInt()) {
             showPage("game"); showGameModes()
         }
         home.addView(categoryGrid)
@@ -553,9 +553,9 @@ class MainActivity : ComponentActivity() {
                 gravity = Gravity.CENTER
                 setPadding(dp(3), dp(8), dp(3), dp(8))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF090F17.toInt())
+                    setColor(0xFF05080D.toInt())
                     cornerRadius = dp(16).toFloat()
-                    setStroke(dp(2), if (label == "AMIS") 0xFF18E6E0.toInt() else 0xFFFF4055.toInt())
+                    setStroke(dp(2), if (label == "AMIS") 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(0, dp(72), 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
@@ -585,7 +585,7 @@ class MainActivity : ComponentActivity() {
         }
         val updateBannerTop = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val updateBannerText = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
-        updateBannerText.addView(txt("MISE À JOUR DISPONIBLE", 13f, 0xFFFF5263.toInt(), true))
+        updateBannerText.addView(txt("MISE À JOUR DISPONIBLE", 13f, 0xFFFF1E1E.toInt(), true))
         updateBannerText.addView(txt("Une nouvelle version de DART VISION est prête.", 10f, muted))
         updateBannerTop.addView(updateBannerText)
         val closeUpdateBanner = TextView(this).apply {
@@ -741,7 +741,7 @@ class MainActivity : ComponentActivity() {
             letterSpacing = .05f
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
             setTextColor(white)
-            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF3048.toInt())
+            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
             setPadding(0, dp(7), 0, dp(2))
         })
         morePage.addView(TextView(this).apply {
@@ -750,10 +750,10 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             letterSpacing = .12f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-            setTextColor(0xFF18E6E0.toInt())
+            setTextColor(0xFF00F0FF.toInt())
             setPadding(0, 0, 0, dp(14))
         })
-        morePage.addView(txt("CAMÉRA & INSTALLATION", 11f, 0xFF18E6E0.toInt(), true))
+        morePage.addView(txt("CAMÉRA & INSTALLATION", 11f, 0xFF00F0FF.toInt(), true))
         val cameraPanel = card().apply { elevation = dp(5).toFloat() }
         cameraPanel.addView(txt("CAMÉRA & CALIBRAGE", 13f, teal, true))
         cameraPanel.addView(txt("Aide au cadrage et analyse des changements d’image. La reconnaissance automatique de la pointe et du score n’est pas encore disponible : vérifie chaque résultat manuellement.", 11f, muted))
@@ -777,7 +777,7 @@ class MainActivity : ComponentActivity() {
         cameraPanel.addView(analyze); cameraPanelView = cameraPanel; cameraPanel.visibility = View.GONE
         morePage.addView(cameraPanel)
         val settings = card().apply { elevation = dp(5).toFloat() }
-        settings.addView(txt("GESTION DE LA PARTIE", 12f, 0xFFFF5263.toInt(), true))
+        settings.addView(txt("GESTION DE LA PARTIE", 12f, 0xFFFF1E1E.toInt(), true))
         btn(settings, "■  ARRÊTER LA PARTIE", false) {
             if (!gameInProgress) {
                 AlertDialog.Builder(this).setTitle("Aucune partie en cours")
@@ -879,7 +879,7 @@ class MainActivity : ComponentActivity() {
                 intArrayOf(0xFF101C28.toInt(), 0xFF05090F.toInt(), 0xFF240A14.toInt())
             ).apply {
                 cornerRadius = dp(20).toFloat()
-                setStroke(dp(2), 0xFF18D9D4.toInt())
+                setStroke(dp(2), 0xFF00F0FF.toInt())
             }
             elevation = dp(4).toFloat()
         }
@@ -889,7 +889,7 @@ class MainActivity : ComponentActivity() {
                 textSize = 11f
                 letterSpacing = .12f
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
-                setTextColor(0xFF18E6E0.toInt())
+                setTextColor(0xFF00F0FF.toInt())
                 setPadding(0, dp(13), 0, dp(7))
             })
         }
@@ -906,7 +906,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF080F17.toInt())
                     cornerRadius = dp(12).toFloat()
-                    setStroke(dp(2), 0xFF19DCD5.toInt())
+                    setStroke(dp(2), 0xFF00F0FF.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, dp(49)).apply {
                     bottomMargin = dp(9)
@@ -923,7 +923,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (primary) 0xFFEC102F.toInt() else 0xFF101B25.toInt())
                     cornerRadius = dp(13).toFloat()
-                    setStroke(dp(2), if (primary) 0xFFFF6A7A.toInt() else 0xFF19DCD5.toInt())
+                    setStroke(dp(2), if (primary) 0xFFFF6A7A.toInt() else 0xFF00F0FF.toInt())
                 }
                 stateListAnimator = null
                 minHeight = dp(48)
@@ -946,7 +946,7 @@ class MainActivity : ComponentActivity() {
             textSize = 10f
             gravity = Gravity.CENTER
             letterSpacing = .15f
-            setTextColor(0xFF18E6E0.toInt())
+            setTextColor(0xFF00F0FF.toInt())
             setPadding(0, 0, 0, dp(13))
         })
 
@@ -960,7 +960,7 @@ class MainActivity : ComponentActivity() {
                 intArrayOf(0xFF10232C.toInt(), 0xFF190D18.toInt())
             ).apply {
                 cornerRadius = dp(16).toFloat()
-                setStroke(dp(2), 0xFFFF3048.toInt())
+                setStroke(dp(2), 0xFFFF1E1E.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -975,7 +975,7 @@ class MainActivity : ComponentActivity() {
             background = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.OVAL
                 setColor(0xFF35131B.toInt())
-                setStroke(dp(2), 0xFFFF4055.toInt())
+                setStroke(dp(2), 0xFFFF1E1E.toInt())
             }
             clipToOutline = true
         }
