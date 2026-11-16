@@ -404,7 +404,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF111923.toInt())
                     shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setStroke(dp(1), 0xFF536170.toInt())
+                    setStroke(dp(1), 0xFF18D9D4.toInt())
                 }
                 contentDescription = label
                 layoutParams = LinearLayout.LayoutParams(dp(32), dp(32)).apply {
@@ -443,6 +443,15 @@ class MainActivity : ComponentActivity() {
             elevation = dp(9).toFloat()
         })
         hero.addView(TextView(this).apply {
+            text = "—  SMART DARTS EXPERIENCE  —"
+            textSize = 10f
+            gravity = Gravity.CENTER
+            letterSpacing = .14f
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
+            setTextColor(0xFF18E6E0.toInt())
+            setPadding(0, dp(1), 0, dp(4))
+        })
+        hero.addView(TextView(this).apply {
             text = android.text.SpannableString("DART VISION").apply {
                 setSpan(android.text.style.ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 5, 0)
                 setSpan(android.text.style.ForegroundColorSpan(0xFF18E6E0.toInt()), 5, length, 0)
@@ -451,6 +460,14 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
             setShadowLayer(dp(8).toFloat(), 0f, 0f, 0xFFFF263F.toInt())
+        })
+        hero.addView(TextView(this).apply {
+            text = "LA PRÉCISION  •  LE JEU  •  LA PERFORMANCE"
+            textSize = 10f
+            gravity = Gravity.CENTER
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
+            setTextColor(0xFFEAF4F5.toInt())
+            setPadding(0, dp(3), 0, dp(2))
         })
         home.addView(hero)
 
@@ -859,7 +876,7 @@ class MainActivity : ComponentActivity() {
                 intArrayOf(0xFF101C28.toInt(), 0xFF070B12.toInt(), 0xFF1C0A13.toInt())
             ).apply {
                 cornerRadius = dp(20).toFloat()
-                setStroke(dp(2), 0xFFFF3048.toInt())
+                setStroke(dp(2), 0xFF18D9D4.toInt())
             }
             elevation = dp(4).toFloat()
         }
@@ -869,7 +886,7 @@ class MainActivity : ComponentActivity() {
                 textSize = 11f
                 letterSpacing = .12f
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
-                setTextColor(0xFFFF4055.toInt())
+                setTextColor(0xFF18E6E0.toInt())
                 setPadding(0, dp(13), 0, dp(7))
             })
         }
@@ -926,7 +943,7 @@ class MainActivity : ComponentActivity() {
             textSize = 10f
             gravity = Gravity.CENTER
             letterSpacing = .15f
-            setTextColor(0xFFFF4055.toInt())
+            setTextColor(0xFF18E6E0.toInt())
             setPadding(0, 0, 0, dp(13))
         })
 
