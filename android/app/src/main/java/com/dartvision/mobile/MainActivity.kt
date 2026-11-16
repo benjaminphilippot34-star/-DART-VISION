@@ -199,7 +199,6 @@ class MainActivity : ComponentActivity() {
         val updatePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         updatePageView = updatePage
         val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
-        val navButtons = mutableListOf<Pair<String, Button>>()
         fun showPage(page: String) {
             currentPage = page
             home.visibility = if (page == "home") View.VISIBLE else View.GONE
@@ -224,17 +223,6 @@ class MainActivity : ComponentActivity() {
             enteringPage.alpha = 0.0f
             enteringPage.translationY = dp(10).toFloat()
             enteringPage.animate().alpha(1.0f).translationY(0f).setDuration(220L).start()
-            navButtons.forEach { (key, view) ->
-                val selected = key == page
-                view.animate().cancel()
-                view.animate().alpha(if (selected) 1f else 0.68f).scaleX(if (selected) 1f else 0.94f)
-                    .scaleY(if (selected) 1f else 0.94f).setDuration(180L).start()
-                view.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) 0xFF3A0D15.toInt() else 0xFF10141B.toInt())
-                    cornerRadius = dp(18).toFloat()
-                    if (selected) setStroke(dp(1), 0xFFFF3045.toInt())
-                }
-            }
         }
         navigateToMorePage = { showPage("more") }
         val header = LinearLayout(this).apply {
@@ -348,6 +336,56 @@ class MainActivity : ComponentActivity() {
             setMargins(dp(18), 0, dp(18), dp(18))
         })
         home.addView(homeStage)
+
+        // Navigation exclusivement verticale : chaque rubrique apparaît une seule fois sous JOUER.
+        fun homeMenuItem(icon: String, title: String, subtitle: String, destination: String, action: (() -> Unit)? = null) {
+            val item = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(17), dp(13), dp(14), dp(13))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF111319.toInt())
+                    cornerRadius = dp(22).toFloat()
+                    setStroke(dp(1), 0xFFE32636.toInt())
+                }
+                elevation = dp(4).toFloat()
+                layoutParams = LinearLayout.LayoutParams(-1, dp(82)).apply { setMargins(dp(2), dp(7), dp(2), dp(7)) }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener {
+                    animate().scaleX(0.985f).scaleY(0.985f).setDuration(75L).withEndAction {
+                        animate().scaleX(1f).scaleY(1f).setDuration(100L).start()
+                        if (action != null) action() else showPage(destination)
+                    }.start()
+                }
+            }
+            item.addView(TextView(this).apply {
+                text = icon; textSize = 28f; gravity = Gravity.CENTER
+                setTextColor(0xFFFF4052.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(dp(55), -1)
+            })
+            item.addView(View(this).apply {
+                setBackgroundColor(0xFF6D252E.toInt())
+                layoutParams = LinearLayout.LayoutParams(dp(1), dp(48)).apply { setMargins(dp(10), 0, dp(15), 0) }
+            })
+            val labels = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
+            labels.addView(txt(title, 17f, white, true))
+            labels.addView(txt(subtitle, 11f, 0xFFADB2BC.toInt()))
+            item.addView(labels)
+            item.addView(TextView(this).apply {
+                text = "›"; textSize = 32f; gravity = Gravity.CENTER
+                setTextColor(0xFFFF3045.toInt()); layoutParams = LinearLayout.LayoutParams(dp(22), -1)
+            })
+            home.addView(item)
+        }
+        homeMenuItem("◎", "JEUX", "501, Cricket, Shanghai, entraînement", "game") {
+            showPage("game"); showGameModes()
+        }
+        homeMenuItem("♙", "PROFIL", "Mon compte et mes statistiques", "account")
+        homeMenuItem("☏", "DISCUSSIONS", "Échanger avec la communauté", "discussions")
+        homeMenuItem("⚙", "PARAMÈTRES", "Application et préférences", "more")
+
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(15), dp(13), dp(12), dp(13))
@@ -558,33 +596,16 @@ class MainActivity : ComponentActivity() {
         status = txt("PRÊT À JOUER", 12f, teal, true)
         settings.addView(txt("ÉTAT DE L’APPLICATION", 10f, muted, true)); settings.addView(status)
         val settingButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        btn(settingButtons, "MODES") { showPage("game"); showGameModes() }
         btn(settingButtons, "MISES À JOUR") { checkForUpdates(silent = false) }
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
 
         root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
+        // Aucun menu inférieur : toute la navigation part de la page d'accueil, sous le bouton JOUER.
+        bottomNavigationBar = null
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        val bottom = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER
-            setPadding(dp(8), dp(7), dp(8), dp(7)); setBackgroundColor(0xFF0D151D.toInt()); elevation = dp(14).toFloat()
-        }
-        bottomNavigationBar = bottom
-        fun nav(key: String, title: String, symbol: String) {
-            val button = Button(this).apply {
-                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title.length > 9) 7.2f else 9f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
-                minHeight = dp(60); stateListAnimator = null
-                layoutParams = LinearLayout.LayoutParams(0, dp(60), 1f).apply { setMargins(dp(2), 0, dp(2), 0) }
-                setOnClickListener { showPage(key) }
-            }
-            if (key == "update") { updateNavButton = button; button.visibility = View.GONE }
-            navButtons.add(key to button); bottom.addView(button)
-        }
-        nav("home", "ACCUEIL", "⌂"); nav("game", "JEUX", "◎"); nav("account", "PROFIL", "♙"); nav("discussions", "DISCUSSIONS", "☏"); nav("more", "PARAMÈTRES", "⚙")
-        nav("update", "MISE À JOUR", "⬇")
         showPage("home")
-        shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(76)))
         setContentView(shell)
         // Android 15+ dessine l'application derrière la barre système :
         // réserver sa hauteur sous la navigation pour garder les onglets entièrement visibles.
