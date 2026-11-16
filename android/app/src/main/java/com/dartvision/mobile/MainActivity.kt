@@ -1024,13 +1024,13 @@ class MainActivity : ComponentActivity() {
                 isFocusable = true
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(118)
+                    height = dp(104)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
                     setMargins(dp(4), dp(4), dp(4), dp(4))
                 }
             }
             tile.addView(DartAvatarPortraitView(this, index).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(66), dp(66))
+                layoutParams = LinearLayout.LayoutParams(dp(58), dp(58))
             })
             tile.addView(TextView(this).apply {
                 text = labels[index]
@@ -1064,7 +1064,9 @@ class MainActivity : ComponentActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.window?.setLayout((resources.displayMetrics.widthPixels * .92f).toInt(), dp(560))
+        val availableHeight = resources.displayMetrics.heightPixels
+        val dialogHeight = minOf(dp(540), (availableHeight * .76f).toInt())
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * .92f).toInt(), dialogHeight)
     }
 
     private fun refreshProfileAvatar() {
