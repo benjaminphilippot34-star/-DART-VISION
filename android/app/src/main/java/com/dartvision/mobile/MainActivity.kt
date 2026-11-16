@@ -917,9 +917,10 @@ class MainActivity : ComponentActivity() {
             setPadding(0, 0, 0, dp(13))
         })
 
+        // Carte profil responsive : les actions occupent une ligne dédiée
+        // afin que leurs libellés ne soient jamais rognés sur les petits écrans.
         val avatarCard = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
+            orientation = LinearLayout.VERTICAL
             setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
@@ -929,6 +930,10 @@ class MainActivity : ComponentActivity() {
                 setStroke(dp(2), 0xFFFF3048.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
+        }
+        val avatarIdentityRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
         }
         profileAvatarPreview = ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(dp(68), dp(68))
@@ -941,9 +946,10 @@ class MainActivity : ComponentActivity() {
             }
             clipToOutline = true
         }
-        avatarCard.addView(profileAvatarPreview)
+        avatarIdentityRow.addView(profileAvatarPreview)
         val avatarInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(12), 0, 0, 0)
         }
         avatarInfo.addView(TextView(this).apply {
@@ -956,26 +962,43 @@ class MainActivity : ComponentActivity() {
             text = "Personnalise ton identité sur DART VISION"
             textSize = 11f
             setTextColor(0xFFAFBBC7.toInt())
-            setPadding(0, dp(4), 0, dp(7))
+            setPadding(0, dp(4), 0, 0)
+            maxLines = 2
         })
-        val avatarActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        avatarActions.addView(actionButton("Ajouter une photo", false) {
+        avatarIdentityRow.addView(avatarInfo, LinearLayout.LayoutParams(0, -2, 1f))
+        avatarIdentityRow.addView(DartNeonArtworkView(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(48), dp(48))
+            alpha = .92f
+            contentDescription = "Cible de fléchettes lumineuse"
+        })
+        avatarCard.addView(avatarIdentityRow)
+
+        val avatarActions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) }
+        }
+        fun compactAvatarButton(label: String, action: () -> Unit): Button =
+            actionButton(label, false, action).apply {
+                textSize = 11f
+                maxLines = 2
+                gravity = Gravity.CENTER
+                includeFontPadding = false
+                minWidth = 0
+                minHeight = dp(44)
+                setPadding(dp(4), dp(5), dp(4), dp(5))
+            }
+        avatarActions.addView(compactAvatarButton("AJOUTER UNE PHOTO") {
             startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "image/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }, 741)
-        }, LinearLayout.LayoutParams(0, dp(39), 1f).apply { rightMargin = dp(5) })
-        avatarActions.addView(actionButton("Choisir un avatar", false) {
+        }, LinearLayout.LayoutParams(0, dp(46), 1f).apply { rightMargin = dp(5) })
+        avatarActions.addView(compactAvatarButton("CHOISIR UN AVATAR") {
             showAvatarGallery()
-        }, LinearLayout.LayoutParams(0, dp(39), 1f))
-        avatarInfo.addView(avatarActions)
-        avatarCard.addView(avatarInfo, LinearLayout.LayoutParams(0, -2, 1f))
-        avatarCard.addView(DartNeonArtworkView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(58), dp(58))
-            alpha = .92f
-            contentDescription = "Cible de fléchettes lumineuse"
-        })
+        }, LinearLayout.LayoutParams(0, dp(46), 1f).apply { leftMargin = dp(5) })
+        avatarCard.addView(avatarActions)
         panel.addView(avatarCard)
         refreshProfileAvatar()
 
