@@ -2412,7 +2412,10 @@ class MainActivity : ComponentActivity() {
                 val versionName = manifest.optString("versionName", "nouvelle version")
                 val apkUrl = manifest.getString("apkUrl")
                 val sha256 = manifest.optString("sha256", "").lowercase()
-                if (!apkUrl.startsWith("https://") || remoteCode <= 0 || versionName.isBlank()) throw IllegalStateException("Manifeste de mise à jour invalide")
+                val trustedReleasePrefix = "https://github.com/benjaminphilippot34-star/-DART-VISION/releases/download/"
+                if (!apkUrl.startsWith(trustedReleasePrefix) || remoteCode <= 0 || versionName.isBlank() || sha256.length != 64 || !sha256.matches(Regex("[a-f0-9]{64}"))) {
+                    throw SecurityException("Manifeste de mise à jour invalide ou non vérifiable")
+                }
                 runOnUiThread {
                     availableUpdate = manifest
                     updateVersionLabel?.text = "DART VISION $versionName est disponible. Appuie ci-dessous pour télécharger la version officielle signée."
@@ -2436,16 +2439,20 @@ class MainActivity : ComponentActivity() {
                 }
                 connection.connect()
                 if (connection.responseCode !in 200..299) throw IllegalStateException("Téléchargement indisponible")
+                val declaredLength = connection.contentLengthLong
+                if (declaredLength > 100L * 1024L * 1024L) throw SecurityException("Fichier de mise à jour trop volumineux")
                 val apk = File(cacheDir, "dart-vision-update.apk")
                 if (apk.exists()) apk.delete()
                 connection.inputStream.use { input -> FileOutputStream(apk).use { output -> input.copyTo(output) } }
                 connection.disconnect()
-                if (expectedSha256.isNotBlank()) {
-                    val digest = MessageDigest.getInstance("SHA-256").digest(apk.readBytes())
-                        .joinToString("") { "%02x".format(it) }
-                    if (!digest.equals(expectedSha256, ignoreCase = true)) {
-                        apk.delete(); throw SecurityException("La vérification du fichier a échoué")
-                    }
+                if (expectedSha256.length != 64 || !expectedSha256.matches(Regex("[a-fA-F0-9]{64}"))) {
+                    apk.delete()
+                    throw SecurityException("Empreinte de sécurité absente ou invalide")
+                }
+                val digest = MessageDigest.getInstance("SHA-256").digest(apk.readBytes())
+                    .joinToString("") { "%02x".format(it) }
+                if (!digest.equals(expectedSha256, ignoreCase = true)) {
+                    apk.delete(); throw SecurityException("La vérification d'intégrité du fichier a échoué")
                 }
                 downloadedUpdate = apk
                 runOnUiThread {
