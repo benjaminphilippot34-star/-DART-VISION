@@ -149,7 +149,7 @@ class MainActivity : ComponentActivity() {
     private fun buildUi() {
         val bg = 0xFF080E15.toInt()
         val panelColor = 0xFF121D27.toInt()
-        val teal = 0xFF28D7C2.toInt()
+        val teal = 0xFFFF3045.toInt()
         val white = 0xFFF4F8FA.toInt()
         val muted = 0xFF91A4B2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
@@ -228,7 +228,7 @@ class MainActivity : ComponentActivity() {
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
                 view.background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (selected) 0xFF174E4B.toInt() else 0xFF121D27.toInt())
+                    setColor(if (selected) 0xFF50151D.toInt() else 0xFF121D27.toInt())
                     cornerRadius = dp(13).toFloat()
                     if (selected) setStroke(dp(1), teal)
                 }
@@ -253,19 +253,12 @@ class MainActivity : ComponentActivity() {
         header.addView(txt("● LOCAL", 9f, teal, true))
         root.addView(header)
 
-        // Accueil premium
-        val hero = card().apply {
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF174541.toInt(), 0xFF122B35.toInt(), 0xFF121D27.toInt())
-            ).apply { cornerRadius = dp(21).toFloat(); setStroke(dp(1), 0xFF26766F.toInt()) }
-        }
-        hero.addView(txt("BIENVENUE SUR", 10f, teal, true))
-        hero.addView(txt("Prêt à viser juste ?", 27f, white, true))
-        hero.addView(txt("Lance tes parties, suis tes scores et mesure tes progrès.", 11f, muted))
-        val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, 0) }
+        // Accueil volontairement minimal : une action principale, sans carte d'accueil encombrante.
+        home.addView(txt("DART VISION", 25f, white, true).apply { setPadding(dp(2), dp(24), dp(2), dp(5)) })
+        home.addView(txt("Choisis un mode et lance ta partie.", 13f, muted).apply { setPadding(dp(2), 0, dp(2), dp(18)) })
+        val play = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(play, "▶  JOUER", true) { showPage("game"); showGameModes() }
-        hero.addView(play)
+        home.addView(play)
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(15), dp(13), dp(12), dp(13))
@@ -294,7 +287,6 @@ class MainActivity : ComponentActivity() {
         }
         homeUpdateBanner?.addView(updateBannerAction)
         home.addView(homeUpdateBanner)
-        home.addView(hero)
 
         // L’inscription et la connexion disposent de leur propre onglet.
         accountPage.addView(buildAccountPanel())
@@ -334,7 +326,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF121D27.toInt()); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0xFF26766F.toInt())
+                setColor(0xFF121D27.toInt()); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0xFF8F2633.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -504,7 +496,7 @@ class MainActivity : ComponentActivity() {
         }
         nav("home", "ACCUEIL", "⌂"); nav("game", "JEUX", "◎"); nav("account", "PROFIL", "♙"); nav("discussions", "DISCUSSIONS", "☏"); nav("more", "PARAMÈTRES", "⚙")
         nav("update", "MISE À JOUR", "⬇")
-        showPage(if (hasAccountAtStart) "home" else "account")
+        showPage("home")
         shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
         setContentView(shell)
         // Android 15+ dessine l'application derrière la barre système :
@@ -631,7 +623,7 @@ class MainActivity : ComponentActivity() {
             val size = (64 * resources.displayMetrics.density).toInt()
             val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
             val canvas = android.graphics.Canvas(bitmap)
-            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF174E4B.toInt() }
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF50151D.toInt() }
             canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
             paint.color = android.graphics.Color.WHITE; paint.textAlign = android.graphics.Paint.Align.CENTER; paint.textSize = size * .48f
             canvas.drawText(emoji, size / 2f, size * .66f, paint); image.setImageBitmap(bitmap)
@@ -873,9 +865,9 @@ class MainActivity : ComponentActivity() {
                     background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF172630.toInt()); cornerRadius = 14f; setStroke(1, 0xFF314653.toInt()) }
                     layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = 8 }
                 }
-                row.addView(TextView(this).apply { text = "♙"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); layoutParams = LinearLayout.LayoutParams(38, -2) })
+                row.addView(TextView(this).apply { text = "♙"; textSize = 20f; setTextColor(0xFFFF3045.toInt()); layoutParams = LinearLayout.LayoutParams(38, -2) })
                 row.addView(TextView(this).apply { text = name; textSize = 15f; setTextColor(0xFFF4F8FA.toInt()); layoutParams = LinearLayout.LayoutParams(0, -2, 1f) })
-                row.addView(TextView(this).apply { text = "✎"; textSize = 20f; setTextColor(0xFF28D7C2.toInt()); setPadding(12, 8, 12, 8); setOnClickListener {
+                row.addView(TextView(this).apply { text = "✎"; textSize = 20f; setTextColor(0xFFFF3045.toInt()); setPadding(12, 8, 12, 8); setOnClickListener {
                     val field = EditText(this@MainActivity).apply { setText(name); setSelection(text.length); setSingleLine(true) }
                     AlertDialog.Builder(this@MainActivity).setTitle("Modifier le pseudo").setView(field)
                         .setNegativeButton("ANNULER", null).setPositiveButton("ENREGISTRER") { _, _ ->
@@ -892,7 +884,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         render(); container.addView(list)
-        val addInput = EditText(this).apply { hint = "Nouveau pseudo"; setSingleLine(true); textSize = 16f; setPadding(14, 12, 14, 12); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFFF7FAF9.toInt()); cornerRadius = 12f; setStroke(1, 0xFF28D7C2.toInt()) } }
+        val addInput = EditText(this).apply { hint = "Nouveau pseudo"; setSingleLine(true); textSize = 16f; setPadding(14, 12, 14, 12); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFFF7FAF9.toInt()); cornerRadius = 12f; setStroke(1, 0xFFFF3045.toInt()) } }
         container.addView(addInput)
         val dialog = AlertDialog.Builder(this).setTitle("MES JOUEURS").setMessage("Enregistre tes pseudos pour les retrouver à chaque nouvelle partie.").setView(container).setPositiveButton("AJOUTER", null).setNegativeButton("FERMER", null).create()
         dialog.setOnShowListener {
@@ -1232,7 +1224,7 @@ class MainActivity : ComponentActivity() {
         }
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val accent = 0xFF28D7C2.toInt()
+        val accent = 0xFFFF3045.toInt()
         val ink = 0xFFF4F8FA.toInt()
         val muted = 0xFF91A4B2.toInt()
         val grid = android.widget.GridLayout(this).apply {
@@ -1423,7 +1415,7 @@ class MainActivity : ComponentActivity() {
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFFF7FAF9.toInt())
                 cornerRadius = 10f
-                setStroke(1, 0xFFB8CECA.toInt())
+                setStroke(1, 0xFFB8B8C2.toInt())
             }
             minimumHeight = 50
         }
@@ -1451,9 +1443,10 @@ class MainActivity : ComponentActivity() {
                 inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                 setPadding(14, 12, 14, 12); minimumHeight = 52
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFFFFFFFF.toInt()); cornerRadius = 12f; setStroke(1, 0xFFB8CECA.toInt())
+                    setColor(0xFFFFFFFF.toInt()); cornerRadius = 12f; setStroke(1, 0xFFB8B8C2.toInt())
                 }
-                setText(savedPlayerNames.getOrNull(index) ?: existingPlayers.optJSONObject(index)?.optString("name", "").orEmpty())
+                existingPlayers.optJSONObject(index)?.optString("name", "")?.takeIf { it.isNotBlank() }?.let { setText(it) }
+                    ?: setText(savedPlayerNames.getOrNull(index).orEmpty())
             }
         }
         playerNameInputs.forEachIndexed { index, input -> input.visibility = if (index < playerSpinner.selectedItemPosition + 1) View.VISIBLE else View.GONE }
@@ -1491,7 +1484,7 @@ class MainActivity : ComponentActivity() {
             if (subtitle != null) card.addView(TextView(this).apply {
                 text = subtitle
                 textSize = 11f
-                setTextColor(0xFF647A76.toInt())
+                setTextColor(0xFF8E929B.toInt())
                 setPadding(0, 0, 0, 8)
             })
             content.addView(card)
@@ -1516,7 +1509,7 @@ class MainActivity : ComponentActivity() {
         })
         playerNameInputs.forEachIndexed { index, input ->
             val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, 3, 0, 3) }
-            row.addView(TextView(this).apply { text = "0${index + 1}"; textSize = 13f; setTextColor(0xFF28AFA1.toInt()); gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(34, 48) })
+            row.addView(TextView(this).apply { text = "0${index + 1}"; textSize = 13f; setTextColor(0xFFE32636.toInt()); gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(34, 48) })
             row.addView(input, LinearLayout.LayoutParams(0, -2, 1f))
             playerSection.addView(row)
         }
@@ -1588,14 +1581,14 @@ class MainActivity : ComponentActivity() {
         val prompt = TextView(this).apply {
             text = "✦  SAISIR LES 3 FLÉCHETTES"
             textSize = 15f
-            setTextColor(0xFF28CDBA.toInt())
+            setTextColor(0xFFFF3045.toInt())
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
             setPadding(dp(12), dp(17), dp(12), dp(17))
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFF1C2A35.toInt())
                 cornerRadius = dp(14).toFloat()
-                setStroke(dp(1), 0xFF28CDBA.toInt())
+                setStroke(dp(1), 0xFFFF3045.toInt())
             }
             setOnClickListener { enterManualTurn() }
         }
@@ -1624,7 +1617,7 @@ class MainActivity : ComponentActivity() {
         val d = resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
         val ink = 0xFFF2F6F8.toInt()
-        val teal = 0xFF28CDBA.toInt()
+        val teal = 0xFFFF3045.toInt()
         val coral = 0xFFFF654F.toInt()
         val pale = 0xFF101B24.toInt()
         val white = android.graphics.Color.WHITE
@@ -1987,7 +1980,7 @@ class MainActivity : ComponentActivity() {
         playerStatsView.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) + "\nSCORE PRÉCÉDENT  " + previous + "\nFLÉCHETTES JETÉES  " + darts
         val opponentJson = JSONArray()
         s.players.forEach { p -> opponentJson.put(JSONObject().put("name", p.name).put("score", p.score)) }
-        refreshOpponentScores(opponentJson, s.activePlayer, 0xFF9AADB8.toInt(), 0xFFF2F6F8.toInt(), 0xFF28CDBA.toInt())
+        refreshOpponentScores(opponentJson, s.activePlayer, 0xFF9AADB8.toInt(), 0xFFF2F6F8.toInt(), 0xFFFF3045.toInt())
         status.text = "MODE X01 • ${s.settings.startingScore} • hors ligne"
     }
 
@@ -2225,7 +2218,7 @@ class MainActivity : ComponentActivity() {
             "\nSCORE PRÉCÉDENT  " + previousScore +
             "\nFLÉCHETTES JETÉES  " + darts
         playerStatsView.visibility = View.VISIBLE
-        refreshOpponentScores(players, active, 0xFF91A4B2.toInt(), 0xFFF4F8FA.toInt(), 0xFF28D7C2.toInt())
+        refreshOpponentScores(players, active, 0xFF91A4B2.toInt(), 0xFFF4F8FA.toInt(), 0xFFFF3045.toInt())
     }
 
     private fun refreshOpponentScores(players: JSONArray, active: Int, muted: Int, white: Int, teal: Int) {
