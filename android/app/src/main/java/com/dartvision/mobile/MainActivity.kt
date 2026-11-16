@@ -1652,7 +1652,6 @@ class MainActivity : ComponentActivity() {
         val playerScoreViews = mutableListOf<TextView>()
         val scoreboard = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; background = rounded(0xFF1C2A35.toInt(), teal, 18); setPadding(dp(10), dp(10), dp(10), dp(10)) }
         val activePanel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(8), dp(8), dp(8)); background = rounded(coral, coral, 14); layoutParams = LinearLayout.LayoutParams(0, dp(210), 1.15f) }
-        activePanel.addView(text("JOUEUR ACTIF", 10f, white, true).apply { gravity = Gravity.START; includeFontPadding = false })
         activePanel.addView(text(activeName, 13f, white, true).apply { gravity = Gravity.START; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; includeFontPadding = false })
         val activeScore = text(gamePlayers?.getOrNull(activeIndex)?.score?.toString() ?: "301", 34f, white, true).apply { gravity = Gravity.START; includeFontPadding = false }
         activePanel.addView(activeScore)
@@ -1698,8 +1697,6 @@ class MainActivity : ComponentActivity() {
         content.addView(entry, LinearLayout.LayoutParams(-1, dp(52)))
         val count = text("0 / 3 fléchettes", 11f, 0xFF9AADB8.toInt(), true)
         content.addView(count, LinearLayout.LayoutParams(-1, dp(18)))
-        val visitTotal = text("TOTAL DE LA VOLÉE : 0", 15f, coral, true)
-        content.addView(visitTotal, LinearLayout.LayoutParams(-1, dp(23)))
         val tabsRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val tabs = mutableListOf<TextView>()
         val tabNames = listOf("Simple", "Double", "Triple", "Bull 50", "Outer 25")
@@ -1785,7 +1782,6 @@ class MainActivity : ComponentActivity() {
                 slot.background = rounded(if (i == hits.size && hits.size < 3) coral else 0xFF1C2A35.toInt(), if (i == hits.size && hits.size < 3) coral else 0xFF3A4D59.toInt(), 2)
             }
             count.text = "${hits.size} / 3 fléchettes"
-            visitTotal.text = "TOTAL DE LA VOLÉE : ${hits.sumOf { it.points }}"
             tabs.forEachIndexed { i, tab ->
                 tab.setTextColor(if (i == selectedTab) white else ink)
                 tab.background = rounded(if (i == selectedTab) coral else 0xFF1C2A35.toInt(), if (i == selectedTab) coral else 0xFF3A4D59.toInt(), 3)
@@ -1812,10 +1808,10 @@ class MainActivity : ComponentActivity() {
                 val average = if (dartsThrown == 0) 0.0 else pointsScored * 3.0 / dartsThrown
                 val previous = history.lastOrNull()?.scoreBefore?.toString() ?: engine.state.settings.startingScore.toString()
                 activeStats.text = "MOYENNE  " + String.format(java.util.Locale.FRANCE, "%.1f", average) +
-                    "\nMANCHE PRÉCÉDENTE  " + previous +
-                    "\nFLÉCHETTES LANCÉES  " + dartsThrown
+                    "\nSCORE PRÉCÉDENT  " + previous +
+                    "\nFLÈCHES LANCÉES  " + dartsThrown
             } else {
-                activeStats.text = "MOYENNE  —\nMANCHE PRÉCÉDENTE  —\nFLÉCHETTES LANCÉES  0"
+                activeStats.text = "MOYENNE  —\nSCORE PRÉCÉDENT  —\nFLÈCHES LANCÉES  0"
             }
         }
         // Sélectionne le bull ou le 25 extérieur directement depuis leur onglet.
