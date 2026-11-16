@@ -309,7 +309,7 @@ class MainActivity : ComponentActivity() {
                 }
                 p.color = 0xFFE32636.toInt(); canvas.drawPath(dart, p)
                 val shade = android.graphics.LinearGradient(0f, 0f, w * .7f, 0f,
-                    intArrayOf(0x0008090D, 0xCC08090D, 0x0008090D), null, android.graphics.Shader.TileMode.CLAMP)
+                    intArrayOf(0x0008090D.toInt(), 0xCC08090D.toInt(), 0x0008090D.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
                 p.shader = shade; canvas.drawRect(0f, 0f, w * .73f, h, p); p.shader = null
             }
         }
