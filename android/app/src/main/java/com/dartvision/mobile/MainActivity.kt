@@ -54,33 +54,90 @@ private class DartAvatarPortraitView(context: android.content.Context, private v
     )
     override fun onDraw(canvas: android.graphics.Canvas) {
         super.onDraw(canvas)
-        val w = width.toFloat(); val h = height.toFloat()
-        val cx = w / 2f; val cy = h / 2f; val radius = minOf(w, h) * .47f
-        val colors = palettes[style % palettes.size]
-        paint.shader = android.graphics.LinearGradient(0f, 0f, w, h, colors[0], 0xFF080E17.toInt(), android.graphics.Shader.TileMode.CLAMP)
-        canvas.drawCircle(cx, cy, radius, paint)
-        paint.shader = null
-        paint.style = android.graphics.Paint.Style.STROKE
-        paint.strokeWidth = 3f
-        paint.color = colors[1]
-        canvas.drawCircle(cx, cy, radius - 1.5f, paint)
-        paint.style = android.graphics.Paint.Style.FILL
-        // Hood / hair silhouette
-        paint.color = 0xFF050910.toInt()
-        canvas.drawOval(cx-radius*.66f, cy-radius*.66f, cx+radius*.66f, cy+radius*.85f, paint)
-        // Face and neck
-        paint.color = when (style % 4) { 0 -> 0xFFB97855.toInt(); 1 -> 0xFF8D5B48.toInt(); 2 -> 0xFFD69A75.toInt(); else -> 0xFF9D6B55.toInt() }
-        canvas.drawOval(cx-radius*.39f, cy-radius*.45f, cx+radius*.39f, cy+radius*.49f, paint)
-        canvas.drawRect(cx-radius*.16f, cy+radius*.30f, cx+radius*.16f, cy+radius*.62f, paint)
-        // Visor / mask for a competitive illustrated look
-        paint.color = if (style % 3 == 0) 0xFF101B28.toInt() else colors[1]
-        canvas.drawRoundRect(cx-radius*.43f, cy-radius*.10f, cx+radius*.43f, cy+radius*.19f, radius*.12f, radius*.12f, paint)
-        paint.color = 0xFFEAFBFF.toInt()
-        canvas.drawCircle(cx-radius*.19f, cy+radius*.015f, radius*.045f, paint)
-        canvas.drawCircle(cx+radius*.19f, cy+radius*.015f, radius*.045f, paint)
-        paint.color = colors[1]
-        paint.strokeWidth = radius*.055f
-        canvas.drawLine(cx-radius*.22f, cy+radius*.32f, cx+radius*.22f, cy+radius*.32f, paint)
+        val w=width.toFloat(); val h=height.toFloat()
+        val cx=w/2f; val cy=h/2f; val r=minOf(w,h)*.47f
+        val accent=palettes[style%palettes.size][1]
+        val skin=when(style%5) {
+            0 -> 0xFFD08A63.toInt()
+            1 -> 0xFF9A604C.toInt()
+            2 -> 0xFFE0A47D.toInt()
+            3 -> 0xFFB97858.toInt()
+            else -> 0xFF8D5847.toInt()
+        }
+        paint.shader=android.graphics.RadialGradient(cx-r*.15f,cy-r*.25f,r*1.5f,
+            intArrayOf(palettes[style%palettes.size][0],0xFF060B13.toInt()),
+            null,android.graphics.Shader.TileMode.CLAMP)
+        canvas.drawCircle(cx,cy,r,paint); paint.shader=null
+        paint.style=android.graphics.Paint.Style.STROKE
+        paint.strokeWidth=maxOf(2f,r*.045f); paint.color=accent
+        paint.setShadowLayer(r*.13f,0f,0f,accent); canvas.drawCircle(cx,cy,r*.94f,paint)
+        paint.clearShadowLayer(); paint.style=android.graphics.Paint.Style.FILL
+
+        // Epaules et veste esport
+        val jacket=android.graphics.Path().apply {
+            moveTo(cx-r*.72f,cy+r*.78f); lineTo(cx-r*.58f,cy+r*.42f)
+            quadTo(cx-r*.42f,cy+r*.26f,cx-r*.18f,cy+r*.30f)
+            lineTo(cx+r*.18f,cy+r*.30f); quadTo(cx+r*.42f,cy+r*.26f,cx+r*.58f,cy+r*.42f)
+            lineTo(cx+r*.72f,cy+r*.78f); close()
+        }
+        paint.color=0xFF080F19.toInt(); canvas.drawPath(jacket,paint)
+        paint.color=accent; paint.strokeWidth=r*.045f
+        canvas.drawLine(cx-r*.48f,cy+r*.49f,cx-r*.28f,cy+r*.78f,paint)
+        canvas.drawLine(cx+r*.48f,cy+r*.49f,cx+r*.28f,cy+r*.78f,paint)
+
+        // Cou et visage
+        paint.color=skin
+        canvas.drawRoundRect(cx-r*.17f,cy+r*.25f,cx+r*.17f,cy+r*.57f,r*.08f,r*.08f,paint)
+        canvas.drawOval(cx-r*.40f,cy-r*.49f,cx+r*.40f,cy+r*.48f,paint)
+        // Cheveux / capuche, variations selon le personnage
+        paint.color=0xFF10131A.toInt()
+        when(style%4) {
+            0 -> {
+                val hair=android.graphics.Path().apply {
+                    moveTo(cx-r*.43f,cy-r*.12f); quadTo(cx-r*.55f,cy-r*.68f,cx-r*.06f,cy-r*.72f)
+                    quadTo(cx+r*.18f,cy-r*.84f,cx+r*.43f,cy-r*.42f)
+                    lineTo(cx+r*.35f,cy-r*.27f); quadTo(cx,cy-r*.43f,cx-r*.43f,cy-r*.12f); close()
+                }; canvas.drawPath(hair,paint)
+            }
+            1 -> canvas.drawRoundRect(cx-r*.46f,cy-r*.62f,cx+r*.46f,cy-r*.24f,r*.12f,r*.12f,paint)
+            2 -> canvas.drawOval(cx-r*.47f,cy-r*.70f,cx+r*.47f,cy-r*.25f,paint)
+            else -> {
+                canvas.drawOval(cx-r*.48f,cy-r*.66f,cx+r*.48f,cy-r*.22f,paint)
+                canvas.drawRect(cx-r*.47f,cy-r*.43f,cx-r*.34f,cy+r*.18f,paint)
+                canvas.drawRect(cx+r*.34f,cy-r*.43f,cx+r*.47f,cy+r*.18f,paint)
+            }
+        }
+        // Oreilles
+        paint.color=skin
+        canvas.drawCircle(cx-r*.40f,cy+r*.02f,r*.085f,paint)
+        canvas.drawCircle(cx+r*.40f,cy+r*.02f,r*.085f,paint)
+        // Yeux et sourcils
+        paint.color=0xFF17151A.toInt()
+        paint.strokeWidth=r*.055f; paint.strokeCap=android.graphics.Paint.Cap.ROUND
+        canvas.drawLine(cx-r*.25f,cy-r*.08f,cx-r*.08f,cy-r*.10f,paint)
+        canvas.drawLine(cx+r*.08f,cy-r*.10f,cx+r*.25f,cy-r*.08f,paint)
+        paint.color=0xFFF5FBFF.toInt()
+        canvas.drawOval(cx-r*.23f,cy-r*.035f,cx-r*.09f,cy+r*.045f,paint)
+        canvas.drawOval(cx+r*.09f,cy-r*.035f,cx+r*.23f,cy+r*.045f,paint)
+        paint.color=0xFF10151E.toInt()
+        canvas.drawCircle(cx-r*.16f,cy+.005f*r,r*.035f,paint)
+        canvas.drawCircle(cx+r*.16f,cy+.005f*r,r*.035f,paint)
+        // Barbe légère et masque signature neon
+        if(style%3==0) {
+            paint.color=0xFF34252A.toInt()
+            canvas.drawOval(cx-r*.29f,cy+r*.17f,cx+r*.29f,cy+r*.48f,paint)
+        }
+        paint.color=accent
+        paint.alpha=225
+        canvas.drawRoundRect(cx-r*.30f,cy+r*.23f,cx+r*.30f,cy+r*.31f,r*.035f,r*.035f,paint)
+        paint.alpha=255
+        // Reflet lumineux sur la veste
+        paint.style=android.graphics.Paint.Style.STROKE
+        paint.strokeWidth=r*.025f
+        paint.color=0xFFE8FCFF.toInt()
+        canvas.drawArc(cx-r*.88f,cy-r*.88f,cx+r*.88f,cy+r*.88f,205f,55f,false,paint)
+        paint.style=android.graphics.Paint.Style.FILL
+        paint.strokeCap=android.graphics.Paint.Cap.BUTT
     }
 }
 
