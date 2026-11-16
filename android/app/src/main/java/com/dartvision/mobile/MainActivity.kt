@@ -175,40 +175,51 @@ private class DartNeonArtworkView(context: android.content.Context, private val 
     }
 }
 
-/** Deep-black DART VISION background with soft diagonal red/cyan neon beams. */
+/** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
 private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
     override fun draw(canvas: android.graphics.Canvas) {
         val b = bounds
-        canvas.drawColor(0xFF05080D.toInt())
         val w = b.width().toFloat()
         val h = b.height().toFloat()
-        val beams = listOf(
-            Triple(-.10f, .18f, 0xFFFF1E1E.toInt()),
-            Triple(.22f, -.08f, 0xFF00F0FF.toInt()),
-            Triple(.78f, -.06f, 0xFF00F0FF.toInt()),
-            Triple(1.08f, .20f, 0xFFFF1E1E.toInt()),
-            Triple(.06f, .94f, 0xFFFF1E1E.toInt()),
-            Triple(.88f, 1.02f, 0xFF00F0FF.toInt())
+        if (w <= 0f || h <= 0f) return
+
+        // Dégradé doux menthe / turquoise très clair.
+        paint.style = android.graphics.Paint.Style.FILL
+        paint.shader = android.graphics.LinearGradient(
+            0f, 0f, w * .18f, h,
+            intArrayOf(0xFFC8E7E2.toInt(), 0xFFE8F5F2.toInt(), 0xFFF7FBF9.toInt()),
+            floatArrayOf(0f, .52f, 1f),
+            android.graphics.Shader.TileMode.CLAMP
         )
-        beams.forEachIndexed { index, beam ->
-            val x = w * beam.first
-            val y = h * beam.second
-            paint.style = android.graphics.Paint.Style.STROKE
-            paint.strokeCap = android.graphics.Paint.Cap.ROUND
-            paint.color = beam.third
-            paint.strokeWidth = if (index < 4) w * .012f else w * .009f
-            paint.alpha = 115
-            paint.setShadowLayer(w * .045f, 0f, 0f, beam.third)
-            canvas.drawLine(x, y, x + w * .20f, y - h * .12f, paint)
-            paint.clearShadowLayer()
-            paint.alpha = 210
-            paint.strokeWidth = maxOf(1f, w * .0025f)
-            canvas.drawLine(x, y, x + w * .20f, y - h * .12f, paint)
+        canvas.drawRect(b, paint)
+        paint.shader = null
+
+        // Trame fine, presque ton sur ton : lignes diagonales et points légers.
+        paint.style = android.graphics.Paint.Style.STROKE
+        paint.strokeWidth = maxOf(1f, resourcesDensity() * .65f)
+        paint.color = 0x183A8F88
+        val step = 34f * resourcesDensity()
+        var x = -h
+        while (x < w + h) {
+            canvas.drawLine(x, 0f, x + h, h, paint)
+            x += step
+        }
+        paint.style = android.graphics.Paint.Style.FILL
+        paint.color = 0x183A8F88
+        val dotStep = 26f * resourcesDensity()
+        var y = dotStep
+        while (y < h) {
+            var dx = dotStep
+            while (dx < w) {
+                canvas.drawCircle(dx, y, 0.8f * resourcesDensity(), paint)
+                dx += dotStep
+            }
+            y += dotStep
         }
         paint.alpha = 255
-        paint.style = android.graphics.Paint.Style.FILL
     }
+    private fun resourcesDensity(): Float = android.content.res.Resources.getSystem().displayMetrics.density
     override fun setAlpha(alpha: Int) { paint.alpha = alpha; invalidateSelf() }
     override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { paint.colorFilter = colorFilter; invalidateSelf() }
     @Deprecated("Deprecated in Android")
@@ -336,7 +347,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF05080D.toInt()
+        val bg = 0xFFE8F5F2.toInt()
         val panelColor = 0xFF101720.toInt()
         val teal = 0xFF00F0FF.toInt()
         val white = 0xFFF4F8FA.toInt()
