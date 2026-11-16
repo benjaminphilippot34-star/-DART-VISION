@@ -499,9 +499,9 @@ class MainActivity : ComponentActivity() {
             }
             header.addView(action)
         }
-        headerAction("♙", "Mon profil") { showPage("account") }
+        headerAction("♙", "Mon profil", click = { showPage("account") })
         headerAction("●", "Notifications", { showPage("update") }, notification = true)
-        headerAction("⚙", "Paramètres") { showPage("more") }
+        headerAction("⚙", "Paramètres", click = { showPage("more") })
         root.addView(header)
         root.addView(View(this).apply {
             background = android.graphics.drawable.GradientDrawable(
