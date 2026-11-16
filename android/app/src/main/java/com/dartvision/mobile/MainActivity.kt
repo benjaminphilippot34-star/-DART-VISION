@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity() {
                 text = value; textSize = size; setTextColor(color)
                 if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setPadding(dp(2), dp(3), dp(2), dp(3))
-                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
+                setTypeface(android.graphics.Typeface.create("sans-serif", if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
             }
         fun card(): LinearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1263,11 +1263,11 @@ class MainActivity : ComponentActivity() {
                     GameModeCategory.PARTY -> "MULTIJOUEUR"
                 }
                 textSize = 9f; setTextColor(accent)
-                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
             })
             tile.addView(TextView(this).apply {
                 text = mode.title; textSize = 16f; setTextColor(ink)
-                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
                 setPadding(0, dp(5), 0, dp(3))
             })
             tile.addView(TextView(this).apply {
@@ -1478,7 +1478,7 @@ class MainActivity : ComponentActivity() {
                 text = title
                 textSize = 17f
                 setTextColor(0xFF102C29.toInt())
-                setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD))
+                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
                 setPadding(0, 0, 0, 5)
             })
             if (subtitle != null) card.addView(TextView(this).apply {
@@ -1582,7 +1582,7 @@ class MainActivity : ComponentActivity() {
             text = "✦  SAISIR LES 3 FLÉCHETTES"
             textSize = 15f
             setTextColor(0xFF28CDBA.toInt())
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
             setPadding(dp(12), dp(17), dp(12), dp(17))
             background = android.graphics.drawable.GradientDrawable().apply {
@@ -1641,7 +1641,7 @@ class MainActivity : ComponentActivity() {
             TextView(this).apply {
                 text = value; textSize = size; gravity = Gravity.CENTER
                 setTextColor(color)
-                setTypeface(android.graphics.Typeface.create("sans-serif-condensed",
+                setTypeface(android.graphics.Typeface.create("sans-serif",
                     if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL))
                 setPadding(dp(2), dp(3), dp(2), dp(3))
             }
