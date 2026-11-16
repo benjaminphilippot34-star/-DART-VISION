@@ -298,7 +298,7 @@ class MainActivity : ComponentActivity() {
                 }
                 val texture = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                     color = 0x247C7569
-                    strokeWidth = dp(0.7f).toFloat()
+                    strokeWidth = dp(1).toFloat()
                 }
                 for (i in 0 until 240) {
                     val angle = i * 2.399963f
@@ -352,7 +352,7 @@ class MainActivity : ComponentActivity() {
                     canvas.drawLine(x1, y1, x2, y2, paint)
                 }
                 for (r in floatArrayOf(.12f, .43f, .49f, .86f, .94f, .985f)) {
-                    paint.strokeWidth = if (r == .49f || r == .86f) dp(2f).toFloat() else dp(1f).toFloat()
+                    paint.strokeWidth = if (r == .49f || r == .86f) dp(2).toFloat() else dp(1).toFloat()
                     canvas.drawCircle(cx, cy, radius * r, paint)
                 }
 
@@ -388,24 +388,24 @@ class MainActivity : ComponentActivity() {
                 val ex = cx - radius * .075f
                 val ey = cy - radius * .07f
                 paint.style = android.graphics.Paint.Style.STROKE
-                paint.strokeWidth = dp(4f).toFloat()
+                paint.strokeWidth = dp(4).toFloat()
                 paint.strokeCap = android.graphics.Paint.Cap.ROUND
                 paint.color = 0xFFCDD3D9.toInt()
-                paint.setShadowLayer(dp(5f).toFloat(), 0f, 0f, 0xAAFF3045.toInt())
+                paint.setShadowLayer(dp(5).toFloat(), 0f, 0f, 0xAAFF3045.toInt())
                 canvas.drawLine(sx, sy, ex, ey, paint)
                 paint.clearShadowLayer()
-                paint.strokeWidth = dp(1f).toFloat()
+                paint.strokeWidth = dp(1).toFloat()
                 paint.color = 0xFF6D747C.toInt()
                 for (i in 1..5) {
                     val t = i / 6f
-                    canvas.drawLine(sx + (ex - sx) * t, sy + (ey - sy) * t - dp(2f), sx + (ex - sx) * t, sy + (ey - sy) * t + dp(2f), paint)
+                    canvas.drawLine(sx + (ex - sx) * t, sy + (ey - sy) * t - dp(2), sx + (ex - sx) * t, sy + (ey - sy) * t + dp(2), paint)
                 }
                 paint.style = android.graphics.Paint.Style.FILL
                 paint.color = red
                 val flight = android.graphics.Path().apply {
-                    moveTo(sx - dp(12f), sy - dp(12f))
-                    lineTo(sx + dp(13f), sy - dp(4f))
-                    lineTo(sx + dp(5f), sy + dp(15f))
+                    moveTo(sx - dp(12), sy - dp(12))
+                    lineTo(sx + dp(13), sy - dp(4))
+                    lineTo(sx + dp(5), sy + dp(15))
                     close()
                 }
                 canvas.drawPath(flight, paint)
