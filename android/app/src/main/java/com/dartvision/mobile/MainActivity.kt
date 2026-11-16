@@ -232,21 +232,25 @@ class MainActivity : ComponentActivity() {
         header.addView(ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo); adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(52), dp(48))
+            layoutParams = LinearLayout.LayoutParams(dp(62), dp(58))
             contentDescription = "Logo DART VISION"
         })
         val brand = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val brandName = android.text.SpannableString("DART VISION")
-        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFFFF3045.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        brand.addView(TextView(this).apply { text = brandName; textSize = 21f; setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)); setTextColor(white) })
-        brand.addView(txt("SMART DARTS EXPERIENCE", 9f, 0xFFFF5263.toInt(), true))
+        brandName.setSpan(android.text.style.ForegroundColorSpan(0xFFFF263B.toInt()), 5, 11, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        brand.addView(TextView(this).apply {
+            text = brandName; textSize = 25f
+            setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
+            setTextColor(white)
+        })
+        brand.addView(txt("—  SMART DARTS EXPERIENCE  —", 9f, 0xFFFF5263.toInt(), true))
         header.addView(brand)
         header.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
         root.addView(header)
 
-        // Accueil premium DART VISION : cible en arrière-plan, accueil éditorial et action principale.
+        // Accueil DART VISION : composition inspirée de la maquette, sans bouton JOUER en doublon.
         val homeStage = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(-1, dp(485))
+            layoutParams = LinearLayout.LayoutParams(-1, dp(340))
             setBackgroundColor(0xFF08090D.toInt())
         }
         val artwork = object : View(this) {
@@ -313,43 +317,28 @@ class MainActivity : ComponentActivity() {
         val welcome = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), 0, dp(8), 0)
-            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(174) }
+            layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(112) }
         }
-        welcome.addView(txt("BIENVENUE !", 13f, 0xFFFF3045.toInt(), true))
-        welcome.addView(txt("Prêt à jouer ?", 31f, white, true).apply { setPadding(0, dp(5), 0, dp(1)) })
-        welcome.addView(txt("Entre dans la partie.", 19f, 0xFFB8BEC8.toInt()))
+        welcome.addView(txt("BIENVENUE !", 14f, 0xFFFF3045.toInt(), true))
+        welcome.addView(txt("Prêt à jouer ?", 30f, white, true).apply { setPadding(0, dp(5), 0, dp(1)) })
         homeStage.addView(welcome)
-        val play = Button(this).apply {
-            text = "▶   JOUER"
-            isAllCaps = false; textSize = 20f
-            setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
-            setTextColor(white)
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(0xFFFF263B.toInt(), 0xFFB90820.toInt())
-            ).apply { cornerRadius = dp(42).toFloat(); setStroke(dp(1), 0xFFFF6976.toInt()) }
-            elevation = dp(12).toFloat()
-            stateListAnimator = null
-            setOnClickListener { showPage("game"); showGameModes() }
-        }
-        homeStage.addView(play, FrameLayout.LayoutParams(-1, dp(76), Gravity.BOTTOM).apply {
-            setMargins(dp(18), 0, dp(18), dp(18))
-        })
         home.addView(homeStage)
 
-        // Navigation exclusivement verticale : chaque rubrique apparaît une seule fois sous JOUER.
+        // Les quatre rubriques principales sont accessibles directement, sans bouton JOUER en doublon.
         fun homeMenuItem(icon: String, title: String, subtitle: String, destination: String, action: (() -> Unit)? = null) {
             val item = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(dp(17), dp(13), dp(14), dp(13))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF111319.toInt())
-                    cornerRadius = dp(22).toFloat()
-                    setStroke(dp(1), 0xFFE32636.toInt())
+                background = android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(0xFFFF263B.toInt(), 0xFFB90820.toInt(), 0xFF850817.toInt())
+                ).apply {
+                    cornerRadius = dp(25).toFloat()
+                    setStroke(dp(2), 0xFFFF5968.toInt())
                 }
-                elevation = dp(4).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(82)).apply { setMargins(dp(2), dp(7), dp(2), dp(7)) }
+                elevation = dp(13).toFloat()
+                layoutParams = LinearLayout.LayoutParams(-1, dp(94)).apply { setMargins(dp(2), dp(8), dp(2), dp(8)) }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
@@ -361,12 +350,12 @@ class MainActivity : ComponentActivity() {
             }
             item.addView(TextView(this).apply {
                 text = icon; textSize = 28f; gravity = Gravity.CENTER
-                setTextColor(0xFFFF4052.toInt())
+                setTextColor(white)
                 typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
                 layoutParams = LinearLayout.LayoutParams(dp(55), -1)
             })
             item.addView(View(this).apply {
-                setBackgroundColor(0xFF6D252E.toInt())
+                setBackgroundColor(0xFFFFA0A8.toInt())
                 layoutParams = LinearLayout.LayoutParams(dp(1), dp(48)).apply { setMargins(dp(10), 0, dp(15), 0) }
             })
             val labels = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
@@ -375,7 +364,7 @@ class MainActivity : ComponentActivity() {
             item.addView(labels)
             item.addView(TextView(this).apply {
                 text = "›"; textSize = 32f; gravity = Gravity.CENTER
-                setTextColor(0xFFFF3045.toInt()); layoutParams = LinearLayout.LayoutParams(dp(22), -1)
+                setTextColor(white); layoutParams = LinearLayout.LayoutParams(dp(22), -1)
             })
             home.addView(item)
         }
