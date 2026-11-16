@@ -911,6 +911,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
     /**
      * Store account credentials in Android Keystore-backed encrypted preferences.
      * Migrate legacy preferences once, then remove the unencrypted copy.
