@@ -195,6 +195,7 @@ class MainActivity : ComponentActivity() {
         val playersPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val morePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val accountPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val discussionsPage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val updatePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         updatePageView = updatePage
         val hasAccountAtStart = getSharedPreferences("dart_vision_account", MODE_PRIVATE).getString("user_id", null) != null
@@ -206,8 +207,23 @@ class MainActivity : ComponentActivity() {
             playersPage.visibility = if (page == "players") View.VISIBLE else View.GONE
             morePage.visibility = if (page == "more") View.VISIBLE else View.GONE
             accountPage.visibility = if (page == "account") View.VISIBLE else View.GONE
+            discussionsPage.visibility = if (page == "discussions") View.VISIBLE else View.GONE
             updatePage.visibility = if (page == "update") View.VISIBLE else View.GONE
             bottomNavigationBar?.visibility = if (page == "game" && gameInProgress) View.GONE else View.VISIBLE
+            val enteringPage = when (page) {
+                "home" -> home
+                "game" -> gamePage
+                "players" -> playersPage
+                "more" -> morePage
+                "account" -> accountPage
+                "discussions" -> discussionsPage
+                "update" -> updatePage
+                else -> home
+            }
+            enteringPage.animate().cancel()
+            enteringPage.alpha = 0.0f
+            enteringPage.translationY = dp(10).toFloat()
+            enteringPage.animate().alpha(1.0f).translationY(0f).setDuration(220L).start()
             navButtons.forEach { (key, view) ->
                 val selected = key == page
                 view.alpha = if (selected) 1f else 0.58f
@@ -279,23 +295,15 @@ class MainActivity : ComponentActivity() {
         homeUpdateBanner?.addView(updateBannerAction)
         home.addView(homeUpdateBanner)
         home.addView(hero)
-        home.addView(txt("MENU PRINCIPAL", 11f, muted, true).apply { setPadding(dp(3), dp(4), 0, dp(7)) })
-        fun tile(title: String, sub: String, glyph: String, click: () -> Unit) {
-            val item = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(13), dp(10), dp(13), dp(10)) }
-            item.addView(txt(glyph, 25f, teal, true).apply { gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(dp(46), dp(46)) })
-            val copy = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
-            copy.addView(txt(title, 14f, white, true)); copy.addView(txt(sub, 10f, muted))
-            item.addView(copy); item.addView(txt("›", 25f, teal, true))
-            item.setOnClickListener { click() }; home.addView(item)
-        }
-        tile("Modes de jeu", "501, Cricket, Shanghai, entraînement", "◎") { showPage("game"); showGameModes() }
-        tile("Caméra & calibrage", "Cadre et calibre ta cible", "⌖") { showPage("more"); setCameraMode(true) }
-        tile("Joueurs & équipes", "Profils et participants", "♙") { showPage("players"); managePlayers() }
-        tile("Statistiques", "Performances et progression", "▥") { showGameStatistics() }
-        tile("Historique", "Retrouve tes dernières manches", "◷") { showTurnHistory() }
-        tile("Paramètres", "Application et mises à jour", "⚙") { showPage("more") }
+
         // L’inscription et la connexion disposent de leur propre onglet.
         accountPage.addView(buildAccountPanel())
+        discussionsPage.addView(txt("DISCUSSIONS", 20f, white, true))
+        discussionsPage.addView(txt("Retrouve bientôt ici tes échanges avec les autres joueurs.", 13f, muted))
+        val discussionCard = card()
+        discussionCard.addView(txt("Un espace pour partager tes parties, échanger des conseils et discuter avec tes amis.", 12f, white))
+        discussionCard.addView(txt("Les discussions seront activées dans une prochaine version.", 10f, teal, true))
+        discussionsPage.addView(discussionCard)
         updatePage.addView(txt("MISE À JOUR DART VISION", 20f, white, true))
         updatePage.addView(txt("Les mises à jour apparaissent ici uniquement lorsqu'une nouvelle version est réellement publiée.", 11f, muted))
         updateVersionLabel = txt("Vérification des mises à jour…", 13f, teal, true).apply { setPadding(0, dp(12), 0, dp(12)) }
@@ -416,7 +424,7 @@ class MainActivity : ComponentActivity() {
         roster.addView(playerActions); playersPage.addView(roster)
 
         // Outils
-        morePage.addView(txt("OUTILS & PARAMÈTRES", 20f, white, true))
+        morePage.addView(txt("PARAMÈTRES", 20f, white, true))
         morePage.addView(txt("Configure ton installation DART VISION.", 11f, muted))
         val cameraPanel = card()
         cameraPanel.addView(txt("CAMÉRA & CALIBRAGE", 13f, teal, true))
@@ -476,7 +484,7 @@ class MainActivity : ComponentActivity() {
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
 
-        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(updatePage)
+        root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         val bottom = LinearLayout(this).apply {
@@ -486,7 +494,7 @@ class MainActivity : ComponentActivity() {
         bottomNavigationBar = bottom
         fun nav(key: String, title: String, symbol: String) {
             val button = Button(this).apply {
-                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title == "JOUEURS") 8f else 10f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
+                text = symbol + "\n" + title; isAllCaps = false; textSize = if (title.length > 9) 7.5f else 9f; maxLines = 2; gravity = Gravity.CENTER; includeFontPadding = false; setTextColor(white)
                 minHeight = dp(54); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, dp(54), 1f).apply { setMargins(dp(3), 0, dp(3), 0) }
                 setOnClickListener { showPage(key) }
@@ -494,8 +502,7 @@ class MainActivity : ComponentActivity() {
             if (key == "update") { updateNavButton = button; button.visibility = View.GONE }
             navButtons.add(key to button); bottom.addView(button)
         }
-        nav("home", "ACCUEIL", "⌂"); nav("game", "JOUER", "◎"); nav("players", "JOUEURS", "♙"); nav("more", "PLUS", "•••")
-        nav("account", if (hasAccountAtStart) "COMPTE" else "INSCRIPTION", "♙")
+        nav("home", "ACCUEIL", "⌂"); nav("game", "JEUX", "◎"); nav("account", "PROFIL", "♙"); nav("discussions", "DISCUSSIONS", "☏"); nav("more", "PARAMÈTRES", "⚙")
         nav("update", "MISE À JOUR", "⬇")
         showPage(if (hasAccountAtStart) "home" else "account")
         shell.addView(bottom, LinearLayout.LayoutParams(-1, dp(68)))
