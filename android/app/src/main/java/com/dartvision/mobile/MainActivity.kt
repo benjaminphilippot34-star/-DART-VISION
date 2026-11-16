@@ -723,8 +723,10 @@ class MainActivity : ComponentActivity() {
         // Android 15+ dessine l'application derrière la barre système :
         // réserver sa hauteur sous la navigation pour garder les onglets entièrement visibles.
         ViewCompat.setOnApplyWindowInsetsListener(shell) { view, insets ->
+            val statusInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
             val navigationInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            view.setPadding(0, 0, 0, navigationInset)
+            // Keep the app header below Android's status bar and the content above navigation.
+            view.setPadding(0, statusInset, 0, navigationInset)
             insets
         }
         ViewCompat.requestApplyInsets(shell)
