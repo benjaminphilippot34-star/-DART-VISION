@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
     private var updatePageView: LinearLayout? = null
     private var homeUpdateBanner: LinearLayout? = null
     private var updateCheckRunning = false
+    private var awaitingInstallPermission = false
     private var gameInProgress = false
     private var currentPage = "home"
     private var bottomNavigationBar: View? = null
@@ -99,7 +100,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        checkForUpdates(silent = true)
+        val pendingApk = downloadedUpdate
+        if (awaitingInstallPermission && pendingApk != null &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && packageManager.canRequestPackageInstalls()) {
+            awaitingInstallPermission = false
+            launchApkInstaller(pendingApk)
+        } else {
+            checkForUpdates(silent = true)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -2467,10 +2475,11 @@ class MainActivity : ComponentActivity() {
 
     private fun launchApkInstaller(apk: File) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !packageManager.canRequestPackageInstalls()) {
+            awaitingInstallPermission = true
             AlertDialog.Builder(this)
                 .setTitle("Autoriser l'installation")
-                .setMessage("Android doit autoriser DART VISION à installer les mises à jour téléchargées.")
-                .setNegativeButton("Annuler", null)
+                .setMessage("Autorise DART VISION à installer sa mise à jour. Le téléchargement est déjà terminé : l'installation reprendra automatiquement à ton retour.")
+                .setNegativeButton("Plus tard") { _, _ -> awaitingInstallPermission = false }
                 .setPositiveButton("Ouvrir les paramètres") { _, _ ->
                     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))
                     startActivity(intent)
