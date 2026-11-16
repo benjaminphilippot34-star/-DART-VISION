@@ -41,6 +41,49 @@ import java.util.concurrent.atomic.AtomicReference
 
 data class Player(var name: String, var score: Int)
 
+/** Original illustrated DART VISION avatar portraits, drawn locally without remote assets. */
+private class DartAvatarPortraitView(context: android.content.Context, private val style: Int) : View(context) {
+    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    private val palettes = arrayOf(
+        intArrayOf(0xFF182D43.toInt(), 0xFF20D9D2.toInt()),
+        intArrayOf(0xFF24172F.toInt(), 0xFFFF4058.toInt()),
+        intArrayOf(0xFF102D35.toInt(), 0xFF31E6C4.toInt()),
+        intArrayOf(0xFF20263B.toInt(), 0xFF5AA9FF.toInt()),
+        intArrayOf(0xFF332018.toInt(), 0xFFFF914D.toInt()),
+        intArrayOf(0xFF28233A.toInt(), 0xFFFFD166.toInt())
+    )
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        val w = width.toFloat(); val h = height.toFloat()
+        val cx = w / 2f; val cy = h / 2f; val radius = minOf(w, h) * .47f
+        val colors = palettes[style % palettes.size]
+        paint.shader = android.graphics.LinearGradient(0f, 0f, w, h, colors[0], 0xFF080E17.toInt(), android.graphics.Shader.TileMode.CLAMP)
+        canvas.drawCircle(cx, cy, radius, paint)
+        paint.shader = null
+        paint.style = android.graphics.Paint.Style.STROKE
+        paint.strokeWidth = 3f
+        paint.color = colors[1]
+        canvas.drawCircle(cx, cy, radius - 1.5f, paint)
+        paint.style = android.graphics.Paint.Style.FILL
+        // Hood / hair silhouette
+        paint.color = 0xFF050910.toInt()
+        canvas.drawOval(cx-radius*.66f, cy-radius*.66f, cx+radius*.66f, cy+radius*.85f, paint)
+        // Face and neck
+        paint.color = when (style % 4) { 0 -> 0xFFB97855.toInt(); 1 -> 0xFF8D5B48.toInt(); 2 -> 0xFFD69A75.toInt(); else -> 0xFF9D6B55.toInt() }
+        canvas.drawOval(cx-radius*.39f, cy-radius*.45f, cx+radius*.39f, cy+radius*.49f, paint)
+        canvas.drawRect(cx-radius*.16f, cy+radius*.30f, cx+radius*.16f, cy+radius*.62f, paint)
+        // Visor / mask for a competitive illustrated look
+        paint.color = if (style % 3 == 0) 0xFF101B28.toInt() else colors[1]
+        canvas.drawRoundRect(cx-radius*.43f, cy-radius*.10f, cx+radius*.43f, cy+radius*.19f, radius*.12f, radius*.12f, paint)
+        paint.color = 0xFFEAFBFF.toInt()
+        canvas.drawCircle(cx-radius*.19f, cy+radius*.015f, radius*.045f, paint)
+        canvas.drawCircle(cx+radius*.19f, cy+radius*.015f, radius*.045f, paint)
+        paint.color = colors[1]
+        paint.strokeWidth = radius*.055f
+        canvas.drawLine(cx-radius*.22f, cy+radius*.32f, cx+radius*.22f, cy+radius*.32f, paint)
+    }
+}
+
 class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
@@ -816,13 +859,8 @@ class MainActivity : ComponentActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }, 741)
         }, LinearLayout.LayoutParams(0, dp(39), 1f).apply { rightMargin = dp(5) })
-        avatarActions.addView(actionButton("Avatar", false) {
-            val opts = arrayOf("🎯","🙂","😎","🔥","⚡","🦊","🐺","👑")
-            AlertDialog.Builder(this@MainActivity).setTitle("Choisis ton avatar").setItems(opts) { _, i ->
-                accountPreferences().edit()
-                    .putString("avatar_emoji", opts[i]).remove("avatar_uri").apply()
-                refreshProfileAvatar()
-            }.show()
+        avatarActions.addView(actionButton("Choisir un avatar", false) {
+            showAvatarGallery()
         }, LinearLayout.LayoutParams(0, dp(39), 1f))
         avatarInfo.addView(avatarActions)
         avatarCard.addView(avatarInfo, LinearLayout.LayoutParams(0, -2, 1f))
@@ -880,6 +918,108 @@ class MainActivity : ComponentActivity() {
         }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { leftMargin = dp(5) })
         panel.addView(phoneActions)
         return panel
+    }
+
+    private fun showAvatarGallery() {
+        val options = listOf(
+            "ace", "shadow", "viper", "wolf", "fox", "royal",
+            "cyber", "bull", "phantom", "storm", "raven", "blaze"
+        )
+        val labels = listOf(
+            "ACE", "SHADOW", "VIPER", "WOLF", "FOX", "ROYAL",
+            "CYBER", "BULL", "PHANTOM", "STORM", "RAVEN", "BLAZE"
+        )
+        val selected = accountPreferences().getString("avatar_emoji", "ace") ?: "ace"
+        val grid = android.widget.GridLayout(this).apply {
+            columnCount = 3
+            setPadding(dp(12), dp(8), dp(12), dp(12))
+            useDefaultMargins = false
+        }
+        val dialog = android.app.Dialog(this)
+        val shell = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(16), dp(16), dp(16), dp(14))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF111D29.toInt(), 0xFF070D14.toInt())
+            ).apply {
+                cornerRadius = dp(22).toFloat()
+                setStroke(dp(1), 0xFF20D9D2.toInt())
+            }
+        }
+        shell.addView(TextView(this).apply {
+            text = "CHOISIS TON AVATAR"
+            textSize = 19f
+            gravity = Gravity.CENTER
+            letterSpacing = .08f
+            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD)
+            setTextColor(android.graphics.Color.WHITE)
+            setPadding(0, dp(4), 0, dp(4))
+        })
+        shell.addView(TextView(this).apply {
+            text = "PORTRAITS EXCLUSIFS  •  DART VISION"
+            textSize = 9f
+            gravity = Gravity.CENTER
+            letterSpacing = .12f
+            setTextColor(0xFF27E4DE.toInt())
+            setPadding(0, 0, 0, dp(10))
+        })
+        options.forEachIndexed { index, key ->
+            val tile = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(dp(4), dp(8), dp(4), dp(7))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(if (key == selected) 0xFF1B3039.toInt() else 0xFF101923.toInt())
+                    cornerRadius = dp(14).toFloat()
+                    setStroke(dp(if (key == selected) 2 else 1),
+                        if (key == selected) 0xFF20E5DE.toInt() else 0xFF344956.toInt())
+                }
+                isClickable = true
+                isFocusable = true
+                layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = dp(118)
+                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                    setMargins(dp(4), dp(4), dp(4), dp(4))
+                }
+            }
+            tile.addView(DartAvatarPortraitView(this, index).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(66), dp(66))
+            })
+            tile.addView(TextView(this).apply {
+                text = labels[index]
+                textSize = 9f
+                gravity = Gravity.CENTER
+                letterSpacing = .06f
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+                setTextColor(if (key == selected) 0xFF35E7E0.toInt() else 0xFFEAF1F5.toInt())
+                setPadding(0, dp(5), 0, 0)
+            })
+            tile.setOnClickListener {
+                accountPreferences().edit().putString("avatar_emoji", key).remove("avatar_uri").apply()
+                refreshProfileAvatar()
+                dialog.dismiss()
+            }
+            grid.addView(tile)
+        }
+        shell.addView(ScrollView(this).apply { addView(grid) },
+            LinearLayout.LayoutParams(-1, 0, 1f))
+        shell.addView(TextView(this).apply {
+            text = "ANNULER"
+            textSize = 11f
+            gravity = Gravity.CENTER
+            letterSpacing = .12f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTextColor(0xFFFF4058.toInt())
+            setPadding(0, dp(12), 0, dp(4))
+            setOnClickListener { dialog.dismiss() }
+        })
+        dialog.setContentView(shell)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * .92f).toInt(), dp(560))
     }
 
     private fun refreshProfileAvatar() {
