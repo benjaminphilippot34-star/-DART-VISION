@@ -901,7 +901,7 @@ class MainActivity : ComponentActivity() {
             setPadding(0, dp(4), 0, dp(7))
         })
         val avatarActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        avatarActions.addView(actionButton("Photo", false) {
+        avatarActions.addView(actionButton("Ajouter une photo", false) {
             startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "image/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -913,6 +913,11 @@ class MainActivity : ComponentActivity() {
         }, LinearLayout.LayoutParams(0, dp(39), 1f))
         avatarInfo.addView(avatarActions)
         avatarCard.addView(avatarInfo, LinearLayout.LayoutParams(0, -2, 1f))
+        avatarCard.addView(DartNeonArtworkView(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(58), dp(58))
+            alpha = .92f
+            contentDescription = "Cible de fléchettes lumineuse"
+        })
         panel.addView(avatarCard)
         refreshProfileAvatar()
 
