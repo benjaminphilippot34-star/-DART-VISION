@@ -464,45 +464,14 @@ class MainActivity : ComponentActivity() {
         })
         header.addView(menuAction)
 
-        val brand = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            layoutParams = android.widget.FrameLayout.LayoutParams(-2, -1, Gravity.CENTER)
-            setPadding(dp(4), 0, dp(4), 0)
-        }
-        brand.addView(ImageView(this).apply {
+        // Logo officiel agrandi : il remplace l'ancien pictogramme et le texte séparé.
+        val brand = ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo)
             scaleType = ImageView.ScaleType.FIT_CENTER
-            layoutParams = LinearLayout.LayoutParams(dp(45), dp(45)).apply {
-                rightMargin = dp(5)
-            }
-            contentDescription = "Logo original DART VISION"
-        })
-        val brandText = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_VERTICAL
+            adjustViewBounds = true
+            contentDescription = "Logo officiel DART VISION"
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(220), dp(58), Gravity.CENTER)
         }
-        brandText.addView(TextView(this).apply {
-            text = android.text.SpannableString("DART VISION").apply {
-                setSpan(android.text.style.ForegroundColorSpan(0xFF101820.toInt()), 0, 5, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                setSpan(android.text.style.ForegroundColorSpan(0xFF00AFC0.toInt()), 5, length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-            textSize = 21f
-            maxLines = 1
-            includeFontPadding = false
-            setTextColor(0xFF101820.toInt())
-            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
-        })
-        brandText.addView(TextView(this).apply {
-            text = "SMART DARTS EXPERIENCE"
-            textSize = 7.5f
-            maxLines = 1
-            includeFontPadding = false
-            letterSpacing = .025f
-            setTextColor(0xFF26383B.toInt())
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-        })
-        brand.addView(brandText)
         header.addView(brand)
 
         val notificationAction = android.widget.FrameLayout(this).apply {
