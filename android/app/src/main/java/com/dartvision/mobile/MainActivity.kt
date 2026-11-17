@@ -2362,25 +2362,14 @@ class MainActivity : ComponentActivity() {
         }
 
         val allModes = DartCounterModeCatalog.default.modes
-        addFolder("Partie locale", "PARTIE LOCALE", "Jouer sur cet appareil ou en réseau local", 0, 0xFFFF394A.toInt()) {
-            showModeFolder("PARTIE LOCALE", allModes.filter {
-                it.category == GameModeCategory.CLASSIC || it.category == GameModeCategory.PARTY
-            })
+        addFolder("Match", "JOUER UN MATCH", "Lancer une partie classique : 301, 501 et variantes", 0, 0xFFFF394A.toInt()) {
+            showModeFolder("JOUER UN MATCH", listOf(DartGameMode.X01))
         }
-        addFolder("Partie en ligne", "PARTIE EN LIGNE", "Défier des joueurs à distance", 1, 0xFF00E5F2.toInt()) {
-            showModeFolderUnavailable(
-                "PARTIE EN LIGNE",
-                "Le dossier est prêt. Les salons, invitations et matchs à distance seront activés lorsque le service multijoueur en ligne sera finalisé."
-            )
+        addFolder("Cricket", "JOUER AU CRICKET", "Retrouver le mode Cricket et ses règles", 2, 0xFF00E5F2.toInt()) {
+            showModeFolder("JOUER AU CRICKET", listOf(DartGameMode.CRICKET))
         }
-        addFolder("Entraînement", "ENTRAÎNEMENT", "Travailler les simples, doubles et finishes", 2, 0xFF00E5F2.toInt()) {
-            showModeFolder("ENTRAÎNEMENT", allModes.filter { it.category == GameModeCategory.TRAINING })
-        }
-        addFolder("Mode classé", "MODE CLASSÉ", "Jouer pour progresser dans le classement", 3, 0xFFFFC83D.toInt()) {
-            showModeFolderUnavailable(
-                "MODE CLASSÉ",
-                "Le mode classé sera activé avec le système de classement et de validation des résultats. Aucun rang fictif ne sera affiché."
-            )
+        addFolder("Jeux de groupe", "JEUX DE GROUPE", "Des modes multijoueurs à partager sur le même appareil", 3, 0xFFFFC83D.toInt()) {
+            showModeFolder("JEUX DE GROUPE", allModes.filter { it.category == GameModeCategory.PARTY })
         }
         dialog.show()
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
