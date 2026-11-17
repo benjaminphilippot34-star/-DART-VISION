@@ -402,6 +402,7 @@ class MainActivity : ComponentActivity() {
         val updatePage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         updatePageView = updatePage
         val hasAccountAtStart = accountPreferences().getString("user_id", null) != null
+        val navItems = mutableMapOf<String, View>()
         fun showPage(page: String) {
             currentPage = page
             home.visibility = if (page == "home") View.VISIBLE else View.GONE
@@ -1016,7 +1017,6 @@ class MainActivity : ComponentActivity() {
         root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
 
         // Navigation principale : même ordre et mêmes intitulés que la maquette validée.
-        val navItems = mutableMapOf<String, View>()
         val navBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
