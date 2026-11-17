@@ -554,10 +554,10 @@ class MainActivity : ComponentActivity() {
                 setOnClickListener { click() }
             })
         }
-        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFF031016.toInt()) }
+        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFFC8E7E2.toInt()) }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFF031016.toInt())
+            setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFFC8E7E2.toInt())
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -706,8 +706,8 @@ class MainActivity : ComponentActivity() {
         })
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
-        home.setBackgroundColor(0xFF031016.toInt())
-        home.setPadding(dp(8), dp(2), dp(8), dp(5))
+        home.setBackgroundColor(0xFFC8E7E2.toInt())
+        home.setPadding(dp(12), dp(5), dp(12), dp(8))
 
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -737,9 +737,9 @@ class MainActivity : ComponentActivity() {
         }
         profileInfo.addView(TextView(this).apply {
             text = accountPreferences().getString("display_name", "Benjamin Philippot")
-            textSize = 19f
+            textSize = 18f
             maxLines = 1
-            setTextColor(0xFFF4FCFF.toInt())
+            setTextColor(0xFF07151B.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
         profileInfo.addView(LinearLayout(this@MainActivity).apply {
@@ -749,7 +749,7 @@ class MainActivity : ComponentActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "▮▮▮  1 245"
                 textSize = 17f
-                setTextColor(0xFFF5F8FF.toInt())
+                setTextColor(0xFF07151B.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
             })
             addView(TextView(this@MainActivity).apply {
@@ -763,7 +763,7 @@ class MainActivity : ComponentActivity() {
         profileInfo.addView(TextView(this).apply {
             text = "●  10 836 en ligne"
             textSize = 12f
-            setTextColor(0xFF39F59A.toInt())
+            setTextColor(0xFFF4FCFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER
             setPadding(dp(14), dp(4), dp(14), dp(4))
@@ -832,14 +832,14 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
-                textSize = 21f
+                textSize = 22f
                 gravity = Gravity.START
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
-                textSize = 12.5f
+                textSize = 13.5f
                 gravity = Gravity.START
                 setTextColor(0xFFF1F7FA.toInt())
                 setPadding(0, dp(4), 0, 0)
@@ -897,13 +897,14 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = title
-                textSize = 22f
+                textSize = 23f
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = subtitle
-                textSize = 13f
+                textSize = 13.5f
+                maxLines = 3
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
