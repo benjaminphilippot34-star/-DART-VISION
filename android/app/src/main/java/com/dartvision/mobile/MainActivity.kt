@@ -875,10 +875,14 @@ class MainActivity : ComponentActivity() {
                 setPadding(0, dp(4), 0, 0)
             })
             tile.addView(labels)
-            tile.addView(DartHomeArtworkView(this, if (title == "PARTIE LOCALE") 0 else 1).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(72), dp(78))
-                contentDescription = title
-            })
+            // La tuile locale reste volontairement sans manette : la flèche circulaire
+            // à droite suffit à signaler l'accès. La tuile en ligne conserve son globe.
+            if (title == "PARTIE EN LIGNE") {
+                tile.addView(DartHomeArtworkView(this, 1).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(72), dp(78))
+                    contentDescription = "Globe — partie en ligne"
+                })
+            }
             tile.addView(TextView(this).apply {
                 text = "›"; textSize = 27f; gravity = Gravity.CENTER
                 setTextColor(0xFFFFFFFF.toInt())
