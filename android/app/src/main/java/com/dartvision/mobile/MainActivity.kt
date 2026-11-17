@@ -2239,60 +2239,121 @@ class MainActivity : ComponentActivity() {
 
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val accent = 0xFFFF3045.toInt()
-        val ink = 0xFF173331.toInt()
-        val muted = 0xFF687F7D.toInt()
+        val dialog = android.app.Dialog(this)
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(16), dp(17), dp(16), dp(12))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                intArrayOf(0xFF102B35.toInt(), 0xFF06151D.toInt(), 0xFF031016.toInt())
+            ).apply {
+                cornerRadius = dp(24).toFloat()
+                setStroke(dp(2), 0xFF00DDE8.toInt())
+            }
+            elevation = dp(12).toFloat()
+        }
+        panel.addView(TextView(this).apply {
+            text = "CHOISIR UN UNIVERS"
+            textSize = 21f
+            includeFontPadding = false
+            setTextColor(0xFFF4FCFF.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
+        })
+        panel.addView(TextView(this).apply {
+            text = "Retrouve chaque type de partie dans son dossier."
+            textSize = 13f
+            setTextColor(0xFFD7E8EC.toInt())
+            setPadding(0, dp(6), 0, dp(12))
+        })
+        panel.addView(View(this).apply {
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xFFFF3045.toInt(), 0xFF00EAF4.toInt())
+            )
+            layoutParams = LinearLayout.LayoutParams(-1, dp(2)).apply { bottomMargin = dp(10) }
+        })
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
-            setPadding(dp(12), dp(8), dp(12), dp(8))
             useDefaultMargins = false
         }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("CHOISIR UN UNIVERS")
-            .setMessage("Retrouve chaque type de partie dans son dossier.")
-            .setView(ScrollView(this).apply { addView(grid) })
-            .setNegativeButton("FERMER", null)
-            .create()
+        panel.addView(ScrollView(this).apply {
+            isFillViewport = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            addView(grid)
+        }, LinearLayout.LayoutParams(-1, -2, 1f))
+        val footer = TextView(this).apply {
+            text = "FERMER"
+            textSize = 14f
+            gravity = Gravity.CENTER
+            setTextColor(0xFFFF5264.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(dp(18), dp(11), dp(18), dp(8))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { dialog.dismiss() }
+        }
+        panel.addView(footer, LinearLayout.LayoutParams(-1, -2).apply {
+            topMargin = dp(5)
+            gravity = Gravity.END
+        })
+        dialog.setContentView(panel)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
 
-        fun addFolder(icon: String, title: String, subtitle: String, action: () -> Unit) {
+        fun addFolder(icon: String, title: String, subtitle: String, artworkKind: Int, accent: Int, action: () -> Unit) {
             val tile = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
+                orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(16), dp(15), dp(14), dp(15))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF172630.toInt())
-                    cornerRadius = dp(20).toFloat()
-                    setStroke(dp(1), 0xFF1D5960.toInt())
+                setPadding(dp(9), dp(10), dp(8), dp(10))
+                background = android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                    when (title) {
+                        "PARTIE LOCALE" -> intArrayOf(0xFFE92335.toInt(), 0xFF8E1425.toInt(), 0xFF170D17.toInt())
+                        "MODE CLASSÉ" -> intArrayOf(0xFF725019.toInt(), 0xFF30220F.toInt(), 0xFF101820.toInt())
+                        else -> intArrayOf(0xFF00AAB8.toInt(), 0xFF07515E.toInt(), 0xFF07151D.toInt())
+                    }
+                ).apply {
+                    cornerRadius = dp(19).toFloat()
+                    setStroke(dp(2), accent)
                 }
+                elevation = dp(7).toFloat()
                 isClickable = true
                 isFocusable = true
-                elevation = dp(3).toFloat()
+                minimumHeight = dp(116)
                 layoutParams = android.widget.GridLayout.LayoutParams().apply {
                     width = 0
-                    height = dp(142)
+                    height = dp(122)
                     columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(dp(5), dp(5), dp(5), dp(5))
+                    setMargins(dp(4), dp(4), dp(4), dp(7))
                 }
             }
-            tile.addView(TextView(this).apply {
-                text = icon
-                textSize = 27f
-                setTextColor(accent)
+            tile.addView(DartHomeArtworkView(this, artworkKind).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(42), dp(54))
+                contentDescription = icon
+            })
+            val labels = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_VERTICAL
-            })
-            tile.addView(TextView(this).apply {
+                setPadding(dp(7), 0, 0, 0)
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            labels.addView(TextView(this).apply {
                 text = title
-                textSize = 15f
-                setTextColor(ink)
-                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
-                setPadding(0, dp(5), 0, dp(3))
+                textSize = 13f
+                includeFontPadding = false
+                maxLines = 2
+                setTextColor(0xFFFFFFFF.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
-            tile.addView(TextView(this).apply {
+            labels.addView(TextView(this).apply {
                 text = subtitle
                 textSize = 10f
-                setTextColor(muted)
-                maxLines = 2
+                includeFontPadding = false
+                maxLines = 3
+                setTextColor(0xFFEAF4F7.toInt())
+                setPadding(0, dp(5), 0, 0)
             })
+            tile.addView(labels)
             tile.setOnClickListener {
                 dialog.dismiss()
                 action()
@@ -2301,27 +2362,29 @@ class MainActivity : ComponentActivity() {
         }
 
         val allModes = DartCounterModeCatalog.default.modes
-        addFolder("⌂", "PARTIE LOCALE", "Jouer sur cet appareil ou en réseau local") {
+        addFolder("Partie locale", "PARTIE LOCALE", "Jouer sur cet appareil ou en réseau local", 0, 0xFFFF394A.toInt()) {
             showModeFolder("PARTIE LOCALE", allModes.filter {
                 it.category == GameModeCategory.CLASSIC || it.category == GameModeCategory.PARTY
             })
         }
-        addFolder("◎", "PARTIE EN LIGNE", "Défier des joueurs à distance") {
+        addFolder("Partie en ligne", "PARTIE EN LIGNE", "Défier des joueurs à distance", 1, 0xFF00E5F2.toInt()) {
             showModeFolderUnavailable(
                 "PARTIE EN LIGNE",
                 "Le dossier est prêt. Les salons, invitations et matchs à distance seront activés lorsque le service multijoueur en ligne sera finalisé."
             )
         }
-        addFolder("🎯", "ENTRAÎNEMENT", "Travailler les simples, doubles et finishes") {
+        addFolder("Entraînement", "ENTRAÎNEMENT", "Travailler les simples, doubles et finishes", 2, 0xFF00E5F2.toInt()) {
             showModeFolder("ENTRAÎNEMENT", allModes.filter { it.category == GameModeCategory.TRAINING })
         }
-        addFolder("🏆", "MODE CLASSÉ", "Jouer pour progresser dans le classement") {
+        addFolder("Mode classé", "MODE CLASSÉ", "Jouer pour progresser dans le classement", 3, 0xFFFFC83D.toInt()) {
             showModeFolderUnavailable(
                 "MODE CLASSÉ",
                 "Le mode classé sera activé avec le système de classement et de validation des résultats. Aucun rang fictif ne sera affiché."
             )
         }
         dialog.show()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.94f).toInt(), -2)
     }
 
     private fun showModeFolderUnavailable(title: String, message: String) {
