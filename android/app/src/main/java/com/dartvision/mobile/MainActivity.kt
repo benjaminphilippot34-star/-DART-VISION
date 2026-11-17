@@ -595,7 +595,7 @@ class MainActivity : ComponentActivity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(226), dp(98), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(276), dp(104), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -667,12 +667,13 @@ class MainActivity : ComponentActivity() {
                 setStroke(dp(2), 0xFF00EAF4.toInt())
             }
             elevation = dp(8).toFloat()
-            layoutParams = LinearLayout.LayoutParams(-1, dp(104)).apply {
-                setMargins(dp(2), dp(4), dp(2), dp(11))
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                setMargins(dp(2), dp(4), dp(2), dp(9))
+                minimumHeight = dp(96)
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(90), dp(90))
+            layoutParams = LinearLayout.LayoutParams(dp(76), dp(76))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -683,7 +684,7 @@ class MainActivity : ComponentActivity() {
         }
         profileInfo.addView(TextView(this).apply {
             text = accountPreferences().getString("display_name", "Benjamin Philippot")
-            textSize = 19f
+            textSize = 17.5f
             maxLines = 1
             setTextColor(0xFFF4FCFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
@@ -745,8 +746,9 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(128), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
+                    minimumHeight = dp(122)
                 }
                 setOnClickListener { action() }
             }
@@ -757,22 +759,38 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
-                textSize = 21f
+                textSize = 19f
+                includeFontPadding = false
                 gravity = Gravity.START
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
-                textSize = 12.5f
+                textSize = 11.5f
+                includeFontPadding = false
                 gravity = Gravity.START
                 setTextColor(0xFFF1F7FA.toInt())
                 setPadding(0, dp(4), 0, 0)
             })
             tile.addView(labels)
             tile.addView(DartHomeArtworkView(this, if (title == "PARTIE LOCALE") 0 else 1).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(82), dp(88))
+                layoutParams = LinearLayout.LayoutParams(dp(54), dp(68))
                 contentDescription = title
+            })
+            tile.addView(TextView(this).apply {
+                text = "›"
+                textSize = 25f
+                gravity = Gravity.CENTER
+                includeFontPadding = false
+                setTextColor(0xFFFFFFFF.toInt())
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(0x22000000)
+                    setStroke(dp(1), 0xDFFFFFFF.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(dp(28), dp(28)).apply { leftMargin = dp(2) }
+                contentDescription = "Ouvrir $title"
             })
             primaryMenuRow.addView(tile)
         }
@@ -803,8 +821,9 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(84)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
+                    minimumHeight = dp(78)
                 }
                 isClickable = true
                 isFocusable = true
@@ -812,7 +831,7 @@ class MainActivity : ComponentActivity() {
             }
             val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
             row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(64), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(52), -1)
                 contentDescription = title
             })
             val labels = LinearLayout(this).apply {
@@ -822,19 +841,21 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = title
-                textSize = 22f
+                textSize = 19f
+                includeFontPadding = false
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = subtitle
-                textSize = 13f
+                textSize = 12f
+                includeFontPadding = false
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
             row.addView(labels)
             row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(100), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(72), -1)
                 contentDescription = "Illustration $title"
             })
             row.addView(TextView(this).apply {
@@ -866,7 +887,7 @@ class MainActivity : ComponentActivity() {
         val quickLinks = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            setPadding(0, dp(10), 0, dp(8))
+            setPadding(0, dp(4), 0, dp(4))
         }
         fun quick(label: String, icon: String, action: () -> Unit) {
             val b = LinearLayout(this).apply {
@@ -897,6 +918,7 @@ class MainActivity : ComponentActivity() {
             showInsightScreen("SUCCÈS", "TES OBJECTIFS DART VISION", emptyList(),
                 listOf("Progression" to "Tes performances et tes réussites apparaîtront ici."))
         }
+        quickLinks.visibility = View.GONE // Les raccourcis sont accessibles depuis la navigation et le menu.
         home.addView(quickLinks)
 
         homeUpdateBanner = LinearLayout(this).apply {
