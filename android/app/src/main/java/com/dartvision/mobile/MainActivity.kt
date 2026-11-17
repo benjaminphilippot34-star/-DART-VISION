@@ -347,11 +347,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFFE8F5F2.toInt()
-        val panelColor = 0xFFFFFFFF.toInt()
-        val teal = 0xFF079BA5.toInt()
-        val white = 0xFF173331.toInt()
-        val muted = 0xFF687F7D.toInt()
+        val bg = 0xFF06131A.toInt()
+        val panelColor = 0xFF0A2029.toInt()
+        val teal = 0xFF00E5F2.toInt()
+        val white = 0xFFF2FBFF.toInt()
+        val muted = 0xFF9BB7BE.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -412,6 +412,11 @@ class MainActivity : ComponentActivity() {
             discussionsPage.visibility = if (page == "discussions") View.VISIBLE else View.GONE
             updatePage.visibility = if (page == "update") View.VISIBLE else View.GONE
             bottomNavigationBar?.visibility = if (page == "game" && gameInProgress) View.GONE else View.VISIBLE
+            navItems["home"]?.let { v ->
+                v.background = if (page == "home") android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF092B35.toInt()); cornerRadius = dp(13).toFloat(); setStroke(dp(1), 0xFF00E5F2.toInt())
+                } else android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            }
             val enteringPage = when (page) {
                 "home" -> home
                 "game" -> gamePage
@@ -449,7 +454,7 @@ class MainActivity : ComponentActivity() {
             textSize = 27f
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setTextColor(0xFF101820.toInt())
+            setTextColor(0xFFF2FBFF.toInt())
             layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
         menuAction.addView(View(this).apply {
@@ -511,120 +516,117 @@ class MainActivity : ComponentActivity() {
             }
         })
 
-        // ÉCRAN 1 — Accueil fidèle à la maquette officielle.
-        val hero = android.widget.FrameLayout(this).apply {
-            clipChildren = false
-            clipToPadding = false
-            layoutParams = LinearLayout.LayoutParams(-1, dp(216)).apply {
-                setMargins(0, dp(2), 0, dp(8))
+        // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
+        home.setBackgroundColor(bg)
+        home.setPadding(dp(4), dp(4), dp(4), dp(6))
+
+        val profileStrip = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(9), dp(10), dp(9))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF0B2029.toInt())
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), 0xFF00DDEB.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                setMargins(dp(2), dp(7), dp(2), dp(12))
             }
         }
-        hero.addView(DartboardPreview(this).apply {
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(184), dp(184), Gravity.CENTER_VERTICAL or Gravity.START).apply {
-                leftMargin = dp(-24)
-            }
-            contentDescription = "Cible de fléchettes détaillée"
-            elevation = dp(10).toFloat()
+        profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(76), dp(76))
+            contentDescription = "Avatar du joueur"
         })
-        val heroBrand = LinearLayout(this).apply {
+        val profileInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            layoutParams = android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.CENTER_VERTICAL).apply {
-                leftMargin = dp(104)
-                rightMargin = dp(2)
-            }
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(11), 0, dp(4), 0)
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
         }
-        heroBrand.addView(TextView(this).apply {
-            text = "D"
-            textSize = 76f
-            gravity = Gravity.CENTER
-            includeFontPadding = false
-            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF079BA5.toInt())
-            setShadowLayer(dp(12).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(78))
-        })
-        heroBrand.addView(TextView(this).apply {
-            text = android.text.SpannableString("DART VISION").apply {
-                setSpan(android.text.style.ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 5, 0)
-                setSpan(android.text.style.ForegroundColorSpan(0xFF00F0FF.toInt()), 5, length, 0)
-            }
-            textSize = 25f
-            gravity = Gravity.CENTER
+        profileInfo.addView(TextView(this).apply {
+            text = accountPreferences().getString("display_name", "Joueur DART VISION")
+            textSize = 16f
             maxLines = 1
-            setSingleLine(true)
-            setTextColor(white)
-            typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
-            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
+            setTextColor(0xFFF4FCFF.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
-        heroBrand.addView(TextView(this).apply {
-            text = "SMART DARTS EXPERIENCE"
-            textSize = 8.5f
-            gravity = Gravity.CENTER
-            letterSpacing = .08f
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF079BA5.toInt())
-            setPadding(0, dp(2), 0, dp(7))
+        profileInfo.addView(TextView(this).apply {
+            text = "NIVEAU 1   •   1 245 XP   ★"
+            textSize = 13f
+            setTextColor(0xFFFFD34E.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+            setPadding(0, dp(3), 0, dp(4))
         })
-        heroBrand.addView(TextView(this).apply {
-            text = "LA PRÉCISION  •  LE JEU\nLA PERFORMANCE"
+        profileInfo.addView(TextView(this).apply {
+            text = "10 836 EN LIGNE"
+            textSize = 10f
+            setTextColor(0xFF32E58C.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+        })
+        profileStrip.addView(profileInfo)
+        val profileButton = TextView(this).apply {
+            text = "MON\nPROFIL"
             textSize = 10f
             gravity = Gravity.CENTER
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF173331.toInt())
-        })
-        hero.addView(heroBrand)
-        home.addView(hero)
-
-        val categoryGrid = android.widget.GridLayout(this).apply {
-            columnCount = 2
-            useDefaultMargins = false
-            setPadding(0, 0, 0, dp(5))
+            setTextColor(0xFFFFFFFF.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(dp(12), dp(9), dp(12), dp(9))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF087BEA.toInt())
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), 0xFF00DDEB.toInt())
+            }
+            isClickable = true
+            setOnClickListener { showPage("account") }
         }
-        fun addCategory(icon: String, title: String, subtitle: String, accent: Int, action: () -> Unit) {
+        profileStrip.addView(profileButton)
+        home.addView(profileStrip)
+
+        val primaryMenuRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        fun addPrimaryMenu(title: String, subtitle: String, accent: Int, artworkKind: Int, action: () -> Unit) {
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                setPadding(dp(8), dp(8), dp(8), dp(8))
+                setPadding(dp(9), dp(10), dp(9), dp(10))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(0xFFFFFFFF.toInt(), 0xFFF2F8F6.toInt())
+                    intArrayOf(if (title == "PARTIE LOCALE") 0xFFE91C2C.toInt() else 0xFF007F91.toInt(), 0xFF07151D.toInt())
                 ).apply {
-                    cornerRadius = dp(17).toFloat()
-                    setStroke(dp(1), accent)
+                    cornerRadius = dp(18).toFloat()
+                    setStroke(dp(2), accent)
                 }
-                elevation = dp(6).toFloat()
+                elevation = dp(5).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = android.widget.GridLayout.LayoutParams().apply {
-                    width = 0
-                    height = dp(154)
-                    columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
-                    setMargins(dp(4), dp(3), dp(4), dp(4))
+                layoutParams = LinearLayout.LayoutParams(0, dp(145), 1f).apply {
+                    setMargins(dp(4), dp(2), dp(4), dp(9))
                 }
                 setOnClickListener { action() }
             }
-            tile.addView(DartNeonArtworkView(this, when (title) {
-                "PARTIE LOCALE" -> 1
-                "PARTIE EN LIGNE" -> 3
-                else -> 0
-            }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(64), dp(64))
+            tile.addView(DartNeonArtworkView(this, artworkKind).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(54), dp(54))
                 contentDescription = title
             })
             tile.addView(TextView(this).apply {
-                text = title; textSize = 14f; gravity = Gravity.CENTER
-                setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC))
-                setTextColor(white)
+                text = title
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFFFFFFF.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             tile.addView(TextView(this).apply {
-                text = subtitle; textSize = 11f; gravity = Gravity.CENTER
-                setTextColor(0xFF687F7D.toInt())
+                text = subtitle
+                textSize = 10f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFE3F5F8.toInt())
                 setPadding(0, dp(4), 0, 0)
             })
-            categoryGrid.addView(tile)
+            primaryMenuRow.addView(tile)
         }
-        addCategory("🎮", "PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFF00F0FF.toInt()) {
+        addPrimaryMenu("PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFFFF394A.toInt(), 1) {
             if (restoreX01Game()) {
                 gameInProgress = true
                 showPage("game")
@@ -633,16 +635,75 @@ class MainActivity : ComponentActivity() {
                 showPage("game"); showGameModes()
             }
         }
-        addCategory("🌐", "PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFFFF1E1E.toInt()) {
+        addPrimaryMenu("PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFF00E5F2.toInt(), 3) {
             showPage("players")
         }
-        addCategory("🎯", "ENTRAÎNEMENT", "Travailler les simples,\ndoubles et finishes", 0xFF00F0FF.toInt()) {
+        home.addView(primaryMenuRow)
+
+        fun addWideMenu(title: String, subtitle: String, accent: Int, icon: String, action: () -> Unit) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(13), dp(9), dp(12), dp(9))
+                background = android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                    intArrayOf(0xFF102630.toInt(), 0xFF06131A.toInt())
+                ).apply {
+                    cornerRadius = dp(17).toFloat()
+                    setStroke(dp(2), accent)
+                }
+                elevation = dp(4).toFloat()
+                layoutParams = LinearLayout.LayoutParams(-1, dp(88)).apply {
+                    setMargins(dp(3), dp(3), dp(3), dp(7))
+                }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { action() }
+            }
+            row.addView(TextView(this).apply {
+                text = icon
+                textSize = 31f
+                gravity = Gravity.CENTER
+                setTextColor(accent)
+                layoutParams = LinearLayout.LayoutParams(dp(52), -1)
+            })
+            val labels = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            labels.addView(TextView(this).apply {
+                text = title
+                textSize = 17f
+                setTextColor(0xFFF5FCFF.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
+            })
+            labels.addView(TextView(this).apply {
+                text = subtitle
+                textSize = 11f
+                setTextColor(0xFFB8D0D5.toInt())
+                setPadding(0, dp(2), 0, 0)
+            })
+            row.addView(labels)
+            row.addView(TextView(this).apply {
+                text = "›"
+                textSize = 30f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFFFFFFF.toInt())
+            })
+            home.addView(row)
+        }
+        addWideMenu("ENTRAÎNEMENT", "Travailler les simples, doubles, triples et finitions", 0xFF00E5F2.toInt(), "◎") {
             showPage("game"); showTrainingModes()
         }
-        addCategory("🏆", "MODE CLASSÉ", "Compétition, classement\net progression", 0xFFFF1E1E.toInt()) {
+        addWideMenu("MODE CLASSÉ", "Compétition, classement et progression", 0xFFFFC247.toInt(), "🏆") {
             showPage("game"); showGameModes()
         }
-        home.addView(categoryGrid)
+        addWideMenu("TOURNOIS", "Participer à des tournois en ligne ou locaux", 0xFFB45BFF.toInt(), "♜") {
+            showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
+                listOf("Tournois" to "L'espace tournois sera disponible ici."))
+        }
+
 
         val quickLinks = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -665,8 +726,8 @@ class MainActivity : ComponentActivity() {
                 isClickable = true
                 setOnClickListener { action() }
             }
-            b.addView(TextView(this).apply { text = icon; textSize = 21f; gravity = Gravity.CENTER; setTextColor(white) })
-            b.addView(TextView(this).apply { text = label; textSize = 10f; gravity = Gravity.CENTER; setTextColor(white) })
+            b.addView(TextView(this).apply { text = icon; textSize = 21f; gravity = Gravity.CENTER; setTextColor(0xFFF2FBFF.toInt()) })
+            b.addView(TextView(this).apply { text = label; textSize = 10f; gravity = Gravity.CENTER; setTextColor(0xFFF2FBFF.toInt()) })
             quickLinks.addView(b)
         }
         quick("STATISTIQUES", "▥") { showAccountHistory() }
@@ -953,10 +1014,60 @@ class MainActivity : ComponentActivity() {
             }
         })
         root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
-        // Aucun menu inférieur : toute la navigation part de la page d'accueil, sous le bouton JOUER.
-        bottomNavigationBar = null
+
+        // Navigation principale : même ordre et mêmes intitulés que la maquette validée.
+        val navItems = mutableMapOf<String, View>()
+        val navBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(5), dp(5), dp(5), dp(5))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF041016.toInt())
+                cornerRadius = dp(17).toFloat()
+                setStroke(dp(1), 0xFF16424B.toInt())
+            }
+            elevation = dp(8).toFloat()
+        }
+        fun addNavItem(key: String, label: String, symbol: String, action: () -> Unit) {
+            val item = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(dp(2), dp(5), dp(2), dp(5))
+                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
+                    setMargins(dp(2), 0, dp(2), 0)
+                }
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { action() }
+            }
+            item.addView(TextView(this).apply {
+                text = symbol
+                textSize = 20f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFEAFBFF.toInt())
+            })
+            item.addView(TextView(this).apply {
+                text = label
+                textSize = 9f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFEAFBFF.toInt())
+            })
+            navItems[key] = item
+            navBar.addView(item)
+        }
+        addNavItem("home", "Accueil", "⌂") { showPage("home") }
+        addNavItem("training", "Entraînement", "◎") { showPage("game"); showTrainingModes() }
+        addNavItem("players", "En ligne", "◎") { showPage("players") }
+        addNavItem("tournaments", "Tournois", "♜") {
+            showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
+                listOf("Tournois" to "L'espace tournois sera disponible ici."))
+        }
+        addNavItem("stats", "Stats", "▥") { showAccountHistory() }
+        bottomNavigationBar = navBar
+
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        shell.addView(navBar, LinearLayout.LayoutParams(-1, dp(68)))
         showPage("home")
         setContentView(shell)
         // Android 15+ dessine l'application derrière la barre système :
