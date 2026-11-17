@@ -997,7 +997,8 @@ class MainActivity : ComponentActivity() {
         val divider = View(this).apply { setBackgroundColor(0xFF314653.toInt()); layoutParams = LinearLayout.LayoutParams(dp(1), -1) }
         scoreCard.addView(divider)
         opponentScoresContainer = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL            gravity = Gravity.CENTER_VERTICAL
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(10), dp(3), dp(3), dp(3))
         }
         val opponentScroll = ScrollView(this).apply {
