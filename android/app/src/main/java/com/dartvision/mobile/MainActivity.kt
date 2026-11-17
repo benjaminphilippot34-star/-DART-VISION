@@ -712,21 +712,19 @@ class MainActivity : ComponentActivity() {
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(10), dp(7), dp(10), dp(7))
+            setPadding(dp(3), dp(5), dp(3), dp(8))
+            // Profil sans cadre : seul l'avatar porte le halo cyan de la maquette.
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(0xFF102B35.toInt(), 0xFF06151D.toInt())
-            ).apply {
-                cornerRadius = dp(23).toFloat()
-                setStroke(dp(2), 0xFF00EAF4.toInt())
+                intArrayOf(0xFF061B22.toInt(), 0xFF031016.toInt())
+            ).apply { cornerRadius = dp(22).toFloat() }
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                setMargins(0, dp(3), 0, dp(9))
             }
-            elevation = dp(8).toFloat()
-            layoutParams = LinearLayout.LayoutParams(-1, dp(92)).apply {
-                setMargins(dp(2), dp(4), dp(2), dp(11))
-            }
+            minimumHeight = dp(104)
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(76), dp(76))
+            layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -806,7 +804,8 @@ class MainActivity : ComponentActivity() {
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(12), dp(8), dp(12), dp(8))
+                setPadding(dp(12), dp(9), dp(8), dp(9))
+                minimumHeight = dp(116)
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     if (title == "PARTIE LOCALE")
@@ -820,7 +819,7 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(116), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
                 }
                 setOnClickListener { action() }
@@ -838,7 +837,8 @@ class MainActivity : ComponentActivity() {
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
-                text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
+                text = if (title == "PARTIE LOCALE") "Jouer sur un seul téléphone ou en réseau local." else "Défier des joueurs à distance et suivre des matchs en direct."
+                includeFontPadding = true
                 textSize = 11.5f
                 gravity = Gravity.START
                 setTextColor(0xFFF1F7FA.toInt())
@@ -848,6 +848,15 @@ class MainActivity : ComponentActivity() {
             tile.addView(DartHomeArtworkView(this, if (title == "PARTIE LOCALE") 0 else 1).apply {
                 layoutParams = LinearLayout.LayoutParams(dp(72), dp(78))
                 contentDescription = title
+            })
+            tile.addView(TextView(this).apply {
+                text = "›"; textSize = 27f; gravity = Gravity.CENTER
+                setTextColor(0xFFFFFFFF.toInt())
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(0x18000000); setStroke(dp(2), 0xFFEAFBFF.toInt())
+                }
+                layoutParams = LinearLayout.LayoutParams(dp(34), dp(34)).apply { leftMargin = dp(2) }
             })
             primaryMenuRow.addView(tile)
         }
@@ -869,7 +878,8 @@ class MainActivity : ComponentActivity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(12), dp(8), dp(8), dp(8))
+                setPadding(dp(12), dp(9), dp(8), dp(9))
+                minimumHeight = dp(82)
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     intArrayOf(0xFF102C36.toInt(), 0xFF061018.toInt())
@@ -878,7 +888,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(76)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
                 }
                 isClickable = true
@@ -904,7 +914,8 @@ class MainActivity : ComponentActivity() {
             labels.addView(TextView(this).apply {
                 text = subtitle
                 textSize = 11.5f
-                maxLines = 3
+                maxLines = Int.MAX_VALUE
+                includeFontPadding = true
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
@@ -948,7 +959,8 @@ class MainActivity : ComponentActivity() {
             val b = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                setPadding(dp(4), dp(10), dp(4), dp(10))
+                setPadding(dp(4), dp(9), dp(4), dp(9))
+                minimumHeight = dp(76)
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     intArrayOf(0xFF101D25.toInt(), 0xFF03090E.toInt())
@@ -957,7 +969,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), if (label == "AMIS") 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt())
                 }
                 elevation = dp(6).toFloat()
-                layoutParams = LinearLayout.LayoutParams(0, dp(76), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
                 }
                 isClickable = true
