@@ -554,7 +554,7 @@ class MainActivity : ComponentActivity() {
                 setOnClickListener { click() }
             })
         }
-        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFFC8E7E2.toInt()) }
+        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFF031016.toInt()) }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFFC8E7E2.toInt())
@@ -628,7 +628,7 @@ class MainActivity : ComponentActivity() {
             textSize = 27f
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setTextColor(0xFF07151B.toInt())
+            setTextColor(0xFFF4FCFF.toInt())
             layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
         menuAction.addView(View(this).apply {
@@ -707,7 +707,7 @@ class MainActivity : ComponentActivity() {
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
         home.setBackgroundColor(0xFFC8E7E2.toInt())
-        home.setPadding(dp(12), dp(5), dp(12), dp(8))
+        home.setPadding(dp(8), dp(2), dp(8), dp(5))
 
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -739,7 +739,7 @@ class MainActivity : ComponentActivity() {
             text = accountPreferences().getString("display_name", "Benjamin Philippot")
             textSize = 18f
             maxLines = 1
-            setTextColor(0xFF07151B.toInt())
+            setTextColor(0xFFEAFBFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
         profileInfo.addView(LinearLayout(this@MainActivity).apply {
@@ -820,7 +820,7 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(184), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(128), 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
                 }
                 setOnClickListener { action() }
@@ -832,14 +832,14 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
-                textSize = 22f
+                textSize = 21f
                 gravity = Gravity.START
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
-                textSize = 13.5f
+                textSize = 12.5f
                 gravity = Gravity.START
                 setTextColor(0xFFF1F7FA.toInt())
                 setPadding(0, dp(4), 0, 0)
@@ -878,7 +878,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(116)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, dp(84)).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
                 }
                 isClickable = true
@@ -887,7 +887,7 @@ class MainActivity : ComponentActivity() {
             }
             val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
             row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(72), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(64), -1)
                 contentDescription = title
             })
             val labels = LinearLayout(this).apply {
@@ -897,20 +897,20 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = title
-                textSize = 23f
+                textSize = 22f
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = subtitle
-                textSize = 13.5f
+                textSize = 13f
                 maxLines = 3
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
             row.addView(labels)
             row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(118), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(100), -1)
                 contentDescription = "Illustration $title"
             })
             row.addView(TextView(this).apply {
@@ -982,7 +982,7 @@ class MainActivity : ComponentActivity() {
             showInsightScreen("SUCCÈS", "TES OBJECTIFS DART VISION", emptyList(),
                 listOf("Progression" to "Tes performances et tes réussites apparaîtront ici."))
         }
-        quickLinks.visibility = View.GONE
+        home.addView(quickLinks)
 
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1267,9 +1267,9 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             setPadding(dp(5), dp(5), dp(5), dp(5))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFFE8F6F3.toInt())
+                setColor(0xFF041016.toInt())
                 cornerRadius = dp(22).toFloat()
-                setStroke(dp(2), 0xFF68CFCB.toInt())
+                setStroke(dp(2), 0xFF00DDEB.toInt())
             }
             elevation = dp(8).toFloat()
         }
