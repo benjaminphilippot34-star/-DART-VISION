@@ -343,7 +343,7 @@ private class DartHomeQuickIconView(context: android.content.Context, private va
     }
 }
 
-/** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
+/** Fond noir profond de la maquette DART VISION. */
 private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
     override fun draw(canvas: android.graphics.Canvas) {
@@ -352,11 +352,11 @@ private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() 
         val h = b.height().toFloat()
         if (w <= 0f || h <= 0f) return
 
-        // Dégradé doux menthe / turquoise très clair.
+        // Dégradé noir profond avec halo bleu nuit.
         paint.style = android.graphics.Paint.Style.FILL
         paint.shader = android.graphics.LinearGradient(
             0f, 0f, w * .18f, h,
-            intArrayOf(0xFFC8E7E2.toInt(), 0xFFE8F5F2.toInt(), 0xFFF7FBF9.toInt()),
+            intArrayOf(0xFF031016.toInt(), 0xFF071923.toInt(), 0xFF02080D.toInt()),
             floatArrayOf(0f, .52f, 1f),
             android.graphics.Shader.TileMode.CLAMP
         )
@@ -366,7 +366,7 @@ private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() 
         // Trame fine, presque ton sur ton : lignes diagonales et points légers.
         paint.style = android.graphics.Paint.Style.STROKE
         paint.strokeWidth = maxOf(1f, resourcesDensity() * .65f)
-        paint.color = 0x183A8F88
+        paint.color = 0x1830DCEB
         val step = 34f * resourcesDensity()
         var x = -h
         while (x < w + h) {
@@ -515,11 +515,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFFE8F5F2.toInt()
-        val panelColor = 0xFFFFFFFF.toInt()
-        val teal = 0xFF079BA5.toInt()
-        val white = 0xFF173331.toInt()
-        val muted = 0xFF687F7D.toInt()
+        val bg = 0xFF031016.toInt()
+        val panelColor = 0xFF0B1B25.toInt()
+        val teal = 0xFF00E5F2.toInt()
+        val white = 0xFFF4FCFF.toInt()
+        val muted = 0xFF91A4B2.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -557,7 +557,7 @@ class MainActivity : ComponentActivity() {
         val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFF031016.toInt()) }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFFC8E7E2.toInt())
+            setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFF031016.toInt())
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -610,7 +610,7 @@ class MainActivity : ComponentActivity() {
         }
         val header = android.widget.FrameLayout(this).apply {
             setBackgroundColor(0xFFC8E7E2.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(120)).apply {
                 bottomMargin = dp(1)
             }
             clipChildren = false
@@ -649,7 +649,7 @@ class MainActivity : ComponentActivity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(226), dp(98), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(250), dp(108), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -706,7 +706,7 @@ class MainActivity : ComponentActivity() {
         })
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
-        home.setBackgroundColor(0xFFC8E7E2.toInt())
+        home.setBackgroundColor(0xFF031016.toInt())
         home.setPadding(dp(8), dp(2), dp(8), dp(5))
 
         val profileStrip = LinearLayout(this).apply {
@@ -749,7 +749,7 @@ class MainActivity : ComponentActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "▮▮▮  1 245"
                 textSize = 17f
-                setTextColor(0xFF07151B.toInt())
+                setTextColor(0xFFF4FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
             })
             addView(TextView(this@MainActivity).apply {
