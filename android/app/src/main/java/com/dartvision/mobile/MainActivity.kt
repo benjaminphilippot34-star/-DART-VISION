@@ -494,7 +494,7 @@ class MainActivity : ComponentActivity() {
         }
         notificationAction.addView(object : View(this) {
             private val bellPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xFF142B2C.toInt()
+                color = 0xFFF4FCFF.toInt()
                 style = android.graphics.Paint.Style.FILL
             }
             override fun onDraw(canvas: android.graphics.Canvas) {
@@ -680,10 +680,10 @@ class MainActivity : ComponentActivity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(16), dp(12), dp(14), dp(12))
+                setPadding(dp(12), dp(8), dp(8), dp(8))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(0xFF102C36.toInt(), 0xFF07151D.toInt())
+                    intArrayOf(0xFF102C36.toInt(), 0xFF061018.toInt())
                 ).apply {
                     cornerRadius = dp(22).toFloat()
                     setStroke(dp(2), accent)
@@ -722,8 +722,18 @@ class MainActivity : ComponentActivity() {
             })
             row.addView(labels)
             row.addView(TextView(this).apply {
+                text = when (title) {
+                    "ENTRAÎNEMENT" -> "🎯"
+                    "MODE CLASSÉ" -> "🏆"
+                    else -> "🎯"
+                }
+                textSize = 34f
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(dp(66), -1)
+            })
+            row.addView(TextView(this).apply {
                 text = "›"
-                textSize = 30f
+                textSize = 28f
                 gravity = Gravity.CENTER
                 setTextColor(0xFFFFFFFF.toInt())
             })
