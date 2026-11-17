@@ -289,6 +289,60 @@ private class DartHomeArtworkView(context: android.content.Context, private val 
     }
 }
 
+/** Icônes vectorielles des trois raccourcis de l'accueil, dessinées à l'échelle. */
+private class DartHomeQuickIconView(context: android.content.Context, private val kind: Int) : View(context) {
+    private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        val side=minOf(width,height).toFloat()
+        if(side<=0f) return
+        val cx=width/2f; val cy=height/2f; val unit=side
+        p.color=0xFFF7FCFF.toInt()
+        p.style=android.graphics.Paint.Style.STROKE
+        p.strokeWidth=unit*.075f
+        p.strokeCap=android.graphics.Paint.Cap.SQUARE
+        p.strokeJoin=android.graphics.Paint.Join.ROUND
+        p.setShadowLayer(unit*.07f,0f,0f,0xAA00EAF4.toInt())
+        when(kind) {
+            0 -> {
+                val base=cy+unit*.28f
+                canvas.drawRect(cx-unit*.34f,base-unit*.34f,cx-unit*.17f,base,p)
+                canvas.drawRect(cx-unit*.085f,base-unit*.55f,cx+unit*.085f,base,p)
+                canvas.drawRect(cx+unit*.17f,base-unit*.78f,cx+unit*.34f,base,p)
+            }
+            1 -> {
+                p.style=android.graphics.Paint.Style.FILL
+                canvas.drawCircle(cx,cy-unit*.19f,unit*.15f,p)
+                val body=android.graphics.Path().apply {
+                    moveTo(cx-unit*.39f,cy+unit*.34f)
+                    quadTo(cx-unit*.36f,cy+unit*.02f,cx,cy+unit*.02f)
+                    quadTo(cx+unit*.36f,cy+unit*.02f,cx+unit*.39f,cy+unit*.34f)
+                    quadTo(cx+unit*.40f,cy+unit*.42f,cx+unit*.31f,cy+unit*.42f)
+                    lineTo(cx-unit*.31f,cy+unit*.42f)
+                    quadTo(cx-unit*.40f,cy+unit*.42f,cx-unit*.39f,cy+unit*.34f)
+                    close()
+                }
+                canvas.drawPath(body,p)
+            }
+            else -> {
+                p.style=android.graphics.Paint.Style.FILL
+                val path=android.graphics.Path()
+                for(i in 0..9) {
+                    val radius=if(i%2==0) unit*.43f else unit*.19f
+                    val angle=(-90.0+i*36.0)*Math.PI/180.0
+                    val x=cx+Math.cos(angle).toFloat()*radius
+                    val y=cy+Math.sin(angle).toFloat()*radius
+                    if(i==0) path.moveTo(x,y) else path.lineTo(x,y)
+                }
+                path.close(); canvas.drawPath(path,p)
+            }
+        }
+        p.clearShadowLayer()
+        p.style=android.graphics.Paint.Style.FILL
+        p.strokeCap=android.graphics.Paint.Cap.BUTT
+    }
+}
+
 /** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
 private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -887,8 +941,17 @@ class MainActivity : ComponentActivity() {
                 isClickable = true
                 setOnClickListener { action() }
             }
-            b.addView(TextView(this).apply { text = icon; textSize = 25f; gravity = Gravity.CENTER; setTextColor(0xFFF2FBFF.toInt()) })
-            b.addView(TextView(this).apply { text = label; textSize = 11f; gravity = Gravity.CENTER; setTextColor(0xFFF2FBFF.toInt()) })
+            b.addView(DartHomeQuickIconView(this, when (label) { "STATISTIQUES" -> 0; "AMIS" -> 1; else -> 2 }).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(34), dp(34))
+                contentDescription = label
+            })
+            b.addView(TextView(this).apply {
+                text = label
+                textSize = 12f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFF2FBFF.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL)
+            })
             quickLinks.addView(b)
         }
         quick("STATISTIQUES", "▥") { showAccountHistory() }
