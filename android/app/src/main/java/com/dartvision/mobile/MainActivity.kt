@@ -742,27 +742,48 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFFF4FCFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
-        profileInfo.addView(TextView(this).apply {
-            text = "▮▮▮  1 245  ⭐"
-            textSize = 15f
-            setTextColor(0xFFFFD34E.toInt())
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-            setPadding(0, dp(3), 0, dp(4))
+        profileInfo.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(2), 0, dp(3))
+            addView(TextView(this).apply {
+                text = "▮▮▮  1 245"
+                textSize = 17f
+                setTextColor(0xFFF5F8FF.toInt())
+                typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
+            })
+            addView(TextView(this).apply {
+                text = "★"
+                textSize = 23f
+                setTextColor(0xFFFFC83D.toInt())
+                gravity = Gravity.CENTER
+                setPadding(dp(7), 0, 0, 0)
+            })
         })
         profileInfo.addView(TextView(this).apply {
-            text = "🟢 10 836 en ligne"
-            textSize = 11f
-            setTextColor(0xFF32E58C.toInt())
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            text = "●  10 836 en ligne"
+            textSize = 12f
+            setTextColor(0xFF39F59A.toInt())
+            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setPadding(dp(14), dp(4), dp(14), dp(4))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xFF031B20.toInt(), 0xFF052A27.toInt())
+            ).apply {
+                cornerRadius = dp(22).toFloat()
+                setStroke(dp(2), 0xFF00E8D5.toInt())
+            }
+            layoutParams = LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(2) }
         })
         profileStrip.addView(profileInfo)
         val profileButton = TextView(this).apply {
             text = "♟  Mon profil"
-            textSize = 12f
+            textSize = 14f
             gravity = Gravity.CENTER
             setTextColor(0xFFFFFFFF.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-            setPadding(dp(14), dp(9), dp(14), dp(9))
+            setPadding(dp(16), dp(11), dp(16), dp(11))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
                 intArrayOf(0xFF008DFF.toInt(), 0xFF064DCE.toInt())
