@@ -609,7 +609,7 @@ class MainActivity : ComponentActivity() {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
         }
         val header = android.widget.FrameLayout(this).apply {
-            setBackgroundColor(0xFF031016.toInt())
+            setBackgroundColor(0xFFC8E7E2.toInt())
             layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
                 bottomMargin = dp(1)
             }
@@ -628,7 +628,7 @@ class MainActivity : ComponentActivity() {
             textSize = 27f
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setTextColor(0xFFF4FCFF.toInt())
+            setTextColor(0xFF07151B.toInt())
             layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
         menuAction.addView(View(this).apply {
@@ -1267,9 +1267,9 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             setPadding(dp(5), dp(5), dp(5), dp(5))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF041016.toInt())
+                setColor(0xFFE8F6F3.toInt())
                 cornerRadius = dp(22).toFloat()
-                setStroke(dp(2), 0xFF00DDEB.toInt())
+                setStroke(dp(2), 0xFF68CFCB.toInt())
             }
             elevation = dp(8).toFloat()
         }
@@ -1289,13 +1289,13 @@ class MainActivity : ComponentActivity() {
                 text = symbol
                 textSize = 20f
                 gravity = Gravity.CENTER
-                setTextColor(0xFFEAFBFF.toInt())
+                setTextColor(0xFF07151B.toInt())
             })
             item.addView(TextView(this).apply {
                 text = label
                 textSize = 9f
                 gravity = Gravity.CENTER
-                setTextColor(0xFFEAFBFF.toInt())
+                setTextColor(0xFF07151B.toInt())
             })
             navItems[key] = item
             navBar.addView(item)
