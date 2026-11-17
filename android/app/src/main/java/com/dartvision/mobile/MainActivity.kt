@@ -435,11 +435,15 @@ class MainActivity : ComponentActivity() {
         }
         navigateToMorePage = { showPage("more") }
         navigateHomeFromPage = { showPage("home") }
-        // En-tête DART VISION — logo d'origine conservé, composition calée sur la maquette.
+        // En-tête de l'accueil — reproduit uniquement la bande supérieure de la maquette validée.
+        window.statusBarColor = bg
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
         val header = android.widget.FrameLayout(this).apply {
-            setBackgroundColor(0xFF06131A.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(62)).apply {
-                bottomMargin = dp(5)
+            setBackgroundColor(bg)
+            layoutParams = LinearLayout.LayoutParams(-1, dp(64)).apply {
+                bottomMargin = dp(3)
             }
             clipChildren = false
             clipToPadding = false
@@ -456,7 +460,7 @@ class MainActivity : ComponentActivity() {
             textSize = 27f
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setTextColor(0xFFF2FBFF.toInt())
+            setTextColor(0xFF142B2C.toInt())
             layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
         menuAction.addView(View(this).apply {
@@ -471,13 +475,13 @@ class MainActivity : ComponentActivity() {
         })
         header.addView(menuAction)
 
-        // Logo officiel agrandi : il remplace l'ancien pictogramme et le texte séparé.
+        // Le fichier logo complet occupe seul le centre : aucun texte DART VISION en doublon.
         val brand = ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo)
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(220), dp(58), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(184), dp(54), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -488,13 +492,31 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Notifications"
             setOnClickListener { showPage("update") }
         }
-        notificationAction.addView(TextView(this).apply {
-            text = "♟"
-            textSize = 23f
-            gravity = Gravity.CENTER
-            includeFontPadding = false
-            setTextColor(0xFF101820.toInt())
-            layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
+        notificationAction.addView(object : View(this) {
+            private val bellPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0xFF142B2C.toInt()
+                style = android.graphics.Paint.Style.FILL
+            }
+            override fun onDraw(canvas: android.graphics.Canvas) {
+                super.onDraw(canvas)
+                val w = width.toFloat()
+                val h = height.toFloat()
+                val bell = android.graphics.Path().apply {
+                    moveTo(w * .50f, h * .08f)
+                    cubicTo(w * .28f, h * .08f, w * .20f, h * .27f, w * .20f, h * .48f)
+                    cubicTo(w * .20f, h * .66f, w * .13f, h * .75f, w * .08f, h * .81f)
+                    quadTo(w * .05f, h * .88f, w * .15f, h * .88f)
+                    lineTo(w * .85f, h * .88f)
+                    quadTo(w * .95f, h * .88f, w * .92f, h * .81f)
+                    cubicTo(w * .87f, h * .75f, w * .80f, h * .66f, w * .80f, h * .48f)
+                    cubicTo(w * .80f, h * .27f, w * .72f, h * .08f, w * .50f, h * .08f)
+                    close()
+                }
+                canvas.drawPath(bell, bellPaint)
+                canvas.drawRoundRect(w * .39f, h * .90f, w * .61f, h, w * .11f, h * .11f, bellPaint)
+            }
+        }.apply {
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(25), dp(28), Gravity.CENTER)
         })
         notificationAction.addView(View(this).apply {
             background = android.graphics.drawable.GradientDrawable().apply {
@@ -509,10 +531,7 @@ class MainActivity : ComponentActivity() {
         header.addView(notificationAction)
         root.addView(header)
         root.addView(View(this).apply {
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(0x00E94B4B, 0xFFE94B4B.toInt(), 0xFF079BA5.toInt(), 0x00079BA5)
-            )
+            setBackgroundColor(0xFFB9DEDA.toInt())
             layoutParams = LinearLayout.LayoutParams(-1, dp(1)).apply {
                 bottomMargin = dp(5)
             }
