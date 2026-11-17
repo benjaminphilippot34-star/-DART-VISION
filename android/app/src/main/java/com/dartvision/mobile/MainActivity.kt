@@ -610,7 +610,7 @@ class MainActivity : ComponentActivity() {
         }
         val header = android.widget.FrameLayout(this).apply {
             background = android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0xFF06151D.toInt(), 0xFF02070C.toInt()))
-            layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(116)).apply {
                 bottomMargin = dp(1)
             }
             clipChildren = false
@@ -649,7 +649,7 @@ class MainActivity : ComponentActivity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(286), dp(104), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(320), dp(112), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -721,12 +721,12 @@ class MainActivity : ComponentActivity() {
                 setStroke(dp(2), 0xFF00EAF4.toInt())
             }
             elevation = dp(8).toFloat()
-            layoutParams = LinearLayout.LayoutParams(-1, dp(96)).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(92)).apply {
                 setMargins(dp(2), dp(4), dp(2), dp(11))
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(84), dp(84))
+            layoutParams = LinearLayout.LayoutParams(dp(76), dp(76))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -737,7 +737,7 @@ class MainActivity : ComponentActivity() {
         }
         profileInfo.addView(TextView(this).apply {
             text = accountPreferences().getString("display_name", "Benjamin Philippot")
-            textSize = 18f
+            textSize = 17f
             maxLines = 1
             setTextColor(0xFFEAFBFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
@@ -820,7 +820,7 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(112), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(116), 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
                 }
                 setOnClickListener { action() }
@@ -832,14 +832,14 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
-                textSize = 21f
+                textSize = 19f
                 gravity = Gravity.START
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
-                textSize = 12.5f
+                textSize = 11.5f
                 gravity = Gravity.START
                 setTextColor(0xFFF1F7FA.toInt())
                 setPadding(0, dp(4), 0, 0)
@@ -878,7 +878,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(72)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, dp(76)).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
                 }
                 isClickable = true
@@ -887,7 +887,7 @@ class MainActivity : ComponentActivity() {
             }
             val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
             row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(58), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(52), -1)
                 contentDescription = title
             })
             val labels = LinearLayout(this).apply {
@@ -897,20 +897,20 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = title
-                textSize = 22f
+                textSize = 19f
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = subtitle
-                textSize = 13f
+                textSize = 11.5f
                 maxLines = 3
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
             row.addView(labels)
             row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(84), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(72), -1)
                 contentDescription = "Illustration $title"
             })
             row.addView(TextView(this).apply {
@@ -942,7 +942,7 @@ class MainActivity : ComponentActivity() {
         val quickLinks = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            setPadding(0, dp(10), 0, dp(8))
+            setPadding(0, dp(7), 0, dp(6))
         }
         fun quick(label: String, icon: String, action: () -> Unit) {
             val b = LinearLayout(this).apply {
@@ -957,7 +957,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), if (label == "AMIS") 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt())
                 }
                 elevation = dp(6).toFloat()
-                layoutParams = LinearLayout.LayoutParams(0, dp(82), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(76), 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
                 }
                 isClickable = true
@@ -1312,7 +1312,7 @@ class MainActivity : ComponentActivity() {
 
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        shell.addView(navBar, LinearLayout.LayoutParams(-1, dp(68)))
+        shell.addView(navBar, LinearLayout.LayoutParams(-1, dp(64)))
         showPage("home")
         setContentView(shell)
         // Android 15+ dessine l'application derrière la barre système :
