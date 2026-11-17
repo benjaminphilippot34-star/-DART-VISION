@@ -667,9 +667,9 @@ class MainActivity : ComponentActivity() {
                 setStroke(dp(2), 0xFF00EAF4.toInt())
             }
             elevation = dp(8).toFloat()
+            minimumHeight = dp(96)
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                 setMargins(dp(2), dp(4), dp(2), dp(9))
-                minimumHeight = dp(96)
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
@@ -746,9 +746,9 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
+                minimumHeight = dp(122)
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
-                    minimumHeight = dp(122)
                 }
                 setOnClickListener { action() }
             }
@@ -821,9 +821,9 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
+                minimumHeight = dp(78)
                 layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
-                    minimumHeight = dp(78)
                 }
                 isClickable = true
                 isFocusable = true
