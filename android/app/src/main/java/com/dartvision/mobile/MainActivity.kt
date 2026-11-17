@@ -997,8 +997,7 @@ class MainActivity : ComponentActivity() {
         val divider = View(this).apply { setBackgroundColor(0xFF314653.toInt()); layoutParams = LinearLayout.LayoutParams(dp(1), -1) }
         scoreCard.addView(divider)
         opponentScoresContainer = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_VERTICAL
+            orientation = LinearLayout.VERTICAL            gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(10), dp(3), dp(3), dp(3))
         }
         val opponentScroll = ScrollView(this).apply {
@@ -1997,8 +1996,7 @@ class MainActivity : ComponentActivity() {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(18), dp(20), dp(24))
-            setBackgroundColor(backgroundColor)
-        }
+            setBackgroundColor(backgroundColor)        }
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -2997,8 +2995,7 @@ class MainActivity : ComponentActivity() {
         val game = x01Engine ?: return
         val snapshot = game.state
         val settings = snapshot.settings
-        val json = JSONObject()
-            .put("startingScore", settings.startingScore)
+        val json = JSONObject()            .put("startingScore", settings.startingScore)
             .put("inRule", settings.inRule.name)
             .put("outRule", settings.outRule.name)
             .put("legsToWin", settings.legsToWin)
