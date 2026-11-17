@@ -347,11 +347,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun buildUi() {
-        val bg = 0xFF06131A.toInt()
-        val panelColor = 0xFF0A2029.toInt()
-        val teal = 0xFF00E5F2.toInt()
-        val white = 0xFFF2FBFF.toInt()
-        val muted = 0xFF9BB7BE.toInt()
+        val bg = 0xFFE8F5F2.toInt()
+        val panelColor = 0xFFFFFFFF.toInt()
+        val teal = 0xFF079BA5.toInt()
+        val white = 0xFF173331.toInt()
+        val muted = 0xFF687F7D.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -437,6 +437,7 @@ class MainActivity : ComponentActivity() {
         navigateHomeFromPage = { showPage("home") }
         // En-tête DART VISION — logo d'origine conservé, composition calée sur la maquette.
         val header = android.widget.FrameLayout(this).apply {
+            setBackgroundColor(0xFF06131A.toInt())
             layoutParams = LinearLayout.LayoutParams(-1, dp(62)).apply {
                 bottomMargin = dp(5)
             }
@@ -518,7 +519,7 @@ class MainActivity : ComponentActivity() {
         })
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
-        home.setBackgroundColor(bg)
+        home.setBackgroundColor(0xFF06131A.toInt())
         home.setPadding(dp(4), dp(4), dp(4), dp(6))
 
         val profileStrip = LinearLayout(this).apply {
