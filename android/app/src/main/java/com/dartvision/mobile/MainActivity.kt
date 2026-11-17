@@ -609,8 +609,8 @@ class MainActivity : ComponentActivity() {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
         }
         val header = android.widget.FrameLayout(this).apply {
-            setBackgroundColor(0xFFC8E7E2.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(120)).apply {
+            background = android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0xFF06151D.toInt(), 0xFF02070C.toInt()))
+            layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
                 bottomMargin = dp(1)
             }
             clipChildren = false
@@ -649,7 +649,7 @@ class MainActivity : ComponentActivity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(250), dp(108), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(286), dp(104), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -707,7 +707,7 @@ class MainActivity : ComponentActivity() {
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
         home.setBackgroundColor(0xFF031016.toInt())
-        home.setPadding(dp(8), dp(2), dp(8), dp(5))
+        home.setPadding(dp(9), dp(2), dp(9), dp(5))
 
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -721,12 +721,12 @@ class MainActivity : ComponentActivity() {
                 setStroke(dp(2), 0xFF00EAF4.toInt())
             }
             elevation = dp(8).toFloat()
-            layoutParams = LinearLayout.LayoutParams(-1, dp(104)).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(96)).apply {
                 setMargins(dp(2), dp(4), dp(2), dp(11))
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
+            layoutParams = LinearLayout.LayoutParams(dp(84), dp(84))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -820,7 +820,7 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(128), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(112), 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
                 }
                 setOnClickListener { action() }
@@ -846,7 +846,7 @@ class MainActivity : ComponentActivity() {
             })
             tile.addView(labels)
             tile.addView(DartHomeArtworkView(this, if (title == "PARTIE LOCALE") 0 else 1).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(82), dp(88))
+                layoutParams = LinearLayout.LayoutParams(dp(72), dp(78))
                 contentDescription = title
             })
             primaryMenuRow.addView(tile)
@@ -878,7 +878,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(84)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, dp(72)).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
                 }
                 isClickable = true
@@ -887,7 +887,7 @@ class MainActivity : ComponentActivity() {
             }
             val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
             row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(64), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(58), -1)
                 contentDescription = title
             })
             val labels = LinearLayout(this).apply {
@@ -910,7 +910,7 @@ class MainActivity : ComponentActivity() {
             })
             row.addView(labels)
             row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(100), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(84), -1)
                 contentDescription = "Illustration $title"
             })
             row.addView(TextView(this).apply {
@@ -957,7 +957,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), if (label == "AMIS") 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt())
                 }
                 elevation = dp(6).toFloat()
-                layoutParams = LinearLayout.LayoutParams(0, dp(76), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(82), 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
                 }
                 isClickable = true
@@ -1289,13 +1289,13 @@ class MainActivity : ComponentActivity() {
                 text = symbol
                 textSize = 20f
                 gravity = Gravity.CENTER
-                setTextColor(0xFF07151B.toInt())
+                setTextColor(0xFFF4FCFF.toInt())
             })
             item.addView(TextView(this).apply {
                 text = label
                 textSize = 9f
                 gravity = Gravity.CENTER
-                setTextColor(0xFF07151B.toInt())
+                setTextColor(0xFFF4FCFF.toInt())
             })
             navItems[key] = item
             navBar.addView(item)
