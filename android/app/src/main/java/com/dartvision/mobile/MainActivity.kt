@@ -386,10 +386,10 @@ class MainActivity : ComponentActivity() {
                 setOnClickListener { click() }
             })
         }
-        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
+        val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false; setBackgroundColor(0xFF031016.toInt()) }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(8), dp(12), dp(12)); setBackgroundColor(bg)
+            setPadding(0, 0, 0, dp(4)); setBackgroundColor(0xFF031016.toInt())
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -436,14 +436,14 @@ class MainActivity : ComponentActivity() {
         navigateToMorePage = { showPage("more") }
         navigateHomeFromPage = { showPage("home") }
         // En-tête de l'accueil — reproduit uniquement la bande supérieure de la maquette validée.
-        window.statusBarColor = bg
+        window.statusBarColor = 0xFF031016.toInt()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
         }
         val header = android.widget.FrameLayout(this).apply {
-            setBackgroundColor(bg)
-            layoutParams = LinearLayout.LayoutParams(-1, dp(64)).apply {
-                bottomMargin = dp(3)
+            setBackgroundColor(0xFF031016.toInt())
+            layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
+                bottomMargin = dp(1)
             }
             clipChildren = false
             clipToPadding = false
@@ -460,7 +460,7 @@ class MainActivity : ComponentActivity() {
             textSize = 27f
             gravity = Gravity.CENTER
             includeFontPadding = false
-            setTextColor(0xFF142B2C.toInt())
+            setTextColor(0xFFF4FCFF.toInt())
             layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1)
         })
         menuAction.addView(View(this).apply {
@@ -481,7 +481,7 @@ class MainActivity : ComponentActivity() {
             scaleType = ImageView.ScaleType.FIT_CENTER
             adjustViewBounds = true
             contentDescription = "Logo officiel DART VISION"
-            layoutParams = android.widget.FrameLayout.LayoutParams(dp(184), dp(54), Gravity.CENTER)
+            layoutParams = android.widget.FrameLayout.LayoutParams(dp(226), dp(98), Gravity.CENTER)
         }
         header.addView(brand)
 
@@ -531,7 +531,7 @@ class MainActivity : ComponentActivity() {
         header.addView(notificationAction)
         root.addView(header)
         root.addView(View(this).apply {
-            setBackgroundColor(0xFFB9DEDA.toInt())
+            setBackgroundColor(0xFF00EAF4.toInt())
             layoutParams = LinearLayout.LayoutParams(-1, dp(1)).apply {
                 bottomMargin = dp(5)
             }
@@ -539,26 +539,26 @@ class MainActivity : ComponentActivity() {
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
         home.setBackgroundColor(0xFF031016.toInt())
-        home.setPadding(dp(7), dp(5), dp(7), dp(8))
+        home.setPadding(dp(8), dp(2), dp(8), dp(5))
 
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(12), dp(12), dp(12), dp(12))
+            setPadding(dp(10), dp(7), dp(10), dp(7))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(0xFF102A35.toInt(), 0xFF06151D.toInt())
+                intArrayOf(0xFF102B35.toInt(), 0xFF06151D.toInt())
             ).apply {
-                cornerRadius = dp(22).toFloat()
+                cornerRadius = dp(23).toFloat()
                 setStroke(dp(2), 0xFF00EAF4.toInt())
             }
-            elevation = dp(7).toFloat()
-            layoutParams = LinearLayout.LayoutParams(-1, dp(112)).apply {
-                setMargins(dp(2), dp(8), dp(2), dp(14))
+            elevation = dp(8).toFloat()
+            layoutParams = LinearLayout.LayoutParams(-1, dp(100)).apply {
+                setMargins(dp(2), dp(4), dp(2), dp(10))
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(88), dp(88))
+            layoutParams = LinearLayout.LayoutParams(dp(90), dp(90))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -568,38 +568,41 @@ class MainActivity : ComponentActivity() {
             layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
         }
         profileInfo.addView(TextView(this).apply {
-            text = accountPreferences().getString("display_name", "Joueur DART VISION")
-            textSize = 18f
+            text = accountPreferences().getString("display_name", "Benjamin Philippot")
+            textSize = 19f
             maxLines = 1
             setTextColor(0xFFF4FCFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
         profileInfo.addView(TextView(this).apply {
-            text = "NIVEAU 1   •   1 245 XP   ★"
+            text = "▮▮▮  1 245  ⭐"
             textSize = 15f
             setTextColor(0xFFFFD34E.toInt())
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
             setPadding(0, dp(3), 0, dp(4))
         })
         profileInfo.addView(TextView(this).apply {
-            text = "10 836 EN LIGNE"
+            text = "🟢 10 836 en ligne"
             textSize = 11f
             setTextColor(0xFF32E58C.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
         })
         profileStrip.addView(profileInfo)
         val profileButton = TextView(this).apply {
-            text = "MON\nPROFIL"
-            textSize = 10f
+            text = "♟  Mon profil"
+            textSize = 12f
             gravity = Gravity.CENTER
             setTextColor(0xFFFFFFFF.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-            setPadding(dp(12), dp(9), dp(12), dp(9))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF087BEA.toInt())
-                cornerRadius = dp(18).toFloat()
-                setStroke(dp(1), 0xFF00DDEB.toInt())
+            setPadding(dp(14), dp(9), dp(14), dp(9))
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xFF008DFF.toInt(), 0xFF064DCE.toInt())
+            ).apply {
+                cornerRadius = dp(28).toFloat()
+                setStroke(dp(2), 0xFF00EAF4.toInt())
             }
+            elevation = dp(8).toFloat()
             isClickable = true
             setOnClickListener { showPage("account") }
         }
@@ -612,9 +615,9 @@ class MainActivity : ComponentActivity() {
         }
         fun addPrimaryMenu(title: String, subtitle: String, accent: Int, artworkKind: Int, action: () -> Unit) {
             val tile = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setPadding(dp(12), dp(12), dp(12), dp(12))
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(12), dp(8), dp(12), dp(8))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     if (title == "PARTIE LOCALE")
@@ -628,28 +631,34 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(178), 1f).apply {
-                    setMargins(dp(4), dp(2), dp(4), dp(9))
+                layoutParams = LinearLayout.LayoutParams(0, dp(122), 1f).apply {
+                    setMargins(dp(3), dp(2), dp(3), dp(8))
                 }
                 setOnClickListener { action() }
             }
-            tile.addView(DartNeonArtworkView(this, artworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(66), dp(66))
-                contentDescription = title
-            })
-            tile.addView(TextView(this).apply {
-                text = title
-                textSize = 17f
-                gravity = Gravity.CENTER
+            val labels = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            labels.addView(TextView(this).apply {
+                text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
+                textSize = 20f
+                gravity = Gravity.START
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
-            tile.addView(TextView(this).apply {
-                text = subtitle
+            labels.addView(TextView(this).apply {
+                text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
                 textSize = 12f
-                gravity = Gravity.CENTER
-                setTextColor(0xFFE3F5F8.toInt())
+                gravity = Gravity.START
+                setTextColor(0xFFF1F7FA.toInt())
                 setPadding(0, dp(4), 0, 0)
+            })
+            tile.addView(labels)
+            tile.addView(DartNeonArtworkView(this, artworkKind).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(66), dp(76))
+                contentDescription = title
             })
             primaryMenuRow.addView(tile)
         }
@@ -680,8 +689,8 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(106)).apply {
-                    setMargins(dp(3), dp(4), dp(3), dp(9))
+                layoutParams = LinearLayout.LayoutParams(-1, dp(78)).apply {
+                    setMargins(dp(3), dp(3), dp(3), dp(7))
                 }
                 isClickable = true
                 isFocusable = true
@@ -689,10 +698,10 @@ class MainActivity : ComponentActivity() {
             }
             row.addView(TextView(this).apply {
                 text = icon
-                textSize = 35f
+                textSize = 32f
                 gravity = Gravity.CENTER
                 setTextColor(accent)
-                layoutParams = LinearLayout.LayoutParams(dp(62), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(64), -1)
             })
             val labels = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
@@ -701,14 +710,14 @@ class MainActivity : ComponentActivity() {
             }
             labels.addView(TextView(this).apply {
                 text = title
-                textSize = 20f
+                textSize = 21f
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
                 text = subtitle
-                textSize = 13f
-                setTextColor(0xFFB8D0D5.toInt())
+                textSize = 12f
+                setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
             row.addView(labels)
@@ -750,7 +759,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), if (label == "AMIS") 0xFF00F0FF.toInt() else 0xFFFF1E1E.toInt())
                 }
                 elevation = dp(6).toFloat()
-                layoutParams = LinearLayout.LayoutParams(0, dp(88), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(72), 1f).apply {
                     setMargins(dp(3), 0, dp(3), 0)
                 }
                 isClickable = true
@@ -1052,8 +1061,8 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(5), dp(5), dp(5), dp(5))
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFF041016.toInt())
-                cornerRadius = dp(17).toFloat()
-                setStroke(dp(1), 0xFF16424B.toInt())
+                cornerRadius = dp(22).toFloat()
+                setStroke(dp(2), 0xFF00DDEB.toInt())
             }
             elevation = dp(8).toFloat()
         }
