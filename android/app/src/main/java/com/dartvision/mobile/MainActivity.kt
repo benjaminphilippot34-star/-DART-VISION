@@ -726,7 +726,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(90), dp(90))
+            layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
             contentDescription = "Avatar du joueur"
         })
         val profileInfo = LinearLayout(this).apply {
@@ -783,7 +783,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             setTextColor(0xFFFFFFFF.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-            setPadding(dp(16), dp(11), dp(16), dp(11))
+            setPadding(dp(10), dp(9), dp(10), dp(9))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
                 intArrayOf(0xFF008DFF.toInt(), 0xFF064DCE.toInt())
@@ -820,7 +820,7 @@ class MainActivity : ComponentActivity() {
                 elevation = dp(9).toFloat()
                 isClickable = true
                 isFocusable = true
-                layoutParams = LinearLayout.LayoutParams(0, dp(128), 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(0, dp(184), 1f).apply {
                     setMargins(dp(3), dp(3), dp(3), dp(9))
                 }
                 setOnClickListener { action() }
@@ -878,7 +878,7 @@ class MainActivity : ComponentActivity() {
                     setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
-                layoutParams = LinearLayout.LayoutParams(-1, dp(84)).apply {
+                layoutParams = LinearLayout.LayoutParams(-1, dp(116)).apply {
                     setMargins(dp(3), dp(4), dp(3), dp(8))
                 }
                 isClickable = true
@@ -887,7 +887,7 @@ class MainActivity : ComponentActivity() {
             }
             val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
             row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(64), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(72), -1)
                 contentDescription = title
             })
             val labels = LinearLayout(this).apply {
@@ -910,7 +910,7 @@ class MainActivity : ComponentActivity() {
             })
             row.addView(labels)
             row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(100), -1)
+                layoutParams = LinearLayout.LayoutParams(dp(118), -1)
                 contentDescription = "Illustration $title"
             })
             row.addView(TextView(this).apply {
@@ -982,7 +982,7 @@ class MainActivity : ComponentActivity() {
             showInsightScreen("SUCCÈS", "TES OBJECTIFS DART VISION", emptyList(),
                 listOf("Progression" to "Tes performances et tes réussites apparaîtront ici."))
         }
-        home.addView(quickLinks)
+        quickLinks.visibility = View.GONE
 
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
