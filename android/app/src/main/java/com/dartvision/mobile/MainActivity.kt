@@ -742,17 +742,17 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFFF4FCFF.toInt())
             typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
         })
-        profileInfo.addView(LinearLayout(this).apply {
+        profileInfo.addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, dp(2), 0, dp(3))
-            addView(TextView(this).apply {
+            addView(TextView(this@MainActivity).apply {
                 text = "▮▮▮  1 245"
                 textSize = 17f
                 setTextColor(0xFFF5F8FF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
             })
-            addView(TextView(this).apply {
+            addView(TextView(this@MainActivity).apply {
                 text = "★"
                 textSize = 23f
                 setTextColor(0xFFFFC83D.toInt())
