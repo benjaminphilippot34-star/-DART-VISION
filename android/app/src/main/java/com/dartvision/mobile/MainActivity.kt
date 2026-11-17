@@ -800,7 +800,9 @@ class MainActivity : ComponentActivity() {
                 showPage("game")
                 showRestoredGameScreen()
             } else {
-                showPage("game"); showGameModes()
+                // Affiche le choix des modes au-dessus de l’accueil : fermer le dialogue
+                // ramène ainsi directement à l’accueil au lieu d’exposer l’écran de jeu vide.
+                showGameModes()
             }
         }
         addPrimaryMenu("PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFF00E5F2.toInt(), 3) {
