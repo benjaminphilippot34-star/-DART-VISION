@@ -706,8 +706,23 @@ class MainActivity : ComponentActivity() {
         })
 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
-        home.setBackgroundColor(0xFF031016.toInt())
+        home.background = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(0xFF00151D.toInt(), 0xFF06131B.toInt(), 0xFF02090F.toInt())
+        )
         home.setPadding(dp(9), dp(2), dp(9), dp(5))
+        fun homePng(name: String): android.graphics.drawable.Drawable? {
+            val id = resources.getIdentifier(name, "drawable", packageName)
+            return if (id != 0) androidx.core.content.ContextCompat.getDrawable(this, id) else null
+        }
+        fun neonImageBackground(name: String, colors: IntArray, radius: Float): android.graphics.drawable.Drawable {
+            val layers = ArrayList<android.graphics.drawable.Drawable>()
+            homePng(name)?.let { layers.add(it) }
+            layers.add(android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, colors
+            ).apply { cornerRadius = radius })
+            return if (layers.size == 1) layers[0] else android.graphics.drawable.LayerDrawable(layers.toTypedArray())
+        }
 
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -723,10 +738,25 @@ class MainActivity : ComponentActivity() {
             }
             minimumHeight = dp(104)
         }
-        profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
-            contentDescription = "Avatar du joueur"
-        })
+        val avatarPng = homePng("home_avatar_benjamin")
+        if (avatarPng != null) {
+            profileStrip.addView(android.widget.ImageView(this).apply {
+                setImageDrawable(avatarPng)
+                scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.OVAL
+                    setColor(0x00000000); setStroke(dp(2), 0xFF00F0FF.toInt())
+                }
+                clipToOutline = true
+                layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
+                contentDescription = "Avatar du joueur"
+            })
+        } else {
+            profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(96), dp(96))
+                contentDescription = "Avatar du joueur"
+            })
+        }
         val profileInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
@@ -880,12 +910,11 @@ class MainActivity : ComponentActivity() {
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(dp(12), dp(9), dp(8), dp(9))
                 minimumHeight = dp(82)
-                background = android.graphics.drawable.GradientDrawable(
-                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(0xFF102C36.toInt(), 0xFF061018.toInt())
-                ).apply {
-                    cornerRadius = dp(22).toFloat()
-                    setStroke(dp(2), accent)
+                background = neonImageBackground(
+                    when (title) { "ENTRAÎNEMENT" -> "home_training_bg"; "MODE CLASSÉ" -> "home_ranked_bg"; else -> "home_tournaments_bg" },
+                    intArrayOf(0xFF102C36.toInt(), 0xFF061018.toInt()), dp(22).toFloat()
+                ).also {
+                    (it as? android.graphics.drawable.GradientDrawable)?.setStroke(dp(2), accent)
                 }
                 elevation = dp(8).toFloat()
                 layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
@@ -1297,12 +1326,22 @@ class MainActivity : ComponentActivity() {
                 isFocusable = true
                 setOnClickListener { action() }
             }
-            item.addView(TextView(this).apply {
-                text = symbol
-                textSize = 20f
-                gravity = Gravity.CENTER
-                setTextColor(0xFFF4FCFF.toInt())
-            })
+            val navIconId = resources.getIdentifier("ic_nav_" + key, "drawable", packageName)
+            if (navIconId != 0) {
+                item.addView(android.widget.ImageView(this).apply {
+                    setImageResource(navIconId)
+                    scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                    layoutParams = LinearLayout.LayoutParams(dp(25), dp(25))
+                    contentDescription = label
+                })
+            } else {
+                item.addView(TextView(this).apply {
+                    text = symbol
+                    textSize = 20f
+                    gravity = Gravity.CENTER
+                    setTextColor(0xFFF4FCFF.toInt())
+                })
+            }
             item.addView(TextView(this).apply {
                 text = label
                 textSize = 9f
