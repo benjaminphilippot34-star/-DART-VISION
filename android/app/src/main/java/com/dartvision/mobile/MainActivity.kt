@@ -348,10 +348,10 @@ class MainActivity : ComponentActivity() {
 
     private fun buildUi() {
         val bg = 0xFFE8F5F2.toInt()
-        val panelColor = 0xFF101720.toInt()
-        val teal = 0xFF00F0FF.toInt()
-        val white = 0xFFF4F8FA.toInt()
-        val muted = 0xFF91BFC2.toInt()
+        val panelColor = 0xFFFFFFFF.toInt()
+        val teal = 0xFF079BA5.toInt()
+        val white = 0xFF173331.toInt()
+        val muted = 0xFF687F7D.toInt()
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
         fun txt(value: String, size: Float, color: Int = white, bold: Boolean = false) =
             TextView(this).apply {
@@ -365,10 +365,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(15), dp(14), dp(15), dp(14))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF14202B.toInt(), 0xFF05080D.toInt(), 0xFF1A0B13.toInt())
+                intArrayOf(0xFFFFFFFF.toInt(), 0xFFF0F8F6.toInt())
             ).apply {
                 cornerRadius = dp(18).toFloat()
-                setStroke(dp(2), 0xFF00F0FF.toInt())
+                setStroke(dp(1), 0xFFD5E7E3.toInt())
             }
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(11) }
         }
@@ -377,9 +377,9 @@ class MainActivity : ComponentActivity() {
                 text = title; isAllCaps = false; textSize = 12f
                 setTextColor(if (primary) 0xFFFFFFFF.toInt() else white)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) 0xFFFF1E1E.toInt() else 0xFF05080D.toInt())
+                    setColor(if (primary) 0xFFE94B4B.toInt() else 0xFFFFFFFF.toInt())
                     cornerRadius = dp(15).toFloat()
-                    setStroke(dp(2), if (primary) 0xFFFF1E1E.toInt() else 0xFF00F0FF.toInt())
+                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFFD5E7E3.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -389,7 +389,7 @@ class MainActivity : ComponentActivity() {
         val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(8), dp(12), dp(12)); background = DartNeonBackgroundDrawable()
+            setPadding(dp(12), dp(8), dp(12), dp(12)); setBackgroundColor(bg)
         }
         scroll.addView(root)
         val home = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -535,7 +535,7 @@ class MainActivity : ComponentActivity() {
         root.addView(View(this).apply {
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(0x00FF1E1E, 0xFFFF1E1E.toInt(), 0xFF00F0FF.toInt(), 0x0000F0FF)
+                intArrayOf(0x00E94B4B, 0xFFE94B4B.toInt(), 0xFF079BA5.toInt(), 0x00079BA5)
             )
             layoutParams = LinearLayout.LayoutParams(-1, dp(1)).apply {
                 bottomMargin = dp(5)
@@ -571,7 +571,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             includeFontPadding = false
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF00F0FF.toInt())
+            setTextColor(0xFF079BA5.toInt())
             setShadowLayer(dp(12).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
             layoutParams = LinearLayout.LayoutParams(-1, dp(78))
         })
@@ -594,7 +594,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             letterSpacing = .08f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFF00F0FF.toInt())
+            setTextColor(0xFF079BA5.toInt())
             setPadding(0, dp(2), 0, dp(7))
         })
         heroBrand.addView(TextView(this).apply {
@@ -602,7 +602,7 @@ class MainActivity : ComponentActivity() {
             textSize = 10f
             gravity = Gravity.CENTER
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD_ITALIC)
-            setTextColor(0xFFFFFFFF.toInt())
+            setTextColor(0xFF173331.toInt())
         })
         hero.addView(heroBrand)
         home.addView(hero)
@@ -619,10 +619,10 @@ class MainActivity : ComponentActivity() {
                 setPadding(dp(8), dp(8), dp(8), dp(8))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(0xFF111B25.toInt(), 0xFF080B12.toInt(), 0xFF1B0B13.toInt())
+                    intArrayOf(0xFFFFFFFF.toInt(), 0xFFF2F8F6.toInt())
                 ).apply {
                     cornerRadius = dp(17).toFloat()
-                    setStroke(dp(2), accent)
+                    setStroke(dp(1), accent)
                 }
                 elevation = dp(6).toFloat()
                 isClickable = true
@@ -650,7 +650,7 @@ class MainActivity : ComponentActivity() {
             })
             tile.addView(TextView(this).apply {
                 text = subtitle; textSize = 11f; gravity = Gravity.CENTER
-                setTextColor(0xFFD0D7DF.toInt())
+                setTextColor(0xFF687F7D.toInt())
                 setPadding(0, dp(4), 0, 0)
             })
             categoryGrid.addView(tile)
@@ -874,7 +874,6 @@ class MainActivity : ComponentActivity() {
             letterSpacing = .05f
             typeface = android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC)
             setTextColor(white)
-            setShadowLayer(dp(7).toFloat(), 0f, 0f, 0xFFFF1E1E.toInt())
             setPadding(0, dp(7), 0, dp(2))
         })
         morePage.addView(TextView(this).apply {
@@ -883,7 +882,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             letterSpacing = .12f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-            setTextColor(0xFF00F0FF.toInt())
+            setTextColor(0xFF079BA5.toInt())
             setPadding(0, 0, 0, dp(14))
         })
         morePage.addView(txt("CAMÉRA & INSTALLATION", 11f, 0xFF00F0FF.toInt(), true))
@@ -1009,10 +1008,10 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(14), dp(14), dp(14), dp(16))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF101C28.toInt(), 0xFF05090F.toInt(), 0xFF240A14.toInt())
+                intArrayOf(0xFFFFFFFF.toInt(), 0xFFF0F8F6.toInt())
             ).apply {
                 cornerRadius = dp(20).toFloat()
-                setStroke(dp(2), 0xFF00F0FF.toInt())
+                setStroke(dp(1), 0xFFD5E7E3.toInt())
             }
             elevation = dp(4).toFloat()
         }
@@ -1022,7 +1021,7 @@ class MainActivity : ComponentActivity() {
                 textSize = 11f
                 letterSpacing = .12f
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
-                setTextColor(0xFF00F0FF.toInt())
+                setTextColor(0xFF079BA5.toInt())
                 setPadding(0, dp(13), 0, dp(7))
             })
         }
@@ -1032,14 +1031,14 @@ class MainActivity : ComponentActivity() {
                 inputType = inputTypeValue
                 setSingleLine(true)
                 textSize = 14f
-                setTextColor(android.graphics.Color.WHITE)
-                setHintTextColor(0xFF8997A5.toInt())
+                setTextColor(0xFF173331.toInt())
+                setHintTextColor(0xFF819390.toInt())
                 if (secret) transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
                 setPadding(dp(13), dp(11), dp(13), dp(11))
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF080F17.toInt())
                     cornerRadius = dp(12).toFloat()
-                    setStroke(dp(2), 0xFF00F0FF.toInt())
+                    setStroke(dp(1), 0xFFD5E7E3.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, dp(49)).apply {
                     bottomMargin = dp(9)
@@ -1054,9 +1053,9 @@ class MainActivity : ComponentActivity() {
                 setTextColor(android.graphics.Color.WHITE)
                 typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(if (primary) 0xFFEC102F.toInt() else 0xFF101B25.toInt())
+                    setColor(if (primary) 0xFFE94B4B.toInt() else 0xFFFFFFFF.toInt())
                     cornerRadius = dp(13).toFloat()
-                    setStroke(dp(2), if (primary) 0xFFFF6A7A.toInt() else 0xFF00F0FF.toInt())
+                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFFD5E7E3.toInt())
                 }
                 stateListAnimator = null
                 minHeight = dp(48)
@@ -1071,7 +1070,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.CENTER
             letterSpacing = .04f
             setTypeface(android.graphics.Typeface.create("sans-serif-black", android.graphics.Typeface.BOLD_ITALIC))
-            setTextColor(android.graphics.Color.WHITE)
+            setTextColor(0xFF173331.toInt())
             setPadding(0, dp(2), 0, dp(3))
         })
         panel.addView(TextView(this).apply {
@@ -1079,7 +1078,7 @@ class MainActivity : ComponentActivity() {
             textSize = 10f
             gravity = Gravity.CENTER
             letterSpacing = .15f
-            setTextColor(0xFF00F0FF.toInt())
+            setTextColor(0xFF079BA5.toInt())
             setPadding(0, 0, 0, dp(13))
         })
 
@@ -1090,7 +1089,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFF10232C.toInt(), 0xFF190D18.toInt())
+                intArrayOf(0xFFFFF4EF.toInt(), 0xFFFFE8DD.toInt())
             ).apply {
                 cornerRadius = dp(16).toFloat()
                 setStroke(dp(2), 0xFFFF1E1E.toInt())
@@ -1107,8 +1106,8 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Photo de profil ou avatar"
             background = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.OVAL
-                setColor(0xFF35131B.toInt())
-                setStroke(dp(2), 0xFFFF1E1E.toInt())
+                setColor(0xFFFFE8DD.toInt())
+                setStroke(dp(2), 0xFFE94B4B.toInt())
             }
             clipToOutline = true
         }
@@ -1122,12 +1121,12 @@ class MainActivity : ComponentActivity() {
             text = "PROFIL JOUEUR"
             textSize = 15f
             setTypeface(android.graphics.Typeface.DEFAULT_BOLD)
-            setTextColor(android.graphics.Color.WHITE)
+            setTextColor(0xFF173331.toInt())
         })
         avatarInfo.addView(TextView(this).apply {
             text = "Personnalise ton identité sur DART VISION"
             textSize = 11f
-            setTextColor(0xFFAFBBC7.toInt())
+            setTextColor(0xFF687F7D.toInt())
             setPadding(0, dp(4), 0, 0)
             maxLines = 2
         })
@@ -1750,11 +1749,11 @@ class MainActivity : ComponentActivity() {
     ) {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val backgroundColor = 0xFF101318.toInt()
-        val cardColor = 0xFF1B2028.toInt()
-        val accentColor = 0xFFE32636.toInt()
-        val whiteColor = 0xFFF5F6F8.toInt()
-        val mutedColor = 0xFF9AA3AF.toInt()
+        val backgroundColor = 0xFFE8F5F2.toInt()
+        val cardColor = 0xFFFFFFFF.toInt()
+        val accentColor = 0xFFE94B4B.toInt()
+        val whiteColor = 0xFF173331.toInt()
+        val mutedColor = 0xFF687F7D.toInt()
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(18), dp(20), dp(24))
@@ -1980,8 +1979,8 @@ class MainActivity : ComponentActivity() {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
         val accent = 0xFFFF3045.toInt()
-        val ink = 0xFFF4F8FA.toInt()
-        val muted = 0xFF91A4B2.toInt()
+        val ink = 0xFF173331.toInt()
+        val muted = 0xFF687F7D.toInt()
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
             setPadding(dp(12), dp(8), dp(12), dp(8))
@@ -2076,8 +2075,8 @@ class MainActivity : ComponentActivity() {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
         val accent = 0xFFFF3045.toInt()
-        val ink = 0xFFF4F8FA.toInt()
-        val muted = 0xFF91A4B2.toInt()
+        val ink = 0xFF173331.toInt()
+        val muted = 0xFF687F7D.toInt()
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
             setPadding(dp(12), dp(8), dp(12), dp(8))
@@ -2094,9 +2093,9 @@ class MainActivity : ComponentActivity() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(13), dp(14), dp(13), dp(14))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF172630.toInt())
+                    setColor(0xFFFFFFFF.toInt())
                     cornerRadius = dp(18).toFloat()
-                    setStroke(dp(1), 0xFF344A58.toInt())
+                    setStroke(dp(1), 0xFFD5E7E3.toInt())
                 }
                 isClickable = true
                 isFocusable = true
@@ -2856,7 +2855,7 @@ class MainActivity : ComponentActivity() {
             text = title
             textSize = 11f
             isAllCaps = false
-            setTextColor(0xFFFFFFFF.toInt())
+            setTextColor(0xFF173331.toInt())
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFFB71929.toInt())
                 cornerRadius = 12f * resources.displayMetrics.density
