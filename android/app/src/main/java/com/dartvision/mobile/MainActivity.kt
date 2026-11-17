@@ -717,10 +717,10 @@ class MainActivity : ComponentActivity() {
         }
         fun neonImageBackground(name: String, colors: IntArray, radius: Float): android.graphics.drawable.Drawable {
             val layers = ArrayList<android.graphics.drawable.Drawable>()
-            homePng(name)?.let { layers.add(it) }
             layers.add(android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, colors
             ).apply { cornerRadius = radius })
+            homePng(name)?.let { layers.add(it) }
             return if (layers.size == 1) layers[0] else android.graphics.drawable.LayerDrawable(layers.toTypedArray())
         }
 
