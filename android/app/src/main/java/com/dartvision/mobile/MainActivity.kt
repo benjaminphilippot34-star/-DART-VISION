@@ -41,6 +41,23 @@ import java.util.concurrent.atomic.AtomicReference
 
 data class Player(var name: String, var score: Int)
 
+/** Popups système habillées dans le style néon sombre de DART VISION. */
+private class DarkAlertBuilder(context: android.content.Context) :
+    AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_Alert) {
+    override fun create(): AlertDialog {
+        val dialog = super.create()
+        val d = context.resources.displayMetrics.density
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+            intArrayOf(0xFF102B35.toInt(), 0xFF06151D.toInt(), 0xFF031016.toInt())
+        ).apply {
+            cornerRadius = 22f * d
+            setStroke((2 * d).toInt(), 0xFF00DDE8.toInt())
+        })
+        return dialog
+    }
+}
+
 /** Original illustrated DART VISION avatar portraits, drawn locally without remote assets. */
 private class DartAvatarPortraitView(context: android.content.Context, private val style: Int) : View(context) {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -197,6 +214,168 @@ private class DartHomeArtworkView(context: android.content.Context, private val 
         when(kind) {
             0 -> { // manette de jeu
                 p.style=android.graphics.Paint.Style.FILL
+                p.color=0xFFF4F8FB.toInt()
+                p.setShadowLayer(s*.09f,0f,s*.03f,0xAAFFFFFF.toInt())
+                val body=android.graphics.Path().apply {
+                    moveTo(cx-s*.39f,cy-s*.10f); quadTo(cx-s*.44f,cy-s*.27f,cx-s*.26f,cy-s*.29f)
+                    lineTo(cx+s*.26f,cy-s*.29f); quadTo(cx+s*.44f,cy-s*.27f,cx+s*.39f,cy-s*.10f)
+                    lineTo(cx+s*.48f,cy+s*.22f); quadTo(cx+s*.49f,cy+s*.37f,cx+s*.34f,cy+s*.36f)
+                    lineTo(cx+s*.13f,cy+s*.15f); lineTo(cx-s*.13f,cy+s*.15f)
+                    lineTo(cx-s*.34f,cy+s*.36f); quadTo(cx-s*.49f,cy+s*.37f,cx-s*.48f,cy+s*.22f); close()
+                }
+                canvas.drawPath(body,p); p.clearShadowLayer()
+                line(canvas,cx-s*.25f,cy,cx-s*.07f,cy,0xFFED2439.toInt(),s*.075f)
+                line(canvas,cx-s*.16f,cy-s*.09f,cx-s*.16f,cy+s*.09f,0xFFED2439.toInt(),s*.075f)
+                p.style=android.graphics.Paint.Style.FILL; p.color=cyan
+                canvas.drawCircle(cx+s*.20f,cy-s*.05f,s*.055f,p); p.color=red
+                canvas.drawCircle(cx+s*.31f,cy+s*.06f,s*.055f,p)
+            }
+            1 -> { // globe
+                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.055f; p.color=white
+                p.setShadowLayer(s*.07f,0f,0f,cyan); canvas.drawCircle(cx,cy,s*.39f,p); p.clearShadowLayer()
+                canvas.drawOval(cx-s*.19f,cy-s*.39f,cx+s*.19f,cy+s*.39f,p)
+                canvas.drawLine(cx-s*.38f,cy,cx+s*.38f,cy,p)
+                canvas.drawArc(cx-s*.36f,cy-s*.19f,cx+s*.36f,cy+s*.19f,0f,180f,false,p)
+                canvas.drawArc(cx-s*.36f,cy-s*.19f,cx+s*.36f,cy+s*.19f,180f,180f,false,p)
+            }
+            2 -> { // cible et fléchette
+                p.style=android.graphics.Paint.Style.STROKE
+                intArrayOf(white,cyan,0xFF16D66B.toInt(),red).forEachIndexed { i,col ->
+                    p.color=col; p.strokeWidth=s*.045f
+                    canvas.drawCircle(cx,cy,s*(.38f-i*.085f),p)
+                }
+                line(canvas,cx+s*.04f,cy-s*.02f,cx+s*.42f,cy-s*.43f,white,s*.045f)
+                val dart=android.graphics.Path().apply {
+                    moveTo(cx+s*.35f,cy-s*.48f); lineTo(cx+s*.51f,cy-s*.52f)
+                    lineTo(cx+s*.45f,cy-s*.35f); close()
+                }
+                p.style=android.graphics.Paint.Style.FILL; p.color=cyan; canvas.drawPath(dart,p)
+                p.color=0xFF23E56B.toInt(); canvas.drawCircle(cx,cy,s*.06f,p)
+            }
+            3 -> { // trophée
+                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.075f; p.color=gold
+                p.setShadowLayer(s*.08f,0f,0f,gold)
+                canvas.drawArc(cx-s*.38f,cy-s*.34f,cx+s*.38f,cy+s*.20f,0f,180f,false,p)
+                canvas.drawArc(cx-s*.51f,cy-s*.31f,cx-s*.18f,cy+s*.06f,80f,205f,false,p)
+                canvas.drawArc(cx+s*.18f,cy-s*.31f,cx+s*.51f,cy+s*.06f,255f,205f,false,p)
+                p.clearShadowLayer()
+                p.style=android.graphics.Paint.Style.FILL
+                val cup=android.graphics.Path().apply {
+                    moveTo(cx-s*.30f,cy-s*.34f); lineTo(cx+s*.30f,cy-s*.34f)
+                    lineTo(cx+s*.23f,cy+s*.08f); quadTo(cx,cy+s*.32f,cx-s*.23f,cy+s*.08f); close()
+                }
+                p.shader=android.graphics.LinearGradient(cx-s*.3f,cy,cx+s*.3f,cy,0xFFFFF19A.toInt(),0xFFE89B00.toInt(),android.graphics.Shader.TileMode.CLAMP)
+                canvas.drawPath(cup,p); p.shader=null
+                p.color=gold; canvas.drawRect(cx-s*.055f,cy+s*.18f,cx+s*.055f,cy+s*.34f,p)
+                canvas.drawRoundRect(cx-s*.21f,cy+s*.32f,cx+s*.21f,cy+s*.41f,s*.035f,s*.035f,p)
+            }
+            4 -> { // calendrier
+                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.055f; p.color=white
+                p.setShadowLayer(s*.05f,0f,0f,cyan)
+                canvas.drawRoundRect(cx-s*.37f,cy-s*.31f,cx+s*.37f,cy+s*.36f,s*.07f,s*.07f,p)
+                canvas.drawLine(cx-s*.37f,cy-s*.12f,cx+s*.37f,cy-s*.12f,p)
+                canvas.drawLine(cx-s*.19f,cy-s*.43f,cx-s*.19f,cy-s*.20f,p)
+                canvas.drawLine(cx+s*.19f,cy-s*.43f,cx+s*.19f,cy-s*.20f,p)
+                p.clearShadowLayer()
+                p.style=android.graphics.Paint.Style.FILL; p.color=cyan
+                for(row in 0..1) for(col in 0..2) canvas.drawRoundRect(cx-s*.23f+col*s*.17f,cy+s*.01f+row*s*.15f,cx-s*.16f+col*s*.17f,cy+s*.08f+row*s*.15f,s*.018f,s*.018f,p)
+            }
+            6 -> { // maison
+                p.style = android.graphics.Paint.Style.FILL
+                p.color = cyan
+                p.setShadowLayer(s * .06f, 0f, 0f, cyan)
+                val house = android.graphics.Path().apply {
+                    moveTo(cx, cy - s * .40f)
+                    lineTo(cx + s * .42f, cy - s * .02f); lineTo(cx + s * .30f, cy - s * .02f)
+                    lineTo(cx + s * .30f, cy + s * .36f); lineTo(cx - s * .30f, cy + s * .36f)
+                    lineTo(cx - s * .30f, cy - s * .02f); lineTo(cx - s * .42f, cy - s * .02f)
+                    close()
+                }
+                canvas.drawPath(house, p)
+                p.clearShadowLayer()
+                p.color = 0xFF041016.toInt()
+                canvas.drawRoundRect(cx - s * .09f, cy + s * .08f, cx + s * .09f, cy + s * .36f, s * .02f, s * .02f, p)
+            }
+            7 -> { // barres (stats)
+                p.style = android.graphics.Paint.Style.FILL
+                p.color = white
+                canvas.drawRoundRect(cx - s * .36f, cy + s * .05f, cx - s * .18f, cy + s * .38f, s * .03f, s * .03f, p)
+                canvas.drawRoundRect(cx - s * .09f, cy - s * .12f, cx + s * .09f, cy + s * .38f, s * .03f, s * .03f, p)
+                canvas.drawRoundRect(cx + s * .18f, cy - s * .38f, cx + s * .36f, cy + s * .38f, s * .03f, s * .03f, p)
+            }
+            else -> { // board photo-like dartboard with three darts
+                p.style=android.graphics.Paint.Style.FILL; p.color=0xFF101821.toInt()
+                canvas.drawCircle(cx,cy,s*.47f,p)
+                p.style=android.graphics.Paint.Style.STROKE
+                for(i in 0..9) {
+                    p.strokeWidth=if(i%2==0) s*.065f else s*.035f
+                    p.color=if(i%2==0) 0xFF16D66B.toInt() else 0xFFECE7D9.toInt()
+                    canvas.drawCircle(cx,cy,s*(.41f-i*.034f),p)
+                }
+                p.color=red; p.strokeWidth=s*.045f; canvas.drawCircle(cx,cy,s*.09f,p)
+                val angles=floatArrayOf(-55f,-8f,42f)
+                angles.forEachIndexed { i,a ->
+                    val rad=Math.toRadians(a.toDouble())
+                    val x=cx+Math.cos(rad).toFloat()*s*.50f
+                    val y=cy+Math.sin(rad).toFloat()*s*.50f
+                    line(canvas,x,y,cx+Math.cos(rad).toFloat()*s*.17f,cy+Math.sin(rad).toFloat()*s*.17f,if(i==1) cyan else white,s*.035f)
+                    p.style=android.graphics.Paint.Style.FILL; p.color=if(i==1) cyan else red
+                    canvas.drawCircle(x,y,s*.045f,p)
+                }
+            }
+        }
+        p.shader=null; p.clearShadowLayer(); p.style=android.graphics.Paint.Style.FILL
+        p.strokeCap=android.graphics.Paint.Cap.BUTT
+    }
+}
+
+/** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
+private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
+    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    override fun draw(canvas: android.graphics.Canvas) {
+        val b = bounds
+        val w = b.width().toFloat()
+        val h = b.height().toFloat()
+        if (w <= 0f || h <= 0f) return
+
+        // Dégradé doux menthe / turquoise très clair.
+        paint.style = android.graphics.Paint.Style.FILL
+        paint.shader = android.graphics.LinearGradient(
+            0f, 0f, w * .18f, h,
+            intArrayOf(0xFFC8E7E2.toInt(), 0xFFE8F5F2.toInt(), 0xFFF7FBF9.toInt()),
+            floatArrayOf(0f, .52f, 1f),
+            android.graphics.Shader.TileMode.CLAMP
+        )
+        canvas.drawRect(b, paint)
+        paint.shader = null
+
+        // Trame fine, presque ton sur ton : lignes diagonales et points légers.
+        paint.style = android.graphics.Paint.Style.STROKE
+        paint.strokeWidth = maxOf(1f, resourcesDensity() * .65f)
+        paint.color = 0x183A8F88
+        val step = 34f * resourcesDensity()
+        var x = -h
+        while (x < w + h) {
+            canvas.drawLine(x, 0f, x + h, h, paint)
+            x += step
+        }
+        paint.style = android.graphics.Paint.Style.FILL
+        paint.color = 0x183A8F88
+        val dotStep = 26f * resourcesDensity()
+        var y = dotStep
+        while (y < h) {
+            var dx = dotStep
+            while (dx < w) {
+                canvas.drawCircle(dx, y, 0.8f * resourcesDensity(), paint)
+                dx += dotStep
+            }
+            y += dotStep
+        }
+        paint.alpha = 255
+    }
+    private fun resourcesDensity(): Float = android.content.res.Resources.getSystem().displayMetrics.density
+    override fun setAlpha(alpha: Int) { paint.alpha = alpha; invalidateSelf() }
+    override fun setColorFiltep.style=android.graphics.Paint.Style.FILL
                 p.color=0xFFF4F8FB.toInt()
                 p.setShadowLayer(s*.09f,0f,s*.03f,0xAAFFFFFF.toInt())
                 val body=android.graphics.Path().apply {
