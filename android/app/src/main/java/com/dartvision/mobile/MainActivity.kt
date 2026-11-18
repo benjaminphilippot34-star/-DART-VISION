@@ -1,5 +1,6 @@
-package com.dartvision.mobile
 
+package com.dartvision.mobile
+ 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.Intent
@@ -38,9 +39,9 @@ import java.security.MessageDigest
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
-
+ 
 data class Player(var name: String, var score: Int)
-
+ 
 /** Popups système habillées dans le style néon sombre de DART VISION. */
 private class DarkAlertBuilder(context: android.content.Context) :
     AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_Alert) {
@@ -57,7 +58,7 @@ private class DarkAlertBuilder(context: android.content.Context) :
         return dialog
     }
 }
-
+ 
 /** Original illustrated DART VISION avatar portraits, drawn locally without remote assets. */
 private class DartAvatarPortraitView(context: android.content.Context, private val style: Int) : View(context) {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -89,7 +90,7 @@ private class DartAvatarPortraitView(context: android.content.Context, private v
         paint.strokeWidth=maxOf(2f,r*.045f); paint.color=accent
         paint.setShadowLayer(r*.13f,0f,0f,accent); canvas.drawCircle(cx,cy,r*.94f,paint)
         paint.clearShadowLayer(); paint.style=android.graphics.Paint.Style.FILL
-
+ 
         // Epaules et veste esport
         val jacket=android.graphics.Path().apply {
             moveTo(cx-r*.72f,cy+r*.78f); lineTo(cx-r*.58f,cy+r*.42f)
@@ -101,7 +102,7 @@ private class DartAvatarPortraitView(context: android.content.Context, private v
         paint.color=accent; paint.strokeWidth=r*.045f
         canvas.drawLine(cx-r*.48f,cy+r*.49f,cx-r*.28f,cy+r*.78f,paint)
         canvas.drawLine(cx+r*.48f,cy+r*.49f,cx+r*.28f,cy+r*.78f,paint)
-
+ 
         // Cou et visage
         paint.color=skin
         canvas.drawRoundRect(cx-r*.17f,cy+r*.25f,cx+r*.17f,cy+r*.57f,r*.08f,r*.08f,paint)
@@ -157,8 +158,8 @@ private class DartAvatarPortraitView(context: android.content.Context, private v
         paint.strokeCap=android.graphics.Paint.Cap.BUTT
     }
 }
-
-
+ 
+ 
 /** Original neon dartboard artwork drawn natively for the DART VISION home screen. */
 private class DartNeonArtworkView(context: android.content.Context, private val kind: Int = 0) : View(context) {
     private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -191,7 +192,7 @@ private class DartNeonArtworkView(context: android.content.Context, private val 
         p.clearShadowLayer(); p.strokeCap=android.graphics.Paint.Cap.BUTT; p.style=android.graphics.Paint.Style.FILL
     }
 }
-
+ 
 /** Illustration vectorielle dédiée à l'accueil : manette, globe, cible, trophée et calendrier. */
 private class DartHomeArtworkView(context: android.content.Context, private val kind: Int) : View(context) {
     private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -328,7 +329,7 @@ private class DartHomeArtworkView(context: android.content.Context, private val 
         p.strokeCap=android.graphics.Paint.Cap.BUTT
     }
 }
-
+ 
 /** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
 private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -337,7 +338,7 @@ private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() 
         val w = b.width().toFloat()
         val h = b.height().toFloat()
         if (w <= 0f || h <= 0f) return
-
+ 
         // Dégradé doux menthe / turquoise très clair.
         paint.style = android.graphics.Paint.Style.FILL
         paint.shader = android.graphics.LinearGradient(
@@ -348,146 +349,7 @@ private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() 
         )
         canvas.drawRect(b, paint)
         paint.shader = null
-
-        // Trame fine, presque ton sur ton : lignes diagonales et points légers.
-        paint.style = android.graphics.Paint.Style.STROKE
-        paint.strokeWidth = maxOf(1f, resourcesDensity() * .65f)
-        paint.color = 0x183A8F88
-        val step = 34f * resourcesDensity()
-        var x = -h
-        while (x < w + h) {
-            canvas.drawLine(x, 0f, x + h, h, paint)
-            x += step
-        }
-        paint.style = android.graphics.Paint.Style.FILL
-        paint.color = 0x183A8F88
-        val dotStep = 26f * resourcesDensity()
-        var y = dotStep
-        while (y < h) {
-            var dx = dotStep
-            while (dx < w) {
-                canvas.drawCircle(dx, y, 0.8f * resourcesDensity(), paint)
-                dx += dotStep
-            }
-            y += dotStep
-        }
-        paint.alpha = 255
-    }
-    private fun resourcesDensity(): Float = android.content.res.Resources.getSystem().displayMetrics.density
-    override fun setAlpha(alpha: Int) { paint.alpha = alpha; invalidateSelf() }
-    override fun setColorFiltep.style=android.graphics.Paint.Style.FILL
-                p.color=0xFFF4F8FB.toInt()
-                p.setShadowLayer(s*.09f,0f,s*.03f,0xAAFFFFFF.toInt())
-                val body=android.graphics.Path().apply {
-                    moveTo(cx-s*.39f,cy-s*.10f); quadTo(cx-s*.44f,cy-s*.27f,cx-s*.26f,cy-s*.29f)
-                    lineTo(cx+s*.26f,cy-s*.29f); quadTo(cx+s*.44f,cy-s*.27f,cx+s*.39f,cy-s*.10f)
-                    lineTo(cx+s*.48f,cy+s*.22f); quadTo(cx+s*.49f,cy+s*.37f,cx+s*.34f,cy+s*.36f)
-                    lineTo(cx+s*.13f,cy+s*.15f); lineTo(cx-s*.13f,cy+s*.15f)
-                    lineTo(cx-s*.34f,cy+s*.36f); quadTo(cx-s*.49f,cy+s*.37f,cx-s*.48f,cy+s*.22f); close()
-                }
-                canvas.drawPath(body,p); p.clearShadowLayer()
-                line(canvas,cx-s*.25f,cy,cx-s*.07f,cy,0xFFED2439.toInt(),s*.075f)
-                line(canvas,cx-s*.16f,cy-s*.09f,cx-s*.16f,cy+s*.09f,0xFFED2439.toInt(),s*.075f)
-                p.style=android.graphics.Paint.Style.FILL; p.color=cyan
-                canvas.drawCircle(cx+s*.20f,cy-s*.05f,s*.055f,p); p.color=red
-                canvas.drawCircle(cx+s*.31f,cy+s*.06f,s*.055f,p)
-            }
-            1 -> { // globe
-                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.055f; p.color=white
-                p.setShadowLayer(s*.07f,0f,0f,cyan); canvas.drawCircle(cx,cy,s*.39f,p); p.clearShadowLayer()
-                canvas.drawOval(cx-s*.19f,cy-s*.39f,cx+s*.19f,cy+s*.39f,p)
-                canvas.drawLine(cx-s*.38f,cy,cx+s*.38f,cy,p)
-                canvas.drawArc(cx-s*.36f,cy-s*.19f,cx+s*.36f,cy+s*.19f,0f,180f,false,p)
-                canvas.drawArc(cx-s*.36f,cy-s*.19f,cx+s*.36f,cy+s*.19f,180f,180f,false,p)
-            }
-            2 -> { // cible et fléchette
-                p.style=android.graphics.Paint.Style.STROKE
-                intArrayOf(white,cyan,0xFF16D66B.toInt(),red).forEachIndexed { i,col ->
-                    p.color=col; p.strokeWidth=s*.045f
-                    canvas.drawCircle(cx,cy,s*(.38f-i*.085f),p)
-                }
-                line(canvas,cx+s*.04f,cy-s*.02f,cx+s*.42f,cy-s*.43f,white,s*.045f)
-                val dart=android.graphics.Path().apply {
-                    moveTo(cx+s*.35f,cy-s*.48f); lineTo(cx+s*.51f,cy-s*.52f)
-                    lineTo(cx+s*.45f,cy-s*.35f); close()
-                }
-                p.style=android.graphics.Paint.Style.FILL; p.color=cyan; canvas.drawPath(dart,p)
-                p.color=0xFF23E56B.toInt(); canvas.drawCircle(cx,cy,s*.06f,p)
-            }
-            3 -> { // trophée
-                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.075f; p.color=gold
-                p.setShadowLayer(s*.08f,0f,0f,gold)
-                canvas.drawArc(cx-s*.38f,cy-s*.34f,cx+s*.38f,cy+s*.20f,0f,180f,false,p)
-                canvas.drawArc(cx-s*.51f,cy-s*.31f,cx-s*.18f,cy+s*.06f,80f,205f,false,p)
-                canvas.drawArc(cx+s*.18f,cy-s*.31f,cx+s*.51f,cy+s*.06f,255f,205f,false,p)
-                p.clearShadowLayer()
-                p.style=android.graphics.Paint.Style.FILL
-                val cup=android.graphics.Path().apply {
-                    moveTo(cx-s*.30f,cy-s*.34f); lineTo(cx+s*.30f,cy-s*.34f)
-                    lineTo(cx+s*.23f,cy+s*.08f); quadTo(cx,cy+s*.32f,cx-s*.23f,cy+s*.08f); close()
-                }
-                p.shader=android.graphics.LinearGradient(cx-s*.3f,cy,cx+s*.3f,cy,0xFFFFF19A.toInt(),0xFFE89B00.toInt(),android.graphics.Shader.TileMode.CLAMP)
-                canvas.drawPath(cup,p); p.shader=null
-                p.color=gold; canvas.drawRect(cx-s*.055f,cy+s*.18f,cx+s*.055f,cy+s*.34f,p)
-                canvas.drawRoundRect(cx-s*.21f,cy+s*.32f,cx+s*.21f,cy+s*.41f,s*.035f,s*.035f,p)
-            }
-            4 -> { // calendrier
-                p.style=android.graphics.Paint.Style.STROKE; p.strokeWidth=s*.055f; p.color=white
-                p.setShadowLayer(s*.05f,0f,0f,cyan)
-                canvas.drawRoundRect(cx-s*.37f,cy-s*.31f,cx+s*.37f,cy+s*.36f,s*.07f,s*.07f,p)
-                canvas.drawLine(cx-s*.37f,cy-s*.12f,cx+s*.37f,cy-s*.12f,p)
-                canvas.drawLine(cx-s*.19f,cy-s*.43f,cx-s*.19f,cy-s*.20f,p)
-                canvas.drawLine(cx+s*.19f,cy-s*.43f,cx+s*.19f,cy-s*.20f,p)
-                p.clearShadowLayer()
-                p.style=android.graphics.Paint.Style.FILL; p.color=cyan
-                for(row in 0..1) for(col in 0..2) canvas.drawRoundRect(cx-s*.23f+col*s*.17f,cy+s*.01f+row*s*.15f,cx-s*.16f+col*s*.17f,cy+s*.08f+row*s*.15f,s*.018f,s*.018f,p)
-            }
-            else -> { // board photo-like dartboard with three darts
-                p.style=android.graphics.Paint.Style.FILL; p.color=0xFF101821.toInt()
-                canvas.drawCircle(cx,cy,s*.47f,p)
-                p.style=android.graphics.Paint.Style.STROKE
-                for(i in 0..9) {
-                    p.strokeWidth=if(i%2==0) s*.065f else s*.035f
-                    p.color=if(i%2==0) 0xFF16D66B.toInt() else 0xFFECE7D9.toInt()
-                    canvas.drawCircle(cx,cy,s*(.41f-i*.034f),p)
-                }
-                p.color=red; p.strokeWidth=s*.045f; canvas.drawCircle(cx,cy,s*.09f,p)
-                val angles=floatArrayOf(-55f,-8f,42f)
-                angles.forEachIndexed { i,a ->
-                    val rad=Math.toRadians(a.toDouble())
-                    val x=cx+Math.cos(rad).toFloat()*s*.50f
-                    val y=cy+Math.sin(rad).toFloat()*s*.50f
-                    line(canvas,x,y,cx+Math.cos(rad).toFloat()*s*.17f,cy+Math.sin(rad).toFloat()*s*.17f,if(i==1) cyan else white,s*.035f)
-                    p.style=android.graphics.Paint.Style.FILL; p.color=if(i==1) cyan else red
-                    canvas.drawCircle(x,y,s*.045f,p)
-                }
-            }
-        }
-        p.shader=null; p.clearShadowLayer(); p.style=android.graphics.Paint.Style.FILL
-        p.strokeCap=android.graphics.Paint.Cap.BUTT
-    }
-}
-
-/** Fond turquoise clair et trame géométrique discrète de la maquette validée. */
-private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() {
-    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-    override fun draw(canvas: android.graphics.Canvas) {
-        val b = bounds
-        val w = b.width().toFloat()
-        val h = b.height().toFloat()
-        if (w <= 0f || h <= 0f) return
-
-        // Dégradé doux menthe / turquoise très clair.
-        paint.style = android.graphics.Paint.Style.FILL
-        paint.shader = android.graphics.LinearGradient(
-            0f, 0f, w * .18f, h,
-            intArrayOf(0xFFC8E7E2.toInt(), 0xFFE8F5F2.toInt(), 0xFFF7FBF9.toInt()),
-            floatArrayOf(0f, .52f, 1f),
-            android.graphics.Shader.TileMode.CLAMP
-        )
-        canvas.drawRect(b, paint)
-        paint.shader = null
-
+ 
         // Trame fine, presque ton sur ton : lignes diagonales et points légers.
         paint.style = android.graphics.Paint.Style.STROKE
         paint.strokeWidth = maxOf(1f, resourcesDensity() * .65f)
@@ -518,7 +380,7 @@ private class DartNeonBackgroundDrawable : android.graphics.drawable.Drawable() 
     @Deprecated("Deprecated in Android")
     override fun getOpacity(): Int = android.graphics.PixelFormat.OPAQUE
 }
-
+ 
 class MainActivity : ComponentActivity() {
     private lateinit var status: TextView
     private lateinit var scoreView: TextView
@@ -572,7 +434,7 @@ class MainActivity : ComponentActivity() {
     private var profileAvatarPreview: ImageView? = null
     private var navigateHomeFromPage: (() -> Unit)? = null
     private var gameExitPrompt: (() -> Unit)? = null
-
+ 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buildUi()
@@ -582,7 +444,7 @@ class MainActivity : ComponentActivity() {
         handleAuthCallback(intent)
         syncAccountProfile()
     }
-
+ 
     override fun onResume() {
         super.onResume()
         val pendingApk = downloadedUpdate
@@ -594,13 +456,13 @@ class MainActivity : ComponentActivity() {
             checkForUpdates(silent = true)
         }
     }
-
+ 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         handleAuthCallback(intent)
     }
-
+ 
     private fun handleAuthCallback(callbackIntent: Intent?) {
         val uri = callbackIntent?.data ?: return
         if (uri.scheme != "dartvision" || uri.host != "auth-callback") return
@@ -638,7 +500,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun buildUi() {
         val bg = 0xFF031016.toInt()
         val panelColor = 0xFF10232D.toInt()
@@ -672,7 +534,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (primary) 0xFFE92335.toInt() else 0xFF102B35.toInt())
                     cornerRadius = dp(15).toFloat()
-                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFFD5E7E3.toInt())
+                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFF24505C.toInt())
                 }
                 minHeight = dp(46); stateListAnimator = null
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
@@ -735,7 +597,7 @@ class MainActivity : ComponentActivity() {
         }
         val header = android.widget.FrameLayout(this).apply {
             setBackgroundColor(0xFF031016.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(108)).apply {
+            layoutParams = LinearLayout.LayoutParams(-1, dp(120)).apply {
                 bottomMargin = dp(1)
             }
             clipChildren = false
@@ -767,7 +629,7 @@ class MainActivity : ComponentActivity() {
             }
         })
         header.addView(menuAction)
-
+ 
         // Le fichier logo complet occupe seul le centre : aucun texte DART VISION en doublon.
         val brand = ImageView(this).apply {
             setImageResource(R.drawable.dart_vision_logo)
@@ -777,7 +639,7 @@ class MainActivity : ComponentActivity() {
             layoutParams = android.widget.FrameLayout.LayoutParams(dp(276), dp(104), Gravity.CENTER)
         }
         header.addView(brand)
-
+ 
         val notificationAction = android.widget.FrameLayout(this).apply {
             layoutParams = android.widget.FrameLayout.LayoutParams(dp(42), dp(46), Gravity.CENTER_VERTICAL or Gravity.END)
             isClickable = true
@@ -829,242 +691,223 @@ class MainActivity : ComponentActivity() {
                 bottomMargin = dp(5)
             }
         })
-
+ 
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
         home.setBackgroundColor(0xFF031016.toInt())
         home.setPadding(dp(8), dp(2), dp(8), dp(5))
-
+ 
+        fun drawableId(name: String): Int = resources.getIdentifier(name, "drawable", packageName)
+        fun neon(fill: Int, stroke: Int, strokeDp: Int, radiusDp: Int = 0, oval: Boolean = false) =
+            android.graphics.drawable.GradientDrawable().apply {
+                if (oval) shape = android.graphics.drawable.GradientDrawable.OVAL
+                else cornerRadius = dp(radiusDp).toFloat()
+                setColor(fill)
+                if (strokeDp > 0) setStroke(dp(strokeDp), stroke)
+            }
+        fun arrowCircle(): TextView = TextView(this).apply {
+            text = "›"; textSize = 26f; gravity = Gravity.CENTER
+            includeFontPadding = false
+            setTextColor(0xFFFFFFFF.toInt())
+            background = neon(0x22000000, 0xFFEAFBFF.toInt(), 2, oval = true)
+        }
+ 
+        // ----- Profil (sans cadre, grand avatar) -----
         val profileStrip = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(10), dp(7), dp(10), dp(7))
-            background = android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                intArrayOf(0xFF102B35.toInt(), 0xFF06151D.toInt())
-            ).apply {
-                cornerRadius = dp(23).toFloat()
-                setStroke(dp(2), 0xFF00EAF4.toInt())
-            }
-            elevation = dp(8).toFloat()
-            minimumHeight = dp(96)
-            layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
-                setMargins(dp(2), dp(4), dp(2), dp(9))
-            }
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+            layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(dp(2), dp(2), dp(2), dp(8)) }
         }
-        profileStrip.addView(DartAvatarPortraitView(this, 0).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(76), dp(76))
-            contentDescription = "Avatar du joueur"
-        })
+        val avatarFrame = FrameLayout(this).apply {
+            setPadding(dp(5), dp(5), dp(5), dp(5))
+            elevation = dp(8).toFloat()
+            background = neon(0xFF0A1A22.toInt(), 0xFF00EAF4.toInt(), 3, oval = true)
+        }
+        val avatarRes = drawableId("home_avatar_benjamin")
+        if (avatarRes != 0) {
+            avatarFrame.addView(ImageView(this).apply {
+                setImageResource(avatarRes)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                outlineProvider = object : android.view.ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: android.graphics.Outline) {
+                        outline.setOval(0, 0, view.width, view.height)
+                    }
+                }
+                clipToOutline = true
+            }, FrameLayout.LayoutParams(-1, -1))
+        } else {
+            avatarFrame.addView(DartAvatarPortraitView(this, 0), FrameLayout.LayoutParams(-1, -1))
+        }
+        profileStrip.addView(avatarFrame, LinearLayout.LayoutParams(dp(108), dp(108)))
+ 
         val profileInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(11), 0, dp(4), 0)
-            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            setPadding(dp(12), 0, 0, 0)
         }
         profileInfo.addView(TextView(this).apply {
             text = accountPreferences().getString("display_name", "Benjamin Philippot")
-            textSize = 17.5f
+            textSize = 22f
             maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
             setTextColor(0xFFF4FCFF.toInt())
-            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD)
+            typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
         })
-        profileInfo.addView(TextView(this).apply {
-            text = "▮▮▮  1 245  ⭐"
-            textSize = 15f
-            setTextColor(0xFFFFD34E.toInt())
-            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
-            setPadding(0, dp(3), 0, dp(4))
+        val statsRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(4), 0, dp(7))
+        }
+        statsRow.addView(TextView(this).apply {
+            text = "▂▄▆"; textSize = 15f; includeFontPadding = false
+            setTextColor(0xFFFF2D2D.toInt())
         })
-        profileInfo.addView(TextView(this).apply {
-            text = "🟢 10 836 en ligne"
-            textSize = 11f
-            setTextColor(0xFF32E58C.toInt())
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-        })
-        profileStrip.addView(profileInfo)
-        val profileButton = TextView(this).apply {
-            text = "♟  Mon profil"
-            textSize = 12f
-            gravity = Gravity.CENTER
+        statsRow.addView(TextView(this).apply {
+            text = "  1 245  "; textSize = 20f
             setTextColor(0xFFFFFFFF.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-            setPadding(dp(14), dp(9), dp(14), dp(9))
+        })
+        statsRow.addView(TextView(this).apply {
+            text = "★"; textSize = 13f; gravity = Gravity.CENTER
+            setTextColor(0xFFFFFFFF.toInt())
+            background = neon(0xFFFFC83D.toInt(), 0, 0, oval = true)
+        }, LinearLayout.LayoutParams(dp(24), dp(24)))
+        statsRow.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+        statsRow.addView(TextView(this).apply {
+            text = "👤  Mon profil"; textSize = 12f; gravity = Gravity.CENTER
+            setTextColor(0xFFFFFFFF.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(dp(12), dp(8), dp(12), dp(8))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
                 intArrayOf(0xFF008DFF.toInt(), 0xFF064DCE.toInt())
-            ).apply {
-                cornerRadius = dp(28).toFloat()
-                setStroke(dp(2), 0xFF00EAF4.toInt())
-            }
-            elevation = dp(8).toFloat()
+            ).apply { cornerRadius = dp(28).toFloat(); setStroke(dp(2), 0xFF00EAF4.toInt()) }
             isClickable = true
             setOnClickListener { showPage("account") }
-        }
-        profileStrip.addView(profileButton)
-        home.addView(profileStrip)
-
-        val primaryMenuRow = LinearLayout(this).apply {
+        })
+        profileInfo.addView(statsRow)
+        val onlinePill = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
+            setPadding(dp(14), dp(5), dp(14), dp(5))
+            background = neon(0xFF06131A.toInt(), 0xFF00EAF4.toInt(), 1, 20)
         }
-        fun addPrimaryMenu(title: String, subtitle: String, accent: Int, artworkKind: Int, action: () -> Unit) {
-            val tile = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(12), dp(8), dp(12), dp(8))
+        onlinePill.addView(View(this).apply {
+            background = neon(0xFF32E58C.toInt(), 0, 0, oval = true)
+        }, LinearLayout.LayoutParams(dp(10), dp(10)).apply { rightMargin = dp(8) })
+        onlinePill.addView(TextView(this).apply {
+            text = "10 836 en ligne"; textSize = 13f
+            setTextColor(0xFFFFFFFF.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+        })
+        profileInfo.addView(onlinePill, LinearLayout.LayoutParams(-2, -2))
+        profileStrip.addView(profileInfo, LinearLayout.LayoutParams(0, -2, 1f))
+        home.addView(profileStrip)
+ 
+        // ----- Partie locale / Partie en ligne -----
+        val primaryMenuRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        fun addPrimaryMenu(title: String, subtitle: String, accent: Int, artKind: Int, colors: IntArray, action: () -> Unit) {
+            val tile = FrameLayout(this).apply {
                 background = android.graphics.drawable.GradientDrawable(
-                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                    if (title == "PARTIE LOCALE")
-                        intArrayOf(0xFFE92335.toInt(), 0xFF8E1425.toInt(), 0xFF170D17.toInt())
-                    else
-                        intArrayOf(0xFF00AAB8.toInt(), 0xFF07515E.toInt(), 0xFF07151D.toInt())
-                ).apply {
-                    cornerRadius = dp(23).toFloat()
-                    setStroke(dp(2), accent)
-                }
+                    android.graphics.drawable.GradientDrawable.Orientation.TL_BR, colors
+                ).apply { cornerRadius = dp(22).toFloat(); setStroke(dp(2), accent) }
                 elevation = dp(9).toFloat()
+                minimumHeight = dp(150)
                 isClickable = true
                 isFocusable = true
-                minimumHeight = dp(122)
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f).apply {
-                    setMargins(dp(3), dp(3), dp(3), dp(9))
-                }
+                setPadding(dp(13), dp(12), dp(13), dp(12))
                 setOnClickListener { action() }
             }
-            val labels = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-            }
-            labels.addView(TextView(this).apply {
-                text = if (title == "PARTIE LOCALE") "PARTIE\nLOCALE" else "PARTIE\nEN LIGNE"
-                textSize = 19f
-                includeFontPadding = false
-                gravity = Gravity.START
+            val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            top.addView(TextView(this).apply {
+                text = title; textSize = 20f
                 setTextColor(0xFFFFFFFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
-            })
-            labels.addView(TextView(this).apply {
-                text = if (title == "PARTIE LOCALE") "Jouer sur un seul\ntéléphone ou en\nréseau local." else "Défier des joueurs\nà distance et suivre\ndes matchs en direct."
-                textSize = 11.5f
-                includeFontPadding = false
-                gravity = Gravity.START
+            }, LinearLayout.LayoutParams(0, -2, 1f))
+            top.addView(DartHomeArtworkView(this, artKind), LinearLayout.LayoutParams(dp(52), dp(52)))
+            col.addView(top)
+            col.addView(TextView(this).apply {
+                text = subtitle; textSize = 12f
                 setTextColor(0xFFF1F7FA.toInt())
-                setPadding(0, dp(4), 0, 0)
+                setPadding(0, dp(6), dp(34), 0)
             })
-            tile.addView(labels)
-            tile.addView(DartHomeArtworkView(this, if (title == "PARTIE LOCALE") 0 else 1).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(54), dp(68))
-                contentDescription = title
-            })
-            tile.addView(TextView(this).apply {
-                text = "›"
-                textSize = 25f
-                gravity = Gravity.CENTER
-                includeFontPadding = false
-                setTextColor(0xFFFFFFFF.toInt())
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setColor(0x22000000)
-                    setStroke(dp(1), 0xDFFFFFFF.toInt())
-                }
-                layoutParams = LinearLayout.LayoutParams(dp(28), dp(28)).apply { leftMargin = dp(2) }
-                contentDescription = "Ouvrir $title"
-            })
-            primaryMenuRow.addView(tile)
+            tile.addView(col, FrameLayout.LayoutParams(-1, -2))
+            tile.addView(arrowCircle(), FrameLayout.LayoutParams(dp(30), dp(30), Gravity.BOTTOM or Gravity.END))
+            primaryMenuRow.addView(tile, LinearLayout.LayoutParams(0, -1, 1f).apply { setMargins(dp(3), dp(3), dp(3), dp(9)) })
         }
-        addPrimaryMenu("PARTIE LOCALE", "Jouer sur cet appareil\nou en réseau local", 0xFFFF394A.toInt(), 1) {
+        addPrimaryMenu("PARTIE\nLOCALE", "Jouer sur un seul téléphone ou en réseau local.",
+            0xFFFF394A.toInt(), 0,
+            intArrayOf(0xFFE92335.toInt(), 0xFF8E1425.toInt(), 0xFF170D17.toInt())) {
             if (restoreX01Game()) {
                 gameInProgress = true
                 showPage("game")
                 showRestoredGameScreen()
             } else {
-                // Affiche le choix des modes au-dessus de l’accueil : fermer le dialogue
-                // ramène ainsi directement à l’accueil au lieu d’exposer l’écran de jeu vide.
-                showGameModes()
+                showPage("game"); showGameModes()
             }
         }
-        addPrimaryMenu("PARTIE EN LIGNE", "Défier des joueurs\nà distance", 0xFF00E5F2.toInt(), 3) {
+        addPrimaryMenu("PARTIE\nEN LIGNE", "Défier des joueurs à distance et suivre des matchs en direct.",
+            0xFF00E5F2.toInt(), 1,
+            intArrayOf(0xFF00AAB8.toInt(), 0xFF07515E.toInt(), 0xFF07151D.toInt())) {
             showPage("players")
         }
         home.addView(primaryMenuRow)
-
-        fun addWideMenu(title: String, subtitle: String, accent: Int, icon: String, action: () -> Unit) {
+ 
+        // ----- Entraînement / Mode classé / Tournois -----
+        fun addWideMenu(title: String, subtitle: String, accent: Int, leftKind: Int, rightKind: Int, rightRes: String, action: () -> Unit) {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(12), dp(8), dp(8), dp(8))
+                minimumHeight = dp(92)
+                setPadding(dp(12), dp(8), dp(10), dp(8))
                 background = android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
                     intArrayOf(0xFF102C36.toInt(), 0xFF061018.toInt())
-                ).apply {
-                    cornerRadius = dp(22).toFloat()
-                    setStroke(dp(2), accent)
-                }
+                ).apply { cornerRadius = dp(22).toFloat(); setStroke(dp(2), accent) }
                 elevation = dp(8).toFloat()
-                minimumHeight = dp(78)
-                layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
-                    setMargins(dp(3), dp(4), dp(3), dp(8))
-                }
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(dp(3), dp(4), dp(3), dp(8)) }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener { action() }
             }
-            val leftArtworkKind = when (title) { "ENTRAÎNEMENT" -> 2; "MODE CLASSÉ" -> 3; else -> 4 }
-            row.addView(DartHomeArtworkView(this, leftArtworkKind).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(52), -1)
-                contentDescription = title
-            })
-            val labels = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-            }
+            row.addView(DartHomeArtworkView(this, leftKind),
+                LinearLayout.LayoutParams(dp(44), dp(44)).apply { rightMargin = dp(10) })
+            val labels = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             labels.addView(TextView(this).apply {
-                text = title
-                textSize = 19f
-                includeFontPadding = false
+                text = title; textSize = 20f
                 setTextColor(0xFFF5FCFF.toInt())
                 typeface = android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC)
             })
             labels.addView(TextView(this).apply {
-                text = subtitle
-                textSize = 12f
-                includeFontPadding = false
+                text = subtitle; textSize = 12f; maxLines = 3
                 setTextColor(0xFFE4F3F6.toInt())
                 setPadding(0, dp(2), 0, 0)
             })
-            row.addView(labels)
-            row.addView(DartHomeArtworkView(this, when (title) { "ENTRAÎNEMENT" -> 5; "MODE CLASSÉ" -> 3; else -> 5 }).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(72), -1)
-                contentDescription = "Illustration $title"
-            })
-            row.addView(TextView(this).apply {
-                text = "›"
-                textSize = 30f
-                gravity = Gravity.CENTER
-                setTextColor(0xFFFFFFFF.toInt())
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setColor(0x18000000)
-                    setStroke(dp(2), 0xFFEAFBFF.toInt())
-                }
-                layoutParams = LinearLayout.LayoutParams(dp(34), dp(34)).apply { leftMargin = dp(3) }
-            })
+            row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
+            val res = drawableId(rightRes)
+            val art: View = if (res != 0) ImageView(this).apply {
+                setImageResource(res)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            } else DartHomeArtworkView(this, rightKind)
+            row.addView(art, LinearLayout.LayoutParams(dp(84), dp(68)).apply { leftMargin = dp(6) })
+            row.addView(arrowCircle(), LinearLayout.LayoutParams(dp(32), dp(32)).apply { leftMargin = dp(6) })
             home.addView(row)
         }
-        addWideMenu("ENTRAÎNEMENT", "Travailler les simples, doubles, triples et finitions", 0xFF00E5F2.toInt(), "◎") {
+        addWideMenu("ENTRAÎNEMENT", "Travailler les simples, doubles, triples et finitions.",
+            0xFF00E5F2.toInt(), 2, 5, "home_training_bg") {
             showPage("game"); showTrainingModes()
         }
-        addWideMenu("MODE CLASSÉ", "Compétition, classement et progression", 0xFFFFC247.toInt(), "🏆") {
+        addWideMenu("MODE CLASSÉ", "Affrontez les meilleurs, progressez et améliorez votre classement.",
+            0xFFFFC247.toInt(), 3, 3, "home_ranked_bg") {
             showPage("game"); showGameModes()
         }
-        addWideMenu("TOURNOIS", "Participer à des tournois en ligne ou locaux", 0xFFB45BFF.toInt(), "♜") {
+        addWideMenu("TOURNOIS", "Participez à des tournois en ligne ou locaux.",
+            0xFFB45BFF.toInt(), 4, 5, "home_tournaments_bg") {
             showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
                 listOf("Tournois" to "L'espace tournois sera disponible ici."))
         }
-
-
+ 
+ 
         val quickLinks = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -1101,7 +944,7 @@ class MainActivity : ComponentActivity() {
         }
         quickLinks.visibility = View.GONE // Les raccourcis sont accessibles depuis la navigation et le menu.
         home.addView(quickLinks)
-
+ 
         homeUpdateBanner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(15), dp(13), dp(12), dp(13))
@@ -1128,7 +971,7 @@ class MainActivity : ComponentActivity() {
         }
         homeUpdateBanner?.addView(updateBannerAction)
         home.addView(homeUpdateBanner)
-
+ 
         // L’inscription et la connexion disposent de leur propre onglet.
         accountPage.addView(buildAccountPanel())
         discussionsPage.addView(txt("DISCUSSIONS", 20f, white, true))
@@ -1148,7 +991,7 @@ class MainActivity : ComponentActivity() {
         }
         updatePage.addView(installUpdateButton)
         updatePage.addView(txt("Android demandera de confirmer l'installation. La mise à jour conserve les données de l'application si elle est signée avec la même clé.", 10f, muted))
-
+ 
         // Écran de jeu compact inspiré de la maquette fournie.
         val currentPlayers = state.get().optJSONArray("players") ?: JSONArray()
         val active = state.get().optInt("active", 0).coerceIn(0, (currentPlayers.length() - 1).coerceAtLeast(0))
@@ -1162,7 +1005,7 @@ class MainActivity : ComponentActivity() {
         gameHeading.visibility = View.GONE
         gameHeadingView = gameHeading
         gamePage.addView(gameHeading)
-
+ 
         val scoreCard = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -1196,7 +1039,7 @@ class MainActivity : ComponentActivity() {
         }
         activePlayerPanel.addView(playerStatsView)
         scoreCard.addView(activePlayerPanel)
-
+ 
         val divider = View(this).apply { setBackgroundColor(0xFF314653.toInt()); layoutParams = LinearLayout.LayoutParams(dp(1), -1) }
         scoreCard.addView(divider)
         opponentScoresContainer = LinearLayout(this).apply {
@@ -1216,7 +1059,7 @@ class MainActivity : ComponentActivity() {
         scoreCard.visibility = View.GONE
         gameScoreCardView = scoreCard
         gamePage.addView(scoreCard)
-
+ 
         manualEntryHost = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         gamePage.addView(manualEntryHost)
         showManualEntryPrompt()
@@ -1236,7 +1079,7 @@ class MainActivity : ComponentActivity() {
         btn(next, "NOUVELLE PARTIE") { if (x01Engine != null) configureX01() else showGameModes() }
         gamePage.addView(next)
         gameNextActionsView = next
-
+ 
         // Joueurs
         playersPage.addView(txt("JOUEURS & ÉQUIPES", 20f, white, true))
         playersPage.addView(txt("Gère les participants de tes parties.", 11f, muted))
@@ -1259,7 +1102,7 @@ class MainActivity : ComponentActivity() {
         btn(playerActions, "＋ AJOUTER") { editPlayerName(null) }
         btn(playerActions, "CONFIGURER X01", true) { configureX01() }
         roster.addView(playerActions); playersPage.addView(roster)
-
+ 
         // Outils
         morePage.addView(TextView(this).apply {
             text = "PARAMÈTRES"
@@ -1304,13 +1147,14 @@ class MainActivity : ComponentActivity() {
         morePage.addView(cameraPanel)
         val settings = card().apply { elevation = dp(5).toFloat() }
         settings.addView(txt("GESTION DE LA PARTIE", 12f, 0xFFFF1E1E.toInt(), true))
-        btn(settings, "■  ARRÊTER LA PARTIE", false) {
+        val stopRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btn(stopRow, "■  ARRÊTER LA PARTIE", false) {
             if (!gameInProgress) {
-                AlertDialog.Builder(this).setTitle("Aucune partie en cours")
+                DarkAlertBuilder(this).setTitle("Aucune partie en cours")
                     .setMessage("Aucune partie active à arrêter.")
                     .setPositiveButton("OK", null).show()
             } else {
-                AlertDialog.Builder(this).setTitle("Arrêter la partie ?")
+                DarkAlertBuilder(this).setTitle("Arrêter la partie ?")
                     .setMessage("Veux-tu sauvegarder cette partie pour la reprendre plus tard ?")
                     .setPositiveButton("SAUVEGARDER") { _, _ ->
                         x01Engine?.let { saveX01Game() }
@@ -1331,15 +1175,16 @@ class MainActivity : ComponentActivity() {
                     .setNeutralButton("ANNULER", null).show()
             }
         }
+        settings.addView(stopRow)
         status = txt("PRÊT À JOUER", 12f, teal, true)
         settings.addView(txt("ÉTAT DE L’APPLICATION", 10f, muted, true)); settings.addView(status)
         val settingButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(settingButtons, "MISES À JOUR") { checkForUpdates(silent = false) }
         btn(settingButtons, "RÉGLAGES") { showAppSettings() }
         settings.addView(settingButtons); morePage.addView(settings)
-
+ 
         gameExitPrompt = {
-            AlertDialog.Builder(this).setTitle("Quitter la partie ?")
+            DarkAlertBuilder(this).setTitle("Quitter la partie ?")
                 .setMessage("Tu peux sauvegarder la partie pour la reprendre plus tard, l'abandonner sans sauvegarde ou continuer à jouer.")
                 .setPositiveButton("SAUVEGARDER ET QUITTER") { _, _ ->
                     x01Engine?.let { saveX01Game() }
@@ -1378,7 +1223,7 @@ class MainActivity : ComponentActivity() {
             }
         })
         root.addView(home); root.addView(gamePage); root.addView(playersPage); root.addView(morePage); root.addView(accountPage); root.addView(discussionsPage); root.addView(updatePage)
-
+ 
         // Navigation principale : même ordre et mêmes intitulés que la maquette validée.
         val navBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -1391,43 +1236,39 @@ class MainActivity : ComponentActivity() {
             }
             elevation = dp(8).toFloat()
         }
-        fun addNavItem(key: String, label: String, symbol: String, action: () -> Unit) {
+        fun addNavItem(key: String, label: String, kind: Int, iconRes: String, action: () -> Unit) {
             val item = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
                 setPadding(dp(2), dp(5), dp(2), dp(5))
-                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply {
-                    setMargins(dp(2), 0, dp(2), 0)
-                }
+                layoutParams = LinearLayout.LayoutParams(0, dp(58), 1f).apply { setMargins(dp(2), 0, dp(2), 0) }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener { action() }
             }
+            val resId = resources.getIdentifier(iconRes, "drawable", packageName)
+            if (resId != 0) {
+                item.addView(ImageView(this).apply { setImageResource(resId) }, LinearLayout.LayoutParams(dp(26), dp(26)))
+            } else {
+                item.addView(DartHomeArtworkView(this, kind), LinearLayout.LayoutParams(dp(26), dp(26)))
+            }
             item.addView(TextView(this).apply {
-                text = symbol
-                textSize = 20f
-                gravity = Gravity.CENTER
-                setTextColor(0xFFEAFBFF.toInt())
-            })
-            item.addView(TextView(this).apply {
-                text = label
-                textSize = 9f
-                gravity = Gravity.CENTER
+                text = label; textSize = 9f; gravity = Gravity.CENTER
                 setTextColor(0xFFEAFBFF.toInt())
             })
             navItems[key] = item
             navBar.addView(item)
         }
-        addNavItem("home", "Accueil", "⌂") { showPage("home") }
-        addNavItem("training", "Entraînement", "◎") { showPage("game"); showTrainingModes() }
-        addNavItem("players", "En ligne", "◎") { showPage("players") }
-        addNavItem("tournaments", "Tournois", "♜") {
+        addNavItem("home", "Accueil", 6, "ic_nav_home") { showPage("home") }
+        addNavItem("training", "Entraînement", 2, "ic_nav_training") { showPage("game"); showTrainingModes() }
+        addNavItem("players", "En ligne", 1, "ic_nav_players") { showPage("players") }
+        addNavItem("tournaments", "Tournois", 3, "ic_nav_tournaments") {
             showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
                 listOf("Tournois" to "L'espace tournois sera disponible ici."))
         }
-        addNavItem("stats", "Stats", "▥") { showAccountHistory() }
+        addNavItem("stats", "Stats", 7, "ic_nav_stats") { showAccountHistory() }
         bottomNavigationBar = navBar
-
+ 
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         shell.addView(navBar, LinearLayout.LayoutParams(-1, dp(68)))
@@ -1444,7 +1285,7 @@ class MainActivity : ComponentActivity() {
         }
         ViewCompat.requestApplyInsets(shell)
     }
-
+ 
     private fun buildAccountPanel(): LinearLayout {
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1475,7 +1316,7 @@ class MainActivity : ComponentActivity() {
                 setSingleLine(true)
                 textSize = 14f
                 setTextColor(0xFFF4FCFF.toInt())
-                setHintTextColor(0xFF819390.toInt())
+                setHintTextColor(0xFF6F8892.toInt())
                 if (secret) transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
                 setPadding(dp(13), dp(11), dp(13), dp(11))
                 background = android.graphics.drawable.GradientDrawable().apply {
@@ -1498,7 +1339,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(if (primary) 0xFFE92335.toInt() else 0xFF102B35.toInt())
                     cornerRadius = dp(13).toFloat()
-                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFFD5E7E3.toInt())
+                    setStroke(dp(1), if (primary) 0xFFE94B4B.toInt() else 0xFF24505C.toInt())
                 }
                 stateListAnimator = null
                 minHeight = dp(48)
@@ -1506,7 +1347,7 @@ class MainActivity : ComponentActivity() {
                 setOnClickListener { action() }
             }
         }
-
+ 
         panel.addView(TextView(this).apply {
             text = "MON COMPTE"
             textSize = 23f
@@ -1524,7 +1365,7 @@ class MainActivity : ComponentActivity() {
             setTextColor(0xFF079BA5.toInt())
             setPadding(0, 0, 0, dp(13))
         })
-
+ 
         // Carte profil responsive : les actions occupent une ligne dédiée
         // afin que leurs libellés ne soient jamais rognés sur les petits écrans.
         val avatarCard = LinearLayout(this).apply {
@@ -1532,7 +1373,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(12), dp(12), dp(12), dp(12))
             background = android.graphics.drawable.GradientDrawable(
                 android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                intArrayOf(0xFFFFF4EF.toInt(), 0xFFFFE8DD.toInt())
+                intArrayOf(0xFF10232D.toInt(), 0xFF06151D.toInt())
             ).apply {
                 cornerRadius = dp(16).toFloat()
                 setStroke(dp(2), 0xFFFF1E1E.toInt())
@@ -1549,7 +1390,7 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Photo de profil ou avatar"
             background = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.OVAL
-                setColor(0xFFFFE8DD.toInt())
+                setColor(0xFF06151D.toInt())
                 setStroke(dp(2), 0xFFE94B4B.toInt())
             }
             clipToOutline = true
@@ -1569,7 +1410,7 @@ class MainActivity : ComponentActivity() {
         avatarInfo.addView(TextView(this).apply {
             text = "Personnalise ton identité sur DART VISION"
             textSize = 11f
-            setTextColor(0xFF687F7D.toInt())
+            setTextColor(0xFF9BB4BE.toInt())
             setPadding(0, dp(4), 0, 0)
             maxLines = 2
         })
@@ -1580,7 +1421,7 @@ class MainActivity : ComponentActivity() {
             contentDescription = "Cible de fléchettes lumineuse"
         })
         avatarCard.addView(avatarIdentityRow)
-
+ 
         val avatarActions = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -1609,7 +1450,7 @@ class MainActivity : ComponentActivity() {
         avatarCard.addView(avatarActions)
         panel.addView(avatarCard)
         refreshProfileAvatar()
-
+ 
         sectionTitle("IDENTIFIANTS")
         val email = field("Adresse e-mail", android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
         email.setText(accountPreferences().getString("email", "").orEmpty())
@@ -1621,14 +1462,14 @@ class MainActivity : ComponentActivity() {
         panel.addView(password)
         panel.addView(phone)
         panel.addView(profileNameInput)
-
+ 
         panel.addView(actionButton("ENREGISTRER MON PROFIL", true) {
             saveAccountProfile(profileNameInput.text.toString())
         }, LinearLayout.LayoutParams(-1, dp(50)).apply { topMargin = dp(2); bottomMargin = dp(9) })
         panel.addView(actionButton("MES STATISTIQUES ET MON HISTORIQUE") {
             showAccountHistory()
         }, LinearLayout.LayoutParams(-1, dp(48)).apply { bottomMargin = dp(12) })
-
+ 
         sectionTitle("ACCÈS AU COMPTE")
         val accountActions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         accountActions.addView(actionButton("CRÉER UN COMPTE") {
@@ -1638,7 +1479,7 @@ class MainActivity : ComponentActivity() {
             runAccountRequest { SupabaseAuthClient().signIn(email.text.toString().trim(), password.text.toString()) }
         }, LinearLayout.LayoutParams(0, dp(47), 1f).apply { leftMargin = dp(5) })
         panel.addView(accountActions)
-
+ 
         val phoneActions = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(8), 0, 0)
@@ -1655,7 +1496,7 @@ class MainActivity : ComponentActivity() {
                 hint = "Code reçu par SMS"
                 inputType = android.text.InputType.TYPE_CLASS_NUMBER
             }
-            AlertDialog.Builder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
+            DarkAlertBuilder(this@MainActivity).setTitle("Vérification du téléphone").setView(code)
                 .setPositiveButton("Valider") { _, _ ->
                     runAccountRequest { SupabaseAuthClient().verifyPhoneOtp(number, code.text.toString().trim()) }
                 }.setNegativeButton("Annuler", null).show()
@@ -1663,7 +1504,7 @@ class MainActivity : ComponentActivity() {
         panel.addView(phoneActions)
         return panel
     }
-
+ 
     private fun showAvatarGallery() {
         val options = listOf(
             "ace", "shadow", "viper", "wolf", "fox", "royal",
@@ -1767,7 +1608,7 @@ class MainActivity : ComponentActivity() {
         val dialogHeight = minOf(dp(540), (availableHeight * .76f).toInt())
         dialog.window?.setLayout((resources.displayMetrics.widthPixels * .92f).toInt(), dialogHeight)
     }
-
+ 
     private fun refreshProfileAvatar() {
         val prefs = accountPreferences()
         val image = profileAvatarPreview ?: return
@@ -1787,7 +1628,7 @@ class MainActivity : ComponentActivity() {
             image.setImageBitmap(bitmap)
         }
     }
-
+ 
     @Deprecated("Deprecated in Android")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -1799,9 +1640,9 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Photo de profil enregistrée sur cet appareil.", Toast.LENGTH_SHORT).show()
         }
     }
-
+ 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-
+ 
     /**
      * Store account credentials in Android Keystore-backed encrypted preferences.
      * Migrate legacy preferences once, then remove the unencrypted copy.
@@ -1834,14 +1675,14 @@ class MainActivity : ComponentActivity() {
         }
         return secure
     }
-
+ 
     private fun accountId(): String? = accountPreferences().getString("user_id", null)
     private fun accountToken(): String? = accountPreferences().getString("access_token", null)
     private fun accountDisplayName(): String = accountPreferences()
         .getString("display_name", null)?.takeIf { it.isNotBlank() }
         ?: accountPreferences().getString("email", null)?.substringBefore("@")
             ?.takeIf { it.isNotBlank() } ?: "Mon profil"
-
+ 
     private fun syncAccountProfile() {
         val id = accountId() ?: return
         val token = accountToken() ?: return
@@ -1857,7 +1698,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun saveAccountProfile(rawName: String) {
         val name = rawName.trim()
         if (name.isBlank()) {
@@ -1881,7 +1722,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun showAccountHistory() {
         val id = accountId()
         val token = accountToken()
@@ -1926,7 +1767,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun saveFinishedAccountMatch() {
         if (!x01AccountParticipant || x01HistorySaved) return
         val id = accountId() ?: return
@@ -1972,7 +1813,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun showAuthenticatedHome() {
         // Après inscription/connexion, l’onglet d’accueil devient l’écran d’entrée.
         val root = (findViewById<android.view.View>(android.R.id.content) as? android.view.ViewGroup)
@@ -1986,7 +1827,7 @@ class MainActivity : ComponentActivity() {
         // La page d’accueil est l’écran par défaut après authentification.
         recreate()
     }
-
+ 
     private fun runAccountRequest(request: () -> SupabaseAuthClient.AuthResult) {
         Toast.makeText(this, "Connexion à Supabase…", Toast.LENGTH_SHORT).show()
         worker.execute {
@@ -2016,7 +1857,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun showMainMenu() {
         val items = arrayOf(
             "Nouvelle partie / configuration X01",
@@ -2027,7 +1868,7 @@ class MainActivity : ComponentActivity() {
             "Mode caméra",
             "Paramètres et mises à jour"
         )
-        AlertDialog.Builder(this)
+        DarkAlertBuilder(this)
             .setTitle("DART VISION • MENU")
             .setItems(items) { _, which ->
                 when (which) {
@@ -2043,7 +1884,7 @@ class MainActivity : ComponentActivity() {
             .setNegativeButton("Fermer", null)
             .show()
     }
-
+ 
     private fun managePlayers() {
         val prefs = getSharedPreferences("dart_vision_players", MODE_PRIVATE)
         val names = prefs.getString("names", "").orEmpty().split("\n").map { it.trim() }.filter { it.isNotBlank() }.toMutableList()
@@ -2062,7 +1903,7 @@ class MainActivity : ComponentActivity() {
                 row.addView(TextView(this).apply { text = name; textSize = 15f; setTextColor(0xFFF4F8FA.toInt()); layoutParams = LinearLayout.LayoutParams(0, -2, 1f) })
                 row.addView(TextView(this).apply { text = "✎"; textSize = 20f; setTextColor(0xFFFF3045.toInt()); setPadding(12, 8, 12, 8); setOnClickListener {
                     val field = EditText(this@MainActivity).apply { setText(name); setSelection(text.length); setSingleLine(true) }
-                    AlertDialog.Builder(this@MainActivity).setTitle("Modifier le pseudo").setView(field)
+                    DarkAlertBuilder(this@MainActivity).setTitle("Modifier le pseudo").setView(field)
                         .setNegativeButton("ANNULER", null).setPositiveButton("ENREGISTRER") { _, _ ->
                             val updated = field.text.toString().trim()
                             if (updated.isNotBlank() && names.indices.none { it != index && names[it].equals(updated, true) }) {
@@ -2079,7 +1920,7 @@ class MainActivity : ComponentActivity() {
         render(); container.addView(list)
         val addInput = EditText(this).apply { hint = "Nouveau pseudo"; setSingleLine(true); textSize = 16f; setPadding(14, 12, 14, 12); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF102B35.toInt()); cornerRadius = 12f; setStroke(1, 0xFFFF3045.toInt()) } }
         container.addView(addInput)
-        val dialog = AlertDialog.Builder(this).setTitle("MES JOUEURS").setMessage("Enregistre tes pseudos pour les retrouver à chaque nouvelle partie.").setView(container).setPositiveButton("AJOUTER", null).setNegativeButton("FERMER", null).create()
+        val dialog = DarkAlertBuilder(this).setTitle("MES JOUEURS").setMessage("Enregistre tes pseudos pour les retrouver à chaque nouvelle partie.").setView(container).setPositiveButton("AJOUTER", null).setNegativeButton("FERMER", null).create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = addInput.text.toString().trim()
@@ -2090,12 +1931,12 @@ class MainActivity : ComponentActivity() {
         }
         dialog.show()
     }
-
+ 
     private fun refreshUiAfterPlayersChanged() {
         buildUi()
         if (x01Engine != null) refreshX01() else refreshScore()
     }
-
+ 
     private fun editPlayerName(index: Int?) {
         val input = EditText(this).apply {
             hint = "Écris le nom que tu veux"
@@ -2109,7 +1950,7 @@ class MainActivity : ComponentActivity() {
                 setSelection(text.length)
             }
         }
-        AlertDialog.Builder(this)
+        DarkAlertBuilder(this)
             .setTitle(if (index == null) "Ajouter un joueur" else "Modifier le nom du joueur")
             .setView(input)
             .setNegativeButton("Annuler", null)
@@ -2129,7 +1970,7 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, "Joueurs mis à jour.", Toast.LENGTH_SHORT).show()
             }.show()
     }
-
+ 
     private fun showGameStatistics() {
         val engine = x01Engine
         val title = "STATISTIQUES"
@@ -2163,7 +2004,7 @@ class MainActivity : ComponentActivity() {
         }
         showInsightScreen(title, "VUE D’ENSEMBLE DE LA PARTIE", metrics, rows)
     }
-
+ 
     private fun showTurnHistory() {
         val engine = x01Engine
         val rows = if (engine == null || engine.state.history.isEmpty()) {
@@ -2183,7 +2024,7 @@ class MainActivity : ComponentActivity() {
         }
         showInsightScreen("HISTORIQUE", "30 DERNIÈRES VOLÉES", emptyList(), rows)
     }
-
+ 
     private fun showInsightScreen(
         title: String,
         subtitle: String,
@@ -2192,11 +2033,11 @@ class MainActivity : ComponentActivity() {
     ) {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
-        val backgroundColor = 0xFFE8F5F2.toInt()
-        val cardColor = 0xFFFFFFFF.toInt()
+        val backgroundColor = 0xFF031016.toInt()
+        val cardColor = 0xFF10232D.toInt()
         val accentColor = 0xFFE94B4B.toInt()
-        val whiteColor = 0xFF173331.toInt()
-        val mutedColor = 0xFF687F7D.toInt()
+        val whiteColor = 0xFFF4FCFF.toInt()
+        val mutedColor = 0xFF9BB4BE.toInt()
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(18), dp(20), dp(24))
@@ -2245,7 +2086,7 @@ class MainActivity : ComponentActivity() {
                         background = android.graphics.drawable.GradientDrawable().apply {
                             setColor(cardColor)
                             cornerRadius = dp(14).toFloat()
-                            setStroke(dp(1), 0xFF2B323D.toInt())
+                            setStroke(dp(1), 0xFF24505C.toInt())
                         }
                     }
                     metric.addView(TextView(this).apply {
@@ -2287,7 +2128,7 @@ class MainActivity : ComponentActivity() {
                 background = android.graphics.drawable.GradientDrawable().apply {
                     setColor(cardColor)
                     cornerRadius = dp(14).toFloat()
-                    setStroke(dp(1), 0xFF2B323D.toInt())
+                    setStroke(dp(1), 0xFF24505C.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                     setMargins(0, dp(4), 0, dp(4))
@@ -2317,10 +2158,10 @@ class MainActivity : ComponentActivity() {
         // Le bouton de fermeture est relié après l’affichage pour utiliser le contexte de la fenêtre.
         (header.getChildAt(1) as? Button)?.setOnClickListener { dialog.dismiss() }
     }
-
+ 
     private fun showAppSettings() {
         val items = arrayOf("Activer le mode normal", "Activer le mode caméra", "Effacer le calibrage", "Rechercher une mise à jour")
-        AlertDialog.Builder(this).setTitle("Paramètres")
+        DarkAlertBuilder(this).setTitle("Paramètres")
             .setItems(items) { _, which ->
                 when (which) {
                     0 -> setCameraMode(false)
@@ -2330,14 +2171,14 @@ class MainActivity : ComponentActivity() {
                 }
             }.setNegativeButton("Fermer", null).show()
     }
-
+ 
     private fun beginBoardCalibration() {
         calibrationPoints.clear()
         calibrationOverlay.resetPoints()
         calibrationOverlay.active = true
         status.text = "CALIBRATION : touche les 4 coins extérieurs dans l'ordre : haut gauche, haut droite, bas droite, bas gauche. Garde toute la cible visible."
     }
-
+ 
     private fun onCalibrationTap(viewX: Double, viewY: Double) {
         if (!calibrationOverlay.active) return
         if (frameAnalyzer.imageWidth <= 0 || frameAnalyzer.imageHeight <= 0) {
@@ -2374,7 +2215,7 @@ class MainActivity : ComponentActivity() {
             status.text = "Calibration invalide : ${e.message}. Recommence en visant les quatre coins."
         }
     }
-
+ 
     private fun loadBoardCalibration() {
         val raw = getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).getString("corners", null) ?: return
         try {
@@ -2392,7 +2233,7 @@ class MainActivity : ComponentActivity() {
             boardCalibration = null
         }
     }
-
+ 
     private fun clearBoardCalibration() {
         boardCalibration = null
         calibrationPoints.clear()
@@ -2401,15 +2242,15 @@ class MainActivity : ComponentActivity() {
         getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit().remove("corners").apply()
         status.text = "Calibration effacée."
     }
-
+ 
     private fun showTrainingModes() {
         showModeCatalogue(trainingOnly = true)
     }
-
+ 
     private fun showGameModes() {
         showModeCatalogue(trainingOnly = false)
     }
-
+ 
     private fun showModeCatalogue(trainingOnly: Boolean) {
         if (trainingOnly) {
             showModeFolder("ENTRAÎNEMENT", DartCounterModeCatalog.default.modes.filter {
@@ -2417,7 +2258,7 @@ class MainActivity : ComponentActivity() {
             })
             return
         }
-
+ 
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
         val dialog = android.app.Dialog(this)
@@ -2480,7 +2321,7 @@ class MainActivity : ComponentActivity() {
         dialog.setContentView(panel)
         dialog.setCancelable(true)
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-
+ 
         fun addFolder(icon: String, title: String, subtitle: String, artworkKind: Int, accent: Int, action: () -> Unit) {
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -2541,7 +2382,7 @@ class MainActivity : ComponentActivity() {
             }
             grid.addView(tile)
         }
-
+ 
         val allModes = DartCounterModeCatalog.default.modes
         addFolder("Match", "JOUER UN MATCH", "Lancer une partie classique : 301, 501 et variantes", 0, 0xFFFF394A.toInt()) {
             showModeFolder("JOUER UN MATCH", listOf(DartGameMode.X01))
@@ -2556,38 +2397,38 @@ class MainActivity : ComponentActivity() {
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.94f).toInt(), -2)
     }
-
+ 
     private fun showModeFolderUnavailable(title: String, message: String) {
-        AlertDialog.Builder(this)
+        DarkAlertBuilder(this)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("COMPRIS", null)
             .show()
     }
-
+ 
     private fun showModeFolder(title: String, modes: List<DartGameMode>) {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
         val accent = 0xFFFF3045.toInt()
-        val ink = 0xFF173331.toInt()
+        val ink = 0xFFF4FCFF.toInt()
         val muted = 0xFF9BB4BE.toInt()
         val grid = android.widget.GridLayout(this).apply {
             columnCount = 2
             setPadding(dp(12), dp(8), dp(12), dp(8))
             useDefaultMargins = false
         }
-        val dialog = AlertDialog.Builder(this)
+        val dialog = DarkAlertBuilder(this)
             .setTitle(title)
             .setView(ScrollView(this).apply { addView(grid) })
             .setNegativeButton("RETOUR", null)
             .create()
-
+ 
         modes.forEach { mode ->
             val tile = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(13), dp(14), dp(13), dp(14))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFFFFFFFF.toInt())
+                    setColor(0xFF10232D.toInt())
                     cornerRadius = dp(18).toFloat()
                     setStroke(dp(1), 0xFF24505C.toInt())
                 }
@@ -2630,7 +2471,7 @@ class MainActivity : ComponentActivity() {
         }
         dialog.show()
     }
-
+ 
     private fun configureTrainingMode() {
         x01Engine = null
         val names = mutableListOf<String>()
@@ -2706,7 +2547,7 @@ class MainActivity : ComponentActivity() {
         status.text = "MODE ${selectedMode.title.uppercase()} • moteur local • saisie manuelle"
         Toast.makeText(this, "${selectedMode.title} prêt. Saisis les fléchettes du tour.", Toast.LENGTH_LONG).show()
     }
-
+ 
     private fun showCheckoutSuggestions() {
         val game = x01Engine
         if (game == null) {
@@ -2716,7 +2557,7 @@ class MainActivity : ComponentActivity() {
         val state = game.state
         val score = state.players[state.activePlayer].score
         if (state.settings.outRule == X01OutRule.STRAIGHT_OUT) {
-            AlertDialog.Builder(this).setTitle("Conseils de sortie")
+            DarkAlertBuilder(this).setTitle("Conseils de sortie")
                 .setMessage("La partie est configurée en sortie libre : aucun finish en double n'est requis.")
                 .setPositiveButton("OK", null).show()
             return
@@ -2726,13 +2567,13 @@ class MainActivity : ComponentActivity() {
             if (score > 170) "Il n'existe pas de sortie en trois fléchettes au-dessus de 170."
             else "Aucune sortie directe en trois fléchettes pour $score."
         } else routes.mapIndexed { i, route -> "${i + 1}. ${route.notation}" }.joinToString("\n")
-        AlertDialog.Builder(this)
+        DarkAlertBuilder(this)
             .setTitle("SORTIES POSSIBLES • $score")
             .setMessage(message)
             .setPositiveButton("FERMER", null)
             .show()
     }
-
+ 
     private fun configureX01() {
         fun spinner(values: List<String>): Spinner = Spinner(this).apply {
             val spinnerAdapter = object : ArrayAdapter<String>(
@@ -2762,7 +2603,7 @@ class MainActivity : ComponentActivity() {
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFF102B35.toInt())
                 cornerRadius = 10f
-                setStroke(1, 0xFFB8B8C2.toInt())
+                setStroke(1, 0xFF24505C.toInt())
             }
             minimumHeight = 50
         }
@@ -2786,11 +2627,11 @@ class MainActivity : ComponentActivity() {
             EditText(this).apply {
                 hint = "Pseudo du joueur ${index + 1}"
                 setSingleLine(true); textSize = 16f
-                setTextColor(0xFF183B36.toInt()); setHintTextColor(0xFF788A86.toInt())
+                setTextColor(0xFFF4FCFF.toInt()); setHintTextColor(0xFF6F8892.toInt())
                 inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                 setPadding(14, 12, 14, 12); minimumHeight = 52
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFFFFFFFF.toInt()); cornerRadius = 12f; setStroke(1, 0xFFB8B8C2.toInt())
+                    setColor(0xFF081920.toInt()); cornerRadius = 12f; setStroke(1, 0xFF24505C.toInt())
                 }
                 existingPlayers.optJSONObject(index)?.optString("name", "")?.takeIf { it.isNotBlank() }?.let { setText(it) }
                     ?: setText(savedPlayerNames.getOrNull(index).orEmpty())
@@ -2806,16 +2647,16 @@ class MainActivity : ComponentActivity() {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(18, 12, 18, 12)
-            setBackgroundColor(0xFFF1F8F7.toInt())
+            setBackgroundColor(0xFF06151D.toInt())
         }
         fun section(title: String, subtitle: String? = null): LinearLayout {
             val card = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(18, 14, 18, 14)
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(android.graphics.Color.WHITE)
+                    setColor(0xFF10232D.toInt())
                     cornerRadius = 22f
-                    setStroke(1, 0xFFD5E8E5.toInt())
+                    setStroke(1, 0xFF24505C.toInt())
                 }
                 layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                     setMargins(0, 0, 0, 14)
@@ -2824,14 +2665,14 @@ class MainActivity : ComponentActivity() {
             card.addView(TextView(this).apply {
                 text = title
                 textSize = 17f
-                setTextColor(0xFF102C29.toInt())
+                setTextColor(0xFFF4FCFF.toInt())
                 setTypeface(android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD))
                 setPadding(0, 0, 0, 5)
             })
             if (subtitle != null) card.addView(TextView(this).apply {
                 text = subtitle
                 textSize = 11f
-                setTextColor(0xFF8E929B.toInt())
+                setTextColor(0xFF9BB4BE.toInt())
                 setPadding(0, 0, 0, 8)
             })
             content.addView(card)
@@ -2882,7 +2723,7 @@ class MainActivity : ComponentActivity() {
             isFillViewport = false
             addView(content)
         }
-        AlertDialog.Builder(this)
+        DarkAlertBuilder(this)
             .setTitle("MATCH")
             .setView(scrollContent)
             .setNegativeButton("ANNULER", null)
@@ -2919,7 +2760,7 @@ class MainActivity : ComponentActivity() {
             }
             .show()
     }
-
+ 
     /**
      * Rebuilds the live match screen after returning from the home page.
      * A saved match must never land on the empty/manual-entry placeholder screen.
@@ -2932,7 +2773,7 @@ class MainActivity : ComponentActivity() {
         refreshX01()
         enterManualTurn()
     }
-
+ 
     private fun showManualEntryPrompt() {
         val host = manualEntryHost ?: return
         host.removeAllViews()
@@ -2954,7 +2795,7 @@ class MainActivity : ComponentActivity() {
         }
         host.addView(prompt, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
     }
-
+ 
     private fun enterManualTurn(initialHit: DartHit? = null) {
         gameInProgress = true
         bottomNavigationBar?.visibility = if (currentPage == "game") View.GONE else View.VISIBLE
@@ -3048,7 +2889,7 @@ class MainActivity : ComponentActivity() {
             })
         }
         val submit = Button(this).apply {
-            text = "SAISIR"; isAllCaps = false; textSize = 13f; setTextColor(0xFF062A27.toInt())
+            text = "SAISIR"; isAllCaps = false; textSize = 13f; setTextColor(0xFFFFFFFF.toInt())
             background = rounded(teal, teal, 28)
             stateListAnimator = null; minHeight = dp(48)
             layoutParams = LinearLayout.LayoutParams(dp(82), dp(42)).apply { setMargins(dp(3), 0, 0, 0) }
@@ -3220,7 +3061,7 @@ class MainActivity : ComponentActivity() {
         page.addView(content)
         render()
     }
-
+ 
     private fun scoreToDarts(total: Int): List<DartHit> {
         require(total in 0..180)
         if (total == 0) return List(3) { DartHit.MISS }
@@ -3243,10 +3084,10 @@ class MainActivity : ComponentActivity() {
         val hits = find(total, 3) ?: throw IllegalArgumentException("Score non représentable")
         return hits + List(3 - hits.size) { DartHit(null, 1) }
     }
-
+ 
     private fun parseDartHit(raw: String): DartHit = DartHitParser.parse(raw)
-
-
+ 
+ 
     private fun saveX01Game() {
         val game = x01Engine ?: return
         val snapshot = game.state
@@ -3280,7 +3121,7 @@ class MainActivity : ComponentActivity() {
         getSharedPreferences("dart_vision_local", MODE_PRIVATE).edit()
             .putString("x01_state", json.toString()).apply()
     }
-
+ 
     private fun restoreX01Game(): Boolean {
         val raw = getSharedPreferences("dart_vision_local", MODE_PRIVATE).getString("x01_state", null) ?: return false
         return try {
@@ -3323,7 +3164,7 @@ class MainActivity : ComponentActivity() {
             false
         }
     }
-
+ 
     private fun refreshX01() {
         val engine = x01Engine ?: return
         val s = engine.state
@@ -3342,7 +3183,7 @@ class MainActivity : ComponentActivity() {
         refreshOpponentScores(opponentJson, s.activePlayer, 0xFF9AADB8.toInt(), 0xFFF2F6F8.toInt(), 0xFFFF3045.toInt())
         status.text = "MODE X01 • ${s.settings.startingScore} • hors ligne"
     }
-
+ 
     private fun addButton(row: LinearLayout, title: String, click: () -> Unit) {
         val b = Button(this).apply {
             text = title
@@ -3389,12 +3230,12 @@ class MainActivity : ComponentActivity() {
         }
         refreshScore()
     }
-
+ 
     private fun saveLocalState(value: JSONObject) {
         getSharedPreferences("dart_vision_local", MODE_PRIVATE)
             .edit().putString("game_state", value.toString()).apply()
     }
-
+ 
     private fun setCameraMode(enabled: Boolean) {
         cameraModeEnabled = enabled
         cameraPanelView?.visibility = if (enabled) View.VISIBLE else View.GONE
@@ -3411,7 +3252,7 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 51)
         }
     }
-
+ 
     private fun startCamera() {
         val future = ProcessCameraProvider.getInstance(this)
         future.addListener({
@@ -3427,13 +3268,13 @@ class MainActivity : ComponentActivity() {
             } catch (e: Exception) { status.text = status.text.toString() + "\nCaméra : ${e.message}" }
         }, ContextCompat.getMainExecutor(this))
     }
-
+ 
     private fun setZoom(value: Float) {
         val z = camera?.cameraInfo?.zoomState?.value ?: return
         zoom = value.coerceIn(z.minZoomRatio, z.maxZoomRatio)
         camera?.cameraControl?.setZoomRatio(zoom)
     }
-
+ 
     private fun localIp(): String {
         val all = NetworkInterface.getNetworkInterfaces()
         while (all.hasMoreElements()) {
@@ -3445,7 +3286,7 @@ class MainActivity : ComponentActivity() {
         }
         return "IP inconnue"
     }
-
+ 
     private fun joinHost(ip: String) {
         if (ip.isBlank()) { status.text = "Saisissez l’adresse IP du téléphone principal."; return }
         val clean = ip.removePrefix("http://").removeSuffix("/")
@@ -3465,7 +3306,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+ 
     private fun fetchRemoteState() {
         val base = hostUrl ?: return
         try {
@@ -3474,7 +3315,7 @@ class MainActivity : ComponentActivity() {
             runOnUiThread { refreshScore() }
         } catch (_: Exception) { runOnUiThread { status.text = "Connexion interrompue • tentative de reconnexion…" } }
     }
-
+ 
     private fun action(name: String, vararg params: Pair<String, String>) {
         worker.execute {
             try {
@@ -3490,7 +3331,7 @@ class MainActivity : ComponentActivity() {
             } catch (_: Exception) { runOnUiThread { status.text = "Action non transmise. Vérifiez la connexion." } }
         }
     }
-
+ 
     private fun handleHostAction(name: String, params: Map<String, String>) {
         synchronized(state) {
             val current = state.get()
@@ -3555,7 +3396,7 @@ class MainActivity : ComponentActivity() {
             saveLocalState(s)
         }
     }
-
+ 
     private fun refreshScore() {
         val s = state.get()
         val players = s.optJSONArray("players") ?: JSONArray()
@@ -3579,7 +3420,7 @@ class MainActivity : ComponentActivity() {
         playerStatsView.visibility = View.VISIBLE
         refreshOpponentScores(players, active, 0xFF91A4B2.toInt(), 0xFFF4F8FA.toInt(), 0xFFFF3045.toInt())
     }
-
+ 
     private fun refreshOpponentScores(players: JSONArray, active: Int, muted: Int, white: Int, teal: Int) {
         if (!::opponentScoresContainer.isInitialized) return
         opponentScoresContainer.removeAllViews()
@@ -3620,7 +3461,7 @@ class MainActivity : ComponentActivity() {
             })
         }
     }
-
+ 
     private fun httpGet(url: String): String {
         val c = URL(url).openConnection() as HttpURLConnection
         c.connectTimeout = 12000
@@ -3636,15 +3477,15 @@ class MainActivity : ComponentActivity() {
             c.disconnect()
         }
     }
-
+ 
     // Manifeste public du canal bêta ; le workflow de publication le met à jour.
     private val updateManifestUrl = "https://raw.githubusercontent.com/benjaminphilippot34-star/-DART-VISION/main/latest.json"
     private var downloadedUpdate: File? = null
-
+ 
     private fun checkForUpdates(silent: Boolean) {
         if (updateCheckRunning) return
         if (updateManifestUrl.contains("OWNER/REPO")) {
-            if (!silent) AlertDialog.Builder(this)
+            if (!silent) DarkAlertBuilder(this)
                 .setTitle("Mises à jour DART VISION")
                 .setMessage("Le système de mise à jour est préparé. La publication en ligne n'est pas encore configurée.")
                 .setPositiveButton("OK", null).show()
@@ -3667,7 +3508,7 @@ class MainActivity : ComponentActivity() {
                         updateNavButton?.visibility = View.GONE
                         homeUpdateBanner?.visibility = View.GONE
                         updateVersionLabel?.text = "Aucune mise à jour disponible. DART VISION est à jour."
-                        if (!silent) AlertDialog.Builder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show()
+                        if (!silent) DarkAlertBuilder(this).setTitle("DART VISION est à jour").setMessage("Version installée : ${packageManager.getPackageInfo(packageName, 0).versionName}").setPositiveButton("OK", null).show()
                     }
                     return@execute
                 }
@@ -3685,13 +3526,13 @@ class MainActivity : ComponentActivity() {
                     homeUpdateBanner?.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
-                if (!silent) runOnUiThread { AlertDialog.Builder(this).setTitle("Vérification impossible").setMessage("Impossible de joindre le serveur de mises à jour (${e.message ?: "erreur réseau"}). Vérifie ta connexion puis réessaie depuis PLUS > MISES À JOUR.").setPositiveButton("OK", null).show() }
+                if (!silent) runOnUiThread { DarkAlertBuilder(this).setTitle("Vérification impossible").setMessage("Impossible de joindre le serveur de mises à jour (${e.message ?: "erreur réseau"}). Vérifie ta connexion puis réessaie depuis PLUS > MISES À JOUR.").setPositiveButton("OK", null).show() }
             } finally {
                 updateCheckRunning = false
             }
         }
     }
-
+ 
     private fun downloadAndInstallUpdate(apkUrl: String, expectedSha256: String) {
         runOnUiThread { status.text = "Téléchargement de la mise à jour…" }
         worker.execute {
@@ -3722,15 +3563,15 @@ class MainActivity : ComponentActivity() {
                     launchApkInstaller(apk)
                 }
             } catch (e: Exception) {
-                runOnUiThread { AlertDialog.Builder(this).setTitle("Échec du téléchargement").setMessage(e.message ?: "Erreur inconnue").setPositiveButton("OK", null).show() }
+                runOnUiThread { DarkAlertBuilder(this).setTitle("Échec du téléchargement").setMessage(e.message ?: "Erreur inconnue").setPositiveButton("OK", null).show() }
             }
         }
     }
-
+ 
     private fun launchApkInstaller(apk: File) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !packageManager.canRequestPackageInstalls()) {
             awaitingInstallPermission = true
-            AlertDialog.Builder(this)
+            DarkAlertBuilder(this)
                 .setTitle("Autoriser l'installation")
                 .setMessage("Autorise DART VISION à installer sa mise à jour. Le téléchargement est déjà terminé : l'installation reprendra automatiquement à ton retour.")
                 .setNegativeButton("Plus tard") { _, _ -> awaitingInstallPermission = false }
@@ -3747,21 +3588,21 @@ class MainActivity : ComponentActivity() {
         }
         startActivity(intent)
     }
-
+ 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 51 && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED && cameraModeEnabled) startCamera()
         else if (requestCode == 51) { cameraModeEnabled = false; cameraPanelView?.visibility = View.GONE; status.text = "Caméra non activée. Le mode normal reste disponible." }
     }
-
+ 
     override fun onDestroy() {
         saveLocalState(state.get())
         server?.stop(); worker.shutdown(); poller.shutdownNow(); analysisExecutor.shutdown()
         super.onDestroy()
     }
 }
-
-
+ 
+ 
 private class DartboardPreview(context: android.content.Context) : View(context) {
     private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
     private val numbers = intArrayOf(20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
@@ -3819,7 +3660,7 @@ private class DartboardPreview(context: android.content.Context) : View(context)
         canvas.drawCircle(cx, cy, radius*.045f, paint)
     }
 }
-
+ 
 private class GameServer(
     port: Int,
     private val state: AtomicReference<JSONObject>,
