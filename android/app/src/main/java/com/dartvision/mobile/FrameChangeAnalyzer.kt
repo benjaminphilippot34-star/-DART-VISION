@@ -4,6 +4,11 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 data class ChangedRegion(
     val minX: Int,
@@ -14,6 +19,17 @@ data class ChangedRegion(
     val centroidX: Double,
     val centroidY: Double
 )
+
+/** Pointe estimée d'une fléchette, en coordonnées normalisées (0..1) du tampon d'analyse. */
+data class DartTip(
+    val normX: Double,
+    val normY: Double,
+    val pixelCount: Int,
+    val elongation: Double,
+    val confident: Boolean
+)
+
+data class DartTipResult(val tip: DartTip?, val note: String)
 
 /**
  * Compare des empreintes de luminance et filtre les changements fugitifs.
@@ -33,6 +49,7 @@ class FrameChangeAnalyzer(
     private val latestFrame = AtomicReference<ByteArray?>(null)
 
     @Volatile private var referenceFrame: ByteArray? = null
+    @Volatile private var latestMask: ByteArray? = null
     @Volatile private var persistenceCounts = ByteArray(sampleWidth * sampleHeight)
 
     @Volatile var changedPercent: Double? = null
@@ -78,6 +95,7 @@ class FrameChangeAnalyzer(
                 reference, sampled, persistenceCounts,
                 pixelThreshold, requiredStableFrames
             )
+            latestMask = stableMask
             changedPercent = changedPixelPercent(
                 ByteArray(stableMask.size), stableMask, 1
             )
@@ -97,6 +115,7 @@ class FrameChangeAnalyzer(
         persistenceCounts = ByteArray(sampleWidth * sampleHeight)
         changedPercent = 0.0
         changedRegions = emptyList()
+        latestMask = null
         return true
     }
 
@@ -110,7 +129,137 @@ class FrameChangeAnalyzer(
 
     fun hasReference(): Boolean = referenceFrame != null
 
+    /** Estime la pointe de la plus grande zone qui a changé de façon stable. */
+    @Synchronized
+    fun estimateDartTip(): DartTipResult {
+        if (referenceFrame == null) {
+            return DartTipResult(null, "Enregistre d'abord l'image avant tir.")
+        }
+        val mask = latestMask
+            ?: return DartTipResult(null, "Aucune analyse disponible. Attends une seconde puis réessaie.")
+        return locateDartTip(mask, sampleWidth, sampleHeight, minPixels = 40)
+    }
+
     companion object {
+        /**
+         * Cherche la plus grande zone changée, calcule son axe principal puis prend comme
+         * pointe l'extrémité la plus fine (l'empennage est large, la pointe est fine).
+         * Résultat approximatif : à valider par l'utilisateur.
+         */
+        internal fun locateDartTip(
+            mask: ByteArray,
+            width: Int,
+            height: Int,
+            minPixels: Int,
+            maxFraction: Double = 0.06
+        ): DartTipResult {
+            require(mask.size == width * height)
+            val seen = BooleanArray(mask.size)
+            val queue = IntArray(mask.size)
+            var best: IntArray? = null
+            var bestCount = 0
+            for (start in mask.indices) {
+                if (seen[start] || mask[start].toInt() == 0) continue
+                var head = 0
+                var tail = 0
+                queue[tail++] = start
+                seen[start] = true
+                while (head < tail) {
+                    val idx = queue[head++]
+                    val x = idx % width
+                    val y = idx / width
+                    if (x > 0) {
+                        val n = idx - 1
+                        if (!seen[n] && mask[n].toInt() != 0) { seen[n] = true; queue[tail++] = n }
+                    }
+                    if (x < width - 1) {
+                        val n = idx + 1
+                        if (!seen[n] && mask[n].toInt() != 0) { seen[n] = true; queue[tail++] = n }
+                    }
+                    if (y > 0) {
+                        val n = idx - width
+                        if (!seen[n] && mask[n].toInt() != 0) { seen[n] = true; queue[tail++] = n }
+                    }
+                    if (y < height - 1) {
+                        val n = idx + width
+                        if (!seen[n] && mask[n].toInt() != 0) { seen[n] = true; queue[tail++] = n }
+                    }
+                }
+                if (tail > bestCount) { bestCount = tail; best = queue.copyOf(tail) }
+            }
+            val pixels = best
+            if (pixels == null || bestCount < minPixels) {
+                return DartTipResult(null, "Aucune fléchette détectée. Vérifie l'image avant tir et la lumière.")
+            }
+            if (bestCount > mask.size * maxFraction) {
+                return DartTipResult(null, "Zone changée trop grande : main ou objet devant la cible ?")
+            }
+
+            val n = pixels.size.toDouble()
+            var sumX = 0.0
+            var sumY = 0.0
+            for (p in pixels) { sumX += p % width; sumY += p / width }
+            val meanX = sumX / n
+            val meanY = sumY / n
+            var sxx = 0.0
+            var syy = 0.0
+            var sxy = 0.0
+            for (p in pixels) {
+                val dx = p % width - meanX
+                val dy = p / width - meanY
+                sxx += dx * dx; syy += dy * dy; sxy += dx * dy
+            }
+            sxx /= n; syy /= n; sxy /= n
+            val half = (sxx + syy) / 2.0
+            val root = sqrt(max(0.0, half * half - (sxx * syy - sxy * sxy)))
+            val l1 = half + root
+            val l2 = max(half - root, 1e-6)
+            val elongation = sqrt(l1 / l2)
+
+            if (elongation < 1.3) {
+                return DartTipResult(
+                    DartTip(meanX / width, meanY / height, pixels.size, elongation, false),
+                    "Forme trop ronde : position approximative."
+                )
+            }
+
+            val theta = 0.5 * atan2(2.0 * sxy, sxx - syy)
+            val ux = cos(theta)
+            val uy = sin(theta)
+            var tMin = Double.MAX_VALUE
+            var tMax = -Double.MAX_VALUE
+            for (p in pixels) {
+                val t = (p % width - meanX) * ux + (p / width - meanY) * uy
+                if (t < tMin) tMin = t
+                if (t > tMax) tMax = t
+            }
+            val length = (tMax - tMin).coerceAtLeast(1.0)
+            var lowCount = 0
+            var highCount = 0
+            for (p in pixels) {
+                val t = (p % width - meanX) * ux + (p / width - meanY) * uy
+                if (t <= tMin + 0.25 * length) lowCount++
+                if (t >= tMax - 0.25 * length) highCount++
+            }
+            val tipIsLow = lowCount < highCount
+            val edge = 0.08 * length
+            var tipX = 0.0
+            var tipY = 0.0
+            var tipN = 0
+            for (p in pixels) {
+                val t = (p % width - meanX) * ux + (p / width - meanY) * uy
+                val inTip = if (tipIsLow) t <= tMin + edge else t >= tMax - edge
+                if (inTip) { tipX += p % width; tipY += p / width; tipN++ }
+            }
+            if (tipN == 0) { tipX = meanX; tipY = meanY; tipN = 1 } else { tipX /= tipN; tipY /= tipN }
+            val ratio = max(lowCount, highCount).toDouble() / max(1, minOf(lowCount, highCount))
+            val confident = elongation >= 1.8 && ratio >= 1.4
+            return DartTipResult(
+                DartTip(tipX / width, tipY / height, pixels.size, elongation, confident),
+                if (confident) "Fléchette détectée." else "Pointe incertaine : vérifie bien le score."
+            )
+        }
+
         internal fun sampleLuma(
             data: ByteArray,
             imageWidth: Int,
