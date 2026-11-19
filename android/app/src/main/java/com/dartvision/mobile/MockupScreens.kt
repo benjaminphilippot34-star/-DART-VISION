@@ -313,6 +313,9 @@ class MockupScreens(
 
     private fun buildOnline(dialog: Dialog, content: LinearLayout) {
         content.addView(buildTitleRow(dialog, "PARTIE EN LIGNE"))
+        content.addView(tv("Présence en direct non connectée • aucun compteur fictif", 12f, muted).apply {
+            setPadding(dp(4), dp(2), 0, dp(8))
+        })
         content.addView(banner(listOf("banner_online"), "🌐", 0xFF08303A.toInt(), 0xFF05121A.toInt()))
         content.addView(menuRow("ic_row_quick", "⚡", "Match rapide", "Jouer immédiatement contre un adversaire.",
             0xFFE92335.toInt(), 0xFF8E1425.toInt(), 0xFFFF394A.toInt(), "online:quick", dialog))
@@ -330,17 +333,22 @@ class MockupScreens(
 
     /** Valeurs par défaut = celles de la maquette. À remplacer par les vraies stats du compte. */
     data class StatsData(
-        val games: String = "125",
-        val wins: String = "78",
-        val winRate: String = "62,4 %",
-        val avg3: String = "83,72",
-        val avg1: String = "27,91",
-        val bestTurn: String = "140",
-        val bestFinish: String = "170",
-        val progression: List<Float> = listOf(61f, 68f, 74f, 71f, 80f, 86f, 97f)
+        val games: String = "—",
+        val wins: String = "—",
+        val winRate: String = "—",
+        val avg3: String = "—",
+        val avg1: String = "—",
+        val bestTurn: String = "—",
+        val bestFinish: String = "—",
+        val progression: List<Float> = emptyList()
     )
 
     var statsData: StatsData = StatsData()
+
+    /** Statistiques injectées depuis l'historique réel du compte. */
+    fun updateStats(data: StatsData) {
+        statsData = data
+    }
 
     private fun buildStats(dialog: Dialog, content: LinearLayout) {
         val d = statsData
