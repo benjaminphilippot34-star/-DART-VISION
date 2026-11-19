@@ -1,4 +1,3 @@
-
 package com.dartvision.mobile
  
 import android.Manifest
@@ -19,6 +18,9 @@ import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
@@ -395,7 +397,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var joinInput: EditText
     private lateinit var connectButton: Button
     private var camera: Camera? = null
-    private val frameAnalyzer = FrameChangeAnalyzer()
+    private val frameAnalyzer = FrameChangeAnalyzer(sampleWidth = 800, sampleHeight = 600, minRegionPixels = 12)
+    private var manualAddHit: ((DartHit) -> Unit)? = null
     private val analysisExecutor = Executors.newSingleThreadExecutor()
     private var server: GameServer? = null
     private val worker = Executors.newSingleThreadExecutor()
@@ -434,6 +437,8 @@ class MainActivity : ComponentActivity() {
     private var profileAvatarPreview: ImageView? = null
     private var navigateHomeFromPage: (() -> Unit)? = null
     private var gameExitPrompt: (() -> Unit)? = null
+    private var mockups: MockupScreens? = null
+    private var fixedHeader: View? = null
  
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -568,6 +573,7 @@ class MainActivity : ComponentActivity() {
             discussionsPage.visibility = if (page == "discussions") View.VISIBLE else View.GONE
             updatePage.visibility = if (page == "update") View.VISIBLE else View.GONE
             bottomNavigationBar?.visibility = if (page == "game" && gameInProgress) View.GONE else View.VISIBLE
+            fixedHeader?.visibility = if (page == "game" && gameInProgress) View.GONE else View.VISIBLE
             navItems["home"]?.let { v ->
                 v.background = if (page == "home") android.graphics.drawable.GradientDrawable().apply {
                     setColor(0xFF092B35.toInt()); cornerRadius = dp(13).toFloat(); setStroke(dp(1), 0xFF00E5F2.toInt())
@@ -590,6 +596,23 @@ class MainActivity : ComponentActivity() {
         }
         navigateToMorePage = { showPage("more") }
         navigateHomeFromPage = { showPage("home") }
+        mockups = MockupScreens(this) { key ->
+            when {
+                key == "home" -> showPage("home")
+                key == "menu" -> showPage("more")
+                key == "notifications" -> showPage("update")
+                key == "history" -> showAccountHistory()
+                key == "training" -> mockups?.show("training")
+                key == "online" -> mockups?.show("online")
+                key == "tournaments" -> mockups?.show("tournaments")
+                key == "stats" -> mockups?.show("stats")
+                key.startsWith("training:") -> { showPage("game"); showTrainingModes() }
+                key == "online:quick" -> showPage("players")
+                key.startsWith("online:") || key.startsWith("tournament:") ->
+                    Toast.makeText(this, "Bientôt disponible.", Toast.LENGTH_SHORT).show()
+                else -> Unit
+            }
+        }
         // En-tête de l'accueil — reproduit uniquement la bande supérieure de la maquette validée.
         window.statusBarColor = 0xFF031016.toInt()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
@@ -684,13 +707,14 @@ class MainActivity : ComponentActivity() {
             }
         })
         header.addView(notificationAction)
-        root.addView(header)
-        root.addView(View(this).apply {
-            setBackgroundColor(0xFF00EAF4.toInt())
-            layoutParams = LinearLayout.LayoutParams(-1, dp(1)).apply {
-                bottomMargin = dp(5)
-            }
-        })
+        val headerBlock = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(0xFF031016.toInt())
+            addView(header)
+            addView(View(this@MainActivity).apply { setBackgroundColor(0xFF00EAF4.toInt()) },
+                LinearLayout.LayoutParams(-1, dp(1)))
+        }
+        fixedHeader = headerBlock
  
         // ÉCRAN 1 — ACCUEIL : première étape de la refonte fidèle à la maquette validée.
         home.setBackgroundColor(0xFF031016.toInt())
@@ -849,7 +873,7 @@ class MainActivity : ComponentActivity() {
         addPrimaryMenu("PARTIE\nEN LIGNE", "Défier des joueurs à distance et suivre des matchs en direct.",
             0xFF00E5F2.toInt(), 1,
             intArrayOf(0xFF00AAB8.toInt(), 0xFF07515E.toInt(), 0xFF07151D.toInt())) {
-            showPage("players")
+            mockups?.show("online")
         }
         home.addView(primaryMenuRow)
  
@@ -895,7 +919,7 @@ class MainActivity : ComponentActivity() {
         }
         addWideMenu("ENTRAÎNEMENT", "Travailler les simples, doubles, triples et finitions.",
             0xFF00E5F2.toInt(), 2, 5, "home_training_bg") {
-            showPage("game"); showTrainingModes()
+            mockups?.show("training")
         }
         addWideMenu("MODE CLASSÉ", "Affrontez les meilleurs, progressez et améliorez votre classement.",
             0xFFFFC247.toInt(), 3, 3, "home_ranked_bg") {
@@ -903,8 +927,7 @@ class MainActivity : ComponentActivity() {
         }
         addWideMenu("TOURNOIS", "Participez à des tournois en ligne ou locaux.",
             0xFFB45BFF.toInt(), 4, 5, "home_tournaments_bg") {
-            showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
-                listOf("Tournois" to "L'espace tournois sera disponible ici."))
+            mockups?.show("tournaments")
         }
  
  
@@ -1142,7 +1165,7 @@ class MainActivity : ComponentActivity() {
         cameraPanel.addView(zoomRow)
         val analyze = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         btn(analyze, "IMAGE AVANT TIR") { status.text = if (frameAnalyzer.captureReference()) "Image de référence enregistrée." else "Caméra en attente." }
-        btn(analyze, "ANALYSER") { status.text = if (!frameAnalyzer.hasReference()) "Enregistre d'abord une image de référence." else "Analyse : " + "%.2f".format(frameAnalyzer.changedPercent ?: 0.0) + " % de différence. Vérifie le score proposé." }
+        btn(analyze, "ANALYSER") { analyzeCameraDart() }
         cameraPanel.addView(analyze); cameraPanelView = cameraPanel; cameraPanel.visibility = View.GONE
         morePage.addView(cameraPanel)
         val settings = card().apply { elevation = dp(5).toFloat() }
@@ -1260,16 +1283,14 @@ class MainActivity : ComponentActivity() {
             navBar.addView(item)
         }
         addNavItem("home", "Accueil", 6, "ic_nav_home") { showPage("home") }
-        addNavItem("training", "Entraînement", 2, "ic_nav_training") { showPage("game"); showTrainingModes() }
-        addNavItem("players", "En ligne", 1, "ic_nav_players") { showPage("players") }
-        addNavItem("tournaments", "Tournois", 3, "ic_nav_tournaments") {
-            showInsightScreen("TOURNOIS", "COMPÉTITIONS DART VISION", emptyList(),
-                listOf("Tournois" to "L'espace tournois sera disponible ici."))
-        }
-        addNavItem("stats", "Stats", 7, "ic_nav_stats") { showAccountHistory() }
+        addNavItem("training", "Entraînement", 2, "ic_nav_training") { mockups?.show("training") }
+        addNavItem("players", "En ligne", 1, "ic_nav_players") { mockups?.show("online") }
+        addNavItem("tournaments", "Tournois", 3, "ic_nav_tournaments") { mockups?.show("tournaments") }
+        addNavItem("stats", "Stats", 7, "ic_nav_stats") { mockups?.show("stats") }
         bottomNavigationBar = navBar
  
         val shell = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(bg) }
+        shell.addView(headerBlock, LinearLayout.LayoutParams(-1, -2))
         shell.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         shell.addView(navBar, LinearLayout.LayoutParams(-1, dp(68)))
         showPage("home")
@@ -2172,11 +2193,63 @@ class MainActivity : ComponentActivity() {
             }.setNegativeButton("Fermer", null).show()
     }
  
+    private fun analyzeCameraDart() {
+        val calibration = boardCalibration
+        if (calibration == null) {
+            status.text = "Calibre d'abord la cible avec le bouton CALIBRER."
+            return
+        }
+        val result = frameAnalyzer.estimateDartTip()
+        val tip = result.tip
+        if (tip == null) {
+            status.text = result.note
+            return
+        }
+        val score = calibration.scoreImagePoint(ImagePoint(tip.normX, tip.normY))
+        if (score == null) {
+            status.text = "Position impossible à convertir. Refais le calibrage."
+            return
+        }
+        val hit = when {
+            score.points == 0 -> DartHit.MISS
+            score.zone == "Bull" -> DartHit(25, 2)
+            score.zone == "Simple extérieur" -> DartHit(25, 1)
+            else -> DartHit(score.number, score.multiplier)
+        }
+        val label = when {
+            score.points == 0 -> "Hors cible"
+            score.zone == "Bull" -> "Bull (50)"
+            score.zone == "Simple extérieur" -> "25"
+            else -> {
+                val prefix = when (score.multiplier) { 3 -> "T"; 2 -> "D"; else -> "S" }
+                "$prefix${score.number} (${score.points})"
+            }
+        }
+        val warnings = mutableListOf<String>()
+        if (!tip.confident) warnings.add(result.note)
+        if (score.nearWire) warnings.add("Près d'un fil : vérifie bien.")
+        status.text = "Détecté : $label"
+        DarkAlertBuilder(this)
+            .setTitle("Fléchette : $label")
+            .setMessage(if (warnings.isEmpty()) "Valider ce score ?" else warnings.joinToString("\n") + "\n\nValider ce score ?")
+            .setPositiveButton("VALIDER") { _, _ -> acceptCameraDart(hit, label) }
+            .setNegativeButton("IGNORER", null)
+            .show()
+    }
+
+    private fun acceptCameraDart(hit: DartHit, label: String) {
+        val add = manualAddHit
+        if (add != null && manualEntryView?.parent != null) add(hit) else enterManualTurn(hit)
+        frameAnalyzer.captureReference()
+        status.text = "$label ajouté. Image avant tir mise à jour pour la fléchette suivante."
+        Toast.makeText(this, "$label ajouté.", Toast.LENGTH_SHORT).show()
+    }
+
     private fun beginBoardCalibration() {
         calibrationPoints.clear()
         calibrationOverlay.resetPoints()
         calibrationOverlay.active = true
-        status.text = "CALIBRATION : touche les 4 coins extérieurs dans l'ordre : haut gauche, haut droite, bas droite, bas gauche. Garde toute la cible visible."
+        status.text = "CALIBRATION : touche 4 points sur le bord extérieur du double, là où le fil touche les séparations 20|1 (haut), 6|10 (droite), 3|19 (bas), 11|14 (gauche), dans cet ordre. Garde toute la cible visible."
     }
  
     private fun onCalibrationTap(viewX: Double, viewY: Double) {
@@ -2193,21 +2266,21 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Touche à l'intérieur de l'image caméra.", Toast.LENGTH_SHORT).show()
             return
         }
-        calibrationPoints.add(point)
+        calibrationPoints.add(ImagePoint(point.x / frameAnalyzer.imageWidth, point.y / frameAnalyzer.imageHeight))
         calibrationOverlay.addScreenPoint(viewX, viewY)
         if (calibrationPoints.size < 4) {
             status.text = "Calibration : point ${calibrationPoints.size}/4 enregistré. Vise le coin ${calibrationPoints.size + 1}."
             return
         }
         try {
-            boardCalibration = BoardCalibration.fromFourCorners(calibrationPoints.toList())
+            boardCalibration = BoardCalibration.fromWirePoints(calibrationPoints.toList())
             val json = JSONArray().apply {
                 calibrationPoints.forEach { put(JSONObject().put("x", it.x).put("y", it.y)) }
             }
             getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit()
-                .putString("corners", json.toString()).apply()
+                .remove("corners").putString("wire_points", json.toString()).apply()
             calibrationOverlay.active = false
-            status.text = "Calibration enregistrée. La transformation perspective est prête ; la localisation automatique de la pointe reste à intégrer."
+            status.text = "Calibration enregistrée. Appuie sur IMAGE AVANT TIR avant chaque fléchette, puis sur ANALYSER après."
             Toast.makeText(this, "Calibration de la cible enregistrée.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             calibrationPoints.clear()
@@ -2217,7 +2290,7 @@ class MainActivity : ComponentActivity() {
     }
  
     private fun loadBoardCalibration() {
-        val raw = getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).getString("corners", null) ?: return
+        val raw = getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).getString("wire_points", null) ?: return
         try {
             val json = JSONArray(raw)
             if (json.length() != 4) return
@@ -2225,7 +2298,7 @@ class MainActivity : ComponentActivity() {
                 val p = json.getJSONObject(i)
                 ImagePoint(p.getDouble("x"), p.getDouble("y"))
             }
-            boardCalibration = BoardCalibration.fromFourCorners(points)
+            boardCalibration = BoardCalibration.fromWirePoints(points)
             calibrationPoints.clear()
             calibrationPoints.addAll(points)
             status.text = "Calibration de cible restaurée."
@@ -2239,7 +2312,7 @@ class MainActivity : ComponentActivity() {
         calibrationPoints.clear()
         calibrationOverlay.resetPoints()
         calibrationOverlay.active = false
-        getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit().remove("corners").apply()
+        getSharedPreferences("dart_vision_calibration", MODE_PRIVATE).edit().remove("corners").remove("wire_points").apply()
         status.text = "Calibration effacée."
     }
  
@@ -3034,6 +3107,7 @@ class MainActivity : ComponentActivity() {
                 } else render()
             }
         }
+        manualAddHit = addHit
         submit.setOnClickListener {
             if (hits.size != 3) return@setOnClickListener
             try {
@@ -3260,6 +3334,17 @@ class MainActivity : ComponentActivity() {
                 val provider = future.get()
                 val previewCase = Preview.Builder().build().also { it.setSurfaceProvider(preview.surfaceProvider) }
                 val analysisCase = ImageAnalysis.Builder()
+                    .setResolutionSelector(
+                        ResolutionSelector.Builder()
+                            .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                            .setResolutionStrategy(
+                                ResolutionStrategy(
+                                    android.util.Size(1600, 1200),
+                                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                                )
+                            )
+                            .build()
+                    )
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also { it.setAnalyzer(analysisExecutor, frameAnalyzer) }
