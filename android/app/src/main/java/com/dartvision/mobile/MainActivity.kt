@@ -605,7 +605,7 @@ class MainActivity : ComponentActivity() {
                 key == "training" -> mockups?.show("training")
                 key == "online" -> mockups?.show("online")
                 key == "tournaments" -> mockups?.show("tournaments")
-                key == "stats" -> mockups?.show("stats")
+                key == "stats" -> { refreshRealStats(); mockups?.show("stats") }
                 key.startsWith("training:") -> { showPage("game"); showTrainingModes() }
                 key == "online:quick" -> showPage("players")
                 key.startsWith("online:") || key.startsWith("tournament:") ->
@@ -816,11 +816,11 @@ class MainActivity : ComponentActivity() {
             background = neon(0xFF06131A.toInt(), 0xFF00EAF4.toInt(), 1, 20)
         }
         onlinePill.addView(View(this).apply {
-            background = neon(0xFF32E58C.toInt(), 0, 0, oval = true)
+            background = neon(0xFF71838C.toInt(), 0, 0, oval = true)
         }, LinearLayout.LayoutParams(dp(10), dp(10)).apply { rightMargin = dp(8) })
         onlinePill.addView(TextView(this).apply {
-            text = "10 836 en ligne"; textSize = 13f
-            setTextColor(0xFFFFFFFF.toInt())
+            text = "Joueurs en ligne : —"; textSize = 12f
+            setTextColor(0xFF9BB4BE.toInt())
             typeface = android.graphics.Typeface.DEFAULT_BOLD
         })
         profileInfo.addView(onlinePill, LinearLayout.LayoutParams(-2, -2))
@@ -1744,6 +1744,65 @@ class MainActivity : ComponentActivity() {
         }
     }
  
+    /** Charge les statistiques réelles du compte sans inventer de valeurs. */
+    private fun refreshRealStats() {
+        val id = accountId()
+        val token = accountToken()
+        val screen = mockups ?: return
+        if (id == null || token == null) {
+            screen.updateStats(MockupScreens.StatsData())
+            return
+        }
+        worker.execute {
+            try {
+                val games = SupabaseAuthClient().loadPlayerGames(token, id, 100)
+                var wins = 0
+                var totalDarts = 0
+                var totalPoints = 0
+                var bestVisit = 0
+                var bestFinish = 0
+                val averages = mutableListOf<Float>()
+                for (i in 0 until games.length()) {
+                    val game = games.getJSONObject(i)
+                    if (game.optString("result") == "won") wins++
+                    val summary = game.optJSONObject("summary") ?: JSONObject()
+                    val darts = summary.optInt("darts").coerceAtLeast(0)
+                    val points = summary.optInt("points").coerceAtLeast(0)
+                    totalDarts += darts
+                    totalPoints += points
+                    bestVisit = maxOf(bestVisit, summary.optInt("best_visit").coerceAtLeast(0))
+                    if (darts > 0) averages.add(points * 3f / darts)
+                    val turns = game.optJSONObject("game_data")?.optJSONArray("turns") ?: JSONArray()
+                    for (t in 0 until turns.length()) {
+                        val turn = turns.optJSONObject(t) ?: continue
+                        if (turn.optBoolean("bust")) continue
+                        val before = turn.optInt("score_before", -1)
+                        val after = turn.optInt("score_after", -1)
+                        if (before > 0 && after == 0) bestFinish = maxOf(bestFinish, before)
+                    }
+                }
+                val avg3 = if (totalDarts == 0) null else totalPoints * 3.0 / totalDarts
+                val avg1 = if (totalDarts == 0) null else totalPoints.toDouble() / totalDarts
+                val rate = if (games.length() == 0) null else wins * 100.0 / games.length()
+                val data = MockupScreens.StatsData(
+                    games = games.length().toString(),
+                    wins = wins.toString(),
+                    winRate = rate?.let { String.format(java.util.Locale.FRANCE, "%.1f %%", it) } ?: "—",
+                    avg3 = avg3?.let { String.format(java.util.Locale.FRANCE, "%.2f", it) } ?: "—",
+                    avg1 = avg1?.let { String.format(java.util.Locale.FRANCE, "%.2f", it) } ?: "—",
+                    bestTurn = if (games.length() == 0) "—" else bestVisit.toString(),
+                    bestFinish = if (bestFinish == 0) "—" else bestFinish.toString(),
+                    progression = averages.takeLast(7)
+                )
+                runOnUiThread { screen.updateStats(data); mockups?.show("stats") }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this, "Statistiques non actualisées : ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
     private fun showAccountHistory() {
         val id = accountId()
         val token = accountToken()
