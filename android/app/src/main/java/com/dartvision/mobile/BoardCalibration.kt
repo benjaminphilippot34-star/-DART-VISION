@@ -1,6 +1,8 @@
 package com.dartvision.mobile
 
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class ImagePoint(val x: Double, val y: Double)
 data class BoardPoint(val xMm: Double, val yMm: Double)
@@ -28,9 +30,33 @@ class BoardCalibration private constructor(private val h: DoubleArray) {
 
     companion object {
         fun fromFourCorners(corners: List<ImagePoint>, halfSizeMm: Double = DartboardScoring.OUTER_RADIUS_MM): BoardCalibration {
-            require(corners.size == 4)
-            require(corners.all { it.x.isFinite() && it.y.isFinite() })
             require(halfSizeMm > 0.0 && halfSizeMm.isFinite())
+            val targets = listOf(
+                BoardPoint(-halfSizeMm, -halfSizeMm),
+                BoardPoint(halfSizeMm, -halfSizeMm),
+                BoardPoint(halfSizeMm, halfSizeMm),
+                BoardPoint(-halfSizeMm, halfSizeMm)
+            )
+            return solve(corners, targets)
+        }
+
+        /**
+         * Calibrage sur 4 points bien visibles : les jonctions entre le fil extérieur du double
+         * et les fils 20|1, 6|10, 3|19 et 11|14 (dans le sens horaire, en partant du haut).
+         * Ces points sont à 9°, 99°, 189° et 279° depuis le 20, sur le bord extérieur du double.
+         */
+        fun fromWirePoints(points: List<ImagePoint>, radiusMm: Double = DartboardScoring.OUTER_RADIUS_MM): BoardCalibration {
+            require(radiusMm > 0.0 && radiusMm.isFinite())
+            val targets = listOf(9.0, 99.0, 189.0, 279.0).map { angle ->
+                val r = Math.toRadians(angle)
+                BoardPoint(radiusMm * sin(r), -radiusMm * cos(r))
+            }
+            return solve(points, targets)
+        }
+
+        private fun solve(corners: List<ImagePoint>, targets: List<BoardPoint>): BoardCalibration {
+            require(corners.size == 4 && targets.size == 4)
+            require(corners.all { it.x.isFinite() && it.y.isFinite() })
             // Reject crossed, duplicated or nearly collinear points before solving the homography.
             val turns = (0..3).map { i ->
                 val a = corners[i]
@@ -48,12 +74,6 @@ class BoardCalibration private constructor(private val h: DoubleArray) {
                 a.x * b.y - b.x * a.y
             }
             require(abs(twiceArea) > 1e-4) { "La surface de calibration est trop petite." }
-            val targets = listOf(
-                BoardPoint(-halfSizeMm, -halfSizeMm),
-                BoardPoint(halfSizeMm, -halfSizeMm),
-                BoardPoint(halfSizeMm, halfSizeMm),
-                BoardPoint(-halfSizeMm, halfSizeMm)
-            )
             val matrix = Array(8) { DoubleArray(9) }
             for (i in 0..3) {
                 val x = corners[i].x
